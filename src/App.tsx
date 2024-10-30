@@ -1,26 +1,26 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import SurveyForm from './components/SurveyForm';
+import GoogleAccount from './components/GoogleAccount';
+import NegativeReviewForm from './components/NegativeReviewForm';
+import PositiveReviewForm from './components/PositiveReviewForm';
+import Confirmation from './components/Confirmation';
+import Thankyou from './components/Thankyou';
 
-function App() {
+
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/surveyform" element={<SurveyForm />} />
+        <Route path="/googleaccount" element={<GoogleAccount />} />
+        <Route path="/previewform" element={<PositiveReviewForm />} />
+        <Route path="/nreviewform" element={<NegativeReviewForm />} />
+        <Route path="/confirmation" element={<Confirmation />} />
+        <Route path="/thankyou" element={<Thankyou />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;

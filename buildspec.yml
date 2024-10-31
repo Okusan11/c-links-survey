@@ -6,7 +6,6 @@ phases:
       nodejs: 10
   pre_build:
     commands:
-      - cd frontapp
       - npm update -g npm
       - npm ci
   build:

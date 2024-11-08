@@ -143,7 +143,7 @@ const Confirmation: React.FC = () => {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell sx={tableCellStyle}>ご利用目的</TableCell>
+                  <TableCell sx={tableCellStyle}>当施設ご利用目的</TableCell>
                   <TableCell align="left">
                     {formatArrayAsLines(state.usagePurpose)}
                   </TableCell>
@@ -159,7 +159,7 @@ const Confirmation: React.FC = () => {
         <CardContent>
           <Typography variant="h6" gutterBottom>
             <StarIcon sx={{ verticalAlign: 'middle', marginRight: 1 }} />
-            施設ご利用後の感想
+            施設利用後のご感想
           </Typography>
           <Divider sx={{ marginBottom: 2 }} />
 
@@ -173,7 +173,7 @@ const Confirmation: React.FC = () => {
                 <Table>
                   <TableBody>
                     <TableRow>
-                      <TableCell sx={tableCellStyle}>満足した点</TableCell>
+                      <TableCell sx={tableCellStyle}>ご満足いただいた点</TableCell>
                       <TableCell align="left">
                         {state.satisfiedPoints[purpose]
                           ? formatArrayAsLines(state.satisfiedPoints[purpose])

@@ -225,7 +225,7 @@ const SurveyForm: React.FC = () => {
     >
       {/* タイトル */}
       <Typography variant="h4" component="h1" textAlign="center" mb={4}>
-        施設利用後のアンケート
+        当施設利用後の<br>アンケート</br>
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>

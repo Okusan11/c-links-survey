@@ -58,10 +58,8 @@ const GoogleAccount: React.FC = () => {
       }}
     >
       {/* タイトル */}
-      <Typography variant="h4" component="h1" textAlign="center" mb={4}>
-        Google Map口コミ
-        {"\n"}
-        投稿のご依頼
+      <Typography variant="h4" component="h1" textAlign="center" mb={4} className="text">
+        {"Google Map口コミ\n投稿のご依頼"}
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>

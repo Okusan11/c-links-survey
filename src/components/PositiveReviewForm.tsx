@@ -65,10 +65,8 @@ const PositiveReviewForm: React.FC = () => {
         borderRadius: 2,
       }}
     >
-      <Typography variant="h4" component="h1" textAlign="center" mb={4}>
-        当施設利用後の
-        {"\n"}
-        ご感想
+      <Typography variant="h4" component="h1" textAlign="center" mb={4} className="text">
+        {"当施設利用後の\nご感想"}
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>

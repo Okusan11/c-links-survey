@@ -7,12 +7,8 @@ import {
   Card,
   CardContent,
   Divider,
-  Table,
-  TableBody,
-  TableCell,
   TableContainer,
-  TableRow,
-  Paper
+  Paper,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import StarIcon from '@mui/icons-material/Star';
@@ -25,16 +21,38 @@ type SatisfactionData = {
   [key in PurposeType]?: string[];
 };
 
+const QuestionAnswer: React.FC<{ question: string; answer: string | string[] }> = ({
+  question,
+  answer,
+}) => {
+  return (
+    <Box sx={{ mb: 2, p: 2, backgroundColor: '#f0f0f0', borderRadius: 1 }}>
+      <Typography variant="subtitle1" fontWeight="bold">
+        {question}
+      </Typography>
+      <Typography variant="body1" sx={{ mt: 1 }}>
+        {Array.isArray(answer)
+          ? answer.map((item, index) => (
+              <span key={index}>
+                {item}
+                <br />
+              </span>
+            ))
+          : answer}
+      </Typography>
+    </Box>
+  );
+};
+
 const Confirmation: React.FC = () => {
-  const { state } = useLocation(); // SurveyFormとReviewFormからのデータ
+  const { state } = useLocation();
   const navigate = useNavigate();
   const [apiEndpoint, setApiEndpoint] = useState<string>('');
 
   useEffect(() => {
     const fetchApiEndpoint = async () => {
       try {
-        // SSM Parameter Storeからエンドポイントを取得
-        const response = await fetch('/get-parameter?name=/shisetsu-review-form/api-endpoint');
+        const response = await fetch('/get-parameter?name=/shisetsu-review-form/api-endpoint-url');
         if (response.ok) {
           const data = await response.json();
           setApiEndpoint(data.parameterValue);
@@ -55,7 +73,6 @@ const Confirmation: React.FC = () => {
       return;
     }
 
-    // 送信データの作成
     const data = {
       visitDate: state.visitDate,
       heardFrom: state.heardFrom,
@@ -63,10 +80,9 @@ const Confirmation: React.FC = () => {
       satisfiedPoints: state.satisfiedPoints,
       improvementPoints: state.improvementPoints,
       satisfaction: state.satisfaction,
-      feedback: state.Feedback || '', // Feedbackがない場合は空文字列
+      feedback: state.Feedback || '',
     };
 
-    // APIリクエストの送信
     fetch(`${apiEndpoint}review`, {
       method: 'POST',
       headers: {
@@ -76,11 +92,9 @@ const Confirmation: React.FC = () => {
     })
       .then((response) => {
         if (response.ok) {
-          // 成功時の処理（例：サンクスページへの遷移）
           alert('フォームが送信されました。ご協力ありがとうございました。');
           navigate('/thankyou');
         } else {
-          // エラー時の処理
           alert('フォームの送信中にエラーが発生しました。');
         }
       })
@@ -88,19 +102,6 @@ const Confirmation: React.FC = () => {
         console.error('Error:', error);
         alert('ネットワークエラーが発生しました。');
       });
-  };
-
-  const formatArrayAsLines = (array: string[]) =>
-    array.map((item, index) => (
-      <span key={index}>
-        {item}
-        {index < array.length - 1 && <br />} {/* 改行 */}
-      </span>
-    ));
-
-  const tableCellStyle = {
-    width: '200px', // 1列目の幅を固定
-    fontWeight: 'bold',
   };
 
   return (
@@ -119,7 +120,6 @@ const Confirmation: React.FC = () => {
         入力内容確認
       </Typography>
 
-      {/* ご利用情報 */}
       <Card sx={{ marginBottom: 2, backgroundColor: '#f9f9f9' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
@@ -127,34 +127,15 @@ const Confirmation: React.FC = () => {
             ご利用情報
           </Typography>
           <Divider sx={{ marginBottom: 2 }} />
-          <TableContainer component={Paper}>
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell sx={tableCellStyle}>当施設ご利用日</TableCell>
-                  <TableCell align="left">
-                    {state.visitDate.year}年 {state.visitDate.month}月 {state.visitDate.day}日
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell sx={tableCellStyle}>当施設を知ったきっかけ</TableCell>
-                  <TableCell align="left">
-                    {formatArrayAsLines(state.heardFrom)}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell sx={tableCellStyle}>当施設ご利用目的</TableCell>
-                  <TableCell align="left">
-                    {formatArrayAsLines(state.usagePurpose)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <QuestionAnswer
+            question="当施設ご利用日"
+            answer={`${state.visitDate.year}年 ${state.visitDate.month}月 ${state.visitDate.day}日`}
+          />
+          <QuestionAnswer question="当施設を知ったきっかけ" answer={state.heardFrom} />
+          <QuestionAnswer question="当施設ご利用目的" answer={state.usagePurpose} />
         </CardContent>
       </Card>
 
-      {/* 施設ご利用後の感想 */}
       <Card sx={{ marginBottom: 2, backgroundColor: '#f9f9f9' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
@@ -163,57 +144,28 @@ const Confirmation: React.FC = () => {
           </Typography>
           <Divider sx={{ marginBottom: 2 }} />
 
-          {/* ご利用目的ごとに表示 */}
           {state.usagePurpose.map((purpose: PurposeType) => (
             <Box key={purpose} sx={{ marginBottom: 2 }}>
               <Typography variant="subtitle1" gutterBottom>
                 【{purpose}】
               </Typography>
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell sx={tableCellStyle}>ご満足いただいた点</TableCell>
-                      <TableCell align="left">
-                        {state.satisfiedPoints[purpose]
-                          ? formatArrayAsLines(state.satisfiedPoints[purpose])
-                          : '選択なし'}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell sx={tableCellStyle}>改善してほしい点</TableCell>
-                      <TableCell align="left">
-                        {state.improvementPoints[purpose]
-                          ? formatArrayAsLines(state.improvementPoints[purpose])
-                          : '選択なし'}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <QuestionAnswer
+                question="ご満足いただいた点"
+                answer={state.satisfiedPoints[purpose] || '選択なし'}
+              />
+              <QuestionAnswer
+                question="改善してほしい点"
+                answer={state.improvementPoints[purpose] || '選択なし'}
+              />
             </Box>
           ))}
 
-          {/* 満足度とご感想 */}
           <Divider sx={{ marginY: 2 }} />
-          <TableContainer component={Paper}>
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell sx={tableCellStyle}>満足度</TableCell>
-                  <TableCell align="left">{state.satisfaction}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell sx={tableCellStyle}>ご感想</TableCell>
-                  <TableCell align="left">{state.Feedback || 'なし'}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <QuestionAnswer question="満足度" answer={state.satisfaction} />
+          <QuestionAnswer question="ご感想" answer={state.Feedback || 'なし'} />
         </CardContent>
       </Card>
 
-      {/* ボタン */}
       <Box display="flex" justifyContent="space-between" mt={4}>
         <Button variant="outlined" color="secondary" onClick={() => navigate(-1)}>
           戻る

@@ -47,25 +47,7 @@ const QuestionAnswer: React.FC<{ question: string; answer: string | string[] }> 
 const Confirmation: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const [apiEndpoint, setApiEndpoint] = useState<string>('');
-
-  useEffect(() => {
-    const fetchApiEndpoint = async () => {
-      try {
-        const response = await fetch('/get-parameter?name=/shisetsu-review-form/api-endpoint-url');
-        if (response.ok) {
-          const data = await response.json();
-          setApiEndpoint(data.parameterValue);
-        } else {
-          console.error('Failed to fetch API endpoint from SSM');
-        }
-      } catch (error) {
-        console.error('Error fetching API endpoint:', error);
-      }
-    };
-
-    fetchApiEndpoint();
-  }, []);
+  const apiEndpoint = "https://0oj3qm35cg.execute-api.ap-northeast-1.amazonaws.com/prod/review"
 
   const handleSubmit = () => {
     if (!apiEndpoint) {
@@ -83,7 +65,7 @@ const Confirmation: React.FC = () => {
       feedback: state.Feedback || '',
     };
 
-    fetch(`${apiEndpoint}review`, {
+    fetch(apiEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

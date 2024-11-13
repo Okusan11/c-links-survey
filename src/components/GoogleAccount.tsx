@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // ナビゲーション用
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -27,13 +27,8 @@ const GoogleAccount: React.FC = () => {
 
     // 回答に応じて次の画面へ遷移
     if (hasGoogleAccount === 'yes') {
-      // Googleアカウントを持っている場合、Googleレビュー誘導画面へ
-      navigate('/GoogleReview', {
-        state: {
-          ...state,
-          hasGoogleAccount,
-        },
-      });
+      // Googleアカウントを持っている場合、Googleレビュー投稿URLに直接遷移
+      window.location.href = 'https://www.google.com/maps/place/YOUR_PLACE_ID/review';
     } else {
       // 持っていない場合、感想入力画面へ
       navigate('/previewform', {
@@ -57,7 +52,6 @@ const GoogleAccount: React.FC = () => {
         borderRadius: 2,
       }}
     >
-      {/* タイトル */}
       <Typography variant="h4" component="h1" textAlign="center" mb={4} className="text">
         {"Google Map口コミ\n投稿のご依頼"}
       </Typography>
@@ -68,7 +62,6 @@ const GoogleAccount: React.FC = () => {
         </div>
       </Typography>
 
-      {/* 質問 */}
       <Box
         sx={{
           backgroundColor: '#fff',
@@ -106,7 +99,6 @@ const GoogleAccount: React.FC = () => {
         </FormControl>
       </Box>
 
-      {/* ボタン */}
       <Box display="flex" justifyContent="space-between" mt={4}>
         <Button variant="outlined" color="secondary" onClick={() => navigate(-1)}>
           戻る

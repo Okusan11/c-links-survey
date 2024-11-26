@@ -74,7 +74,6 @@ const Confirmation: React.FC = () => {
     })
       .then((response) => {
         if (response.ok) {
-          alert('フォームが送信されました。ご協力ありがとうございました。');
           navigate('/thankyou');
         } else {
           alert('フォームの送信中にエラーが発生しました。');

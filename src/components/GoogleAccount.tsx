@@ -21,7 +21,7 @@ const GoogleAccount: React.FC = () => {
     event.preventDefault();
 
     if (!hasGoogleAccount) {
-      alert('Googleアカウントをお持ちですか？の質問に回答してください');
+      alert('Googleアカウントをお持ちですか？の質問に回答してください。');
       return;
     }
 

@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 
 // 利用目的の型を定義
-type PurposeType = 'デイケア' | 'リハビリテーション' | 'ショートステイ' | '長期入居';
+type PurposeType = '児童発達支援事業所' | '放課後等デイサービス' | '生活介護' ;
 
 const SurveyForm: React.FC = () => {
   const { state } = useLocation(); //
@@ -137,76 +137,62 @@ const SurveyForm: React.FC = () => {
     PurposeType,
     { satisfied: string[]; improvement: string[] }
   > = {
-    デイケア: {
+    児童発達支援事業所: {
       satisfied: [
-        'スタッフの対応が親切で明るい',
-        'レクリエーション活動が豊富で楽しい',
-        '送迎サービスが時間通りで安心',
-        '食事が美味しく栄養バランスが良い',
-        '施設内が清潔で快適',
-        '特になし',
+        "スタッフが子どもの特性をよく理解している",
+        "個別支援計画がわかりやすく、適切に実施されている",
+        "遊びや学習機会がバリエーション豊富で、子どもが楽しめる",
+        "親へのフィードバックがこまめで丁寧",
+        "安全面への配慮が行き届いている",
+        "施設内が清潔で衛生的",
+        "特になし"
       ],
       improvement: [
-        'レクリエーションの種類を増やしてほしい',
-        'スタッフの人数を増やしてほしい',
-        '利用時間の延長を検討してほしい',
-        '送迎エリアを拡大してほしい',
-        '個別のケアプランを充実させてほしい',
-        '特になし',
+        "スタッフ数を増やして、よりきめ細やかな対応をしてほしい",
+        "遊具や教材の更新・拡充を検討してほしい",
+        "保護者とのコミュニケーション機会を増やしてほしい",
+        "子どもの発達段階に合わせた新たなプログラムの導入を検討してほしい",
+        "利用日時や送迎サービスの選択肢を増やしてほしい",
+        "特になし"
       ],
     },
-    リハビリテーション: {
+    放課後等デイサービス: {
       satisfied: [
-        '専門スタッフによる質の高いリハビリ',
-        '個別のプログラムを作成してくれる',
-        '最新の機器を使用している',
-        '進捗状況を詳しく説明してくれる',
-        'モチベーションを高めてくれるサポート',
-        '特になし',
+        "スタッフの対応が親切で明るい",
+        "リハビリの提供が充実している",
+        "医療的ケアへの対応が適切に行われている",
+        "送迎があって安心できる",
+        "施設内が清潔で快適",
+        "学習支援や生活指導が丁寧で、学校生活との連動がある",
+        "コミュニケーションスキルを育むプログラムが豊富",
+        "特になし"
       ],
       improvement: [
-        'リハビリの予約が取りにくい',
-        '待ち時間を短くしてほしい',
-        'スタッフの入れ替わりが多い',
-        'リハビリ室が混雑している',
-        '家庭での継続ケアの指導を充実させてほしい',
-        '特になし',
+        "スタッフが不足しており、個別対応が難しい状況を改善してほしい",
+        "送迎時間やルートの選択肢を増やしてほしい",
+        "施設や設備の老朽化箇所を整備してほしい",
+        "プログラム内容のマンネリ化を防ぐ取り組みを強化してほしい",
+        "保護者へ活動内容をより分かりやすく発信してほしい",
+        "特になし"
       ],
     },
-    ショートステイ: {
+    生活介護: {
       satisfied: [
-        '急な利用にも柔軟に対応してくれた',
-        'スタッフが親身になってくれた',
-        '部屋が清潔で過ごしやすい',
-        '食事が美味しく特別食にも対応',
-        '家族への連絡がスムーズだった',
-        '特になし',
+        "スタッフが利用者一人ひとりに寄り添い、個別ニーズに対応してくれる",
+        "医療的対応や健康管理が適切に行われている",
+        "日中活動やレクリエーションが充実しており楽しめる",
+        "衛生環境が整っていて清潔感がある",
+        "家族やケアマネージャーとの連携が円滑である",
+        "食事が栄養バランスに配慮されており選択肢が豊富",
+        "特になし"
       ],
       improvement: [
-        '予約が取りにくい時がある',
-        '持ち物の管理を徹底してほしい',
-        'スタッフからの説明が不足していた',
-        '夜間の対応体制を強化してほしい',
-        '料金体系を分かりやすくしてほしい',
-        '特になし',
-      ],
-    },
-    長期入居: {
-      satisfied: [
-        '24時間の介護体制で安心できる',
-        'スタッフが家族のように接してくれる',
-        '医療サポートが充実している',
-        '施設内のイベントや活動が豊富',
-        'プライバシーが尊重されている',
-        '特になし',
-      ],
-      improvement: [
-        '部屋の設備を新しくしてほしい',
-        '食事のメニューにバリエーションを増やしてほしい',
-        'スタッフとのコミュニケーションを増やしてほしい',
-        '面会時間を柔軟に対応してほしい',
-        '月々の費用について詳細な説明が欲しい',
-        '特になし',
+        "スタッフ数やシフト体制の見直しで、よりきめ細やかな対応をしてほしい",
+        "バリアフリー化を進め、利用者の移動・介助をしやすくしてほしい",
+        "プライバシー確保のための環境改善が必要",
+        "利用者の関心に合わせた日中活動のバリエーションを増やしてほしい",
+        "外部機関（病院・地域施設）との連携を強化し、外出行事を充実させてほしい",
+        "特になし"
       ],
     },
   };
@@ -293,12 +279,12 @@ const SurveyForm: React.FC = () => {
             <FormControlLabel
               control={
                 <Checkbox
-                  value="ケアマネジャーからのご紹介"
+                  value="相談員からのご紹介"
                   onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
-                  checked={heardFrom.includes('ケアマネジャーからのご紹介')}
+                  checked={heardFrom.includes('相談員からのご紹介')}
                 />
               }
-              label="ケアマネジャーからのご紹介"
+              label="相談員からのご紹介"
             />
             <FormControlLabel
               control={
@@ -436,42 +422,32 @@ const SurveyForm: React.FC = () => {
             <FormControlLabel
               control={
                 <Checkbox
-                  value="デイケア"
+                  value="児童発達支援事業所"
                   onChange={(e) => handleSimpleCheckboxChange<PurposeType>(e, setUsagePurpose)}
-                  checked={usagePurpose.includes('デイケア')}
+                  checked={usagePurpose.includes('児童発達支援事業所')}
                 />
               }
-              label="デイケア"
+              label="児童発達支援事業所"
             />
             <FormControlLabel
               control={
                 <Checkbox
-                  value="リハビリテーション"
+                  value="放課後等デイサービス"
                   onChange={(e) => handleSimpleCheckboxChange<PurposeType>(e, setUsagePurpose)}
-                  checked={usagePurpose.includes('リハビリテーション')}
+                  checked={usagePurpose.includes('放課後等デイサービス')}
                 />
               }
-              label="リハビリテーション"
+              label="放課後等デイサービス"
             />
             <FormControlLabel
               control={
                 <Checkbox
-                  value="ショートステイ"
+                  value="生活介護"
                   onChange={(e) => handleSimpleCheckboxChange<PurposeType>(e, setUsagePurpose)}
-                  checked={usagePurpose.includes('ショートステイ')}
+                  checked={usagePurpose.includes('生活介護')}
                 />
               }
-              label="ショートステイ"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="長期入居"
-                  onChange={(e) => handleSimpleCheckboxChange<PurposeType>(e, setUsagePurpose)}
-                  checked={usagePurpose.includes('長期入居')}
-                />
-              }
-              label="長期入居"
+              label="生活介護"
             />
           </FormGroup>
         </FormControl>

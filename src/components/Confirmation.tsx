@@ -15,7 +15,7 @@ import StarIcon from '@mui/icons-material/Star';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SendIcon from '@mui/icons-material/Send';
 
-type PurposeType = 'デイケア' | 'リハビリテーション' | 'ショートステイ' | '長期入居';
+type PurposeType = '児童発達支援事業所' | '放課後等デイサービス' | '生活介護' ;
 
 type SatisfactionData = {
   [key in PurposeType]?: string[];

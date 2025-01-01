@@ -47,7 +47,7 @@ const QuestionAnswer: React.FC<{ question: string; answer: string | string[] }> 
 const Confirmation: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const apiEndpoint = "https://0oj3qm35cg.execute-api.ap-northeast-1.amazonaws.com/prod/review"
+  const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
 
   const handleSubmit = () => {
     if (!apiEndpoint) {

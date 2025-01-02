@@ -28,7 +28,7 @@ const GoogleAccount: React.FC = () => {
     // 回答に応じて次の画面へ遷移
     if (hasGoogleAccount === 'yes') {
       // Googleアカウントを持っている場合、Googleレビュー投稿URLに直接遷移
-      window.location.href = 'https://g.page/r/CZQiwOcTV9SFEBM/review';
+      window.location.href = 'https://g.page/r/CQLC84E_YkSTEBM/review';
     } else {
       // 持っていない場合、感想入力画面へ
       navigate('/previewform', {

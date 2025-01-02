@@ -7,8 +7,6 @@ import {
   Card,
   CardContent,
   Divider,
-  TableContainer,
-  Paper,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import StarIcon from '@mui/icons-material/Star';

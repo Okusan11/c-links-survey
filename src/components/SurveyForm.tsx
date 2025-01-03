@@ -128,7 +128,7 @@ const SurveyForm: React.FC = () => {
   };
 
   // 年、月、日を生成するための配列を作成
-  const years = Array.from({ length: 2024 - 1920 + 1 }, (_, i) => String(1920 + i));
+  const years = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => String(2020 + i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 

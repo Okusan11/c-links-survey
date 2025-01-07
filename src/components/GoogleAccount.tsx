@@ -8,7 +8,7 @@ import {
   FormLabel,
   Radio,
   RadioGroup,
-  Typography
+  Typography,
 } from '@mui/material';
 
 const GoogleAccount: React.FC = () => {
@@ -16,6 +16,11 @@ const GoogleAccount: React.FC = () => {
   const navigate = useNavigate();
 
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>('');
+
+  // ① ここで SSM パラメータをビルド時に埋め込んだ環境変数を参照
+  const googleReviewUrl =
+    process.env.REACT_APP_GMAP_REVIEW_URL ||
+    'https://www.google.com/maps'; // デフォルト値(SSM取得失敗時のフォールバック)
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -27,8 +32,8 @@ const GoogleAccount: React.FC = () => {
 
     // 回答に応じて次の画面へ遷移
     if (hasGoogleAccount === 'yes') {
-      // Googleアカウントを持っている場合、Googleレビュー投稿URLに直接遷移
-      window.location.href = 'https://g.page/r/CQLC84E_YkSTEBM/review';
+      // ② SSMから取得したURLへ遷移
+      window.location.href = googleReviewUrl;
     } else {
       // 持っていない場合、感想入力画面へ
       navigate('/previewform', {
@@ -53,7 +58,7 @@ const GoogleAccount: React.FC = () => {
       }}
     >
       <Typography variant="h4" component="h1" textAlign="center" mb={4} className="text">
-        {"Google Map口コミ\n投稿のご依頼"}
+        {'Google Map口コミ\n投稿のご依頼'}
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>

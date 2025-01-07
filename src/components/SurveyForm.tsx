@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // ナビゲーション用
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -11,40 +11,84 @@ import {
   MenuItem,
   Rating,
   Select,
-  Typography
+  Typography,
 } from '@mui/material';
 
-// 利用目的の型を定義
-type PurposeType = '児童発達支援事業所' | '放課後等デイサービス' | '生活介護' ;
+/**
+ * 1. 型定義
+ */
+// 1-1. サービスキーの型
+type ServiceKey = 'childDevelopmentSupport' | 'afterSchoolDayService' | 'lifeCare';
+
+// 1-2. サービスごとの定義
+interface ServiceDefinition {
+  key: ServiceKey;
+  label: string;
+  satisfiedOptions: string[];
+  improvementOptions: string[];
+}
+
+// 1-3. SSMに格納したJSON全体を受け取るための型
+interface SurveyConfig {
+  heardFromOptions: string[];
+  serviceDefinitions: ServiceDefinition[];
+}
 
 const SurveyForm: React.FC = () => {
-  const { state } = useLocation(); //
+  const navigate = useNavigate();
+  const { state } = useLocation();
+
+  // 2. SSMパラメータ（JSON）をパースして保持
+  const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
+
+  useEffect(() => {
+    const rawConfig = process.env.REACT_APP_SURVEY_CONFIG;
+    if (!rawConfig) {
+      console.error('REACT_APP_SURVEY_CONFIG is not defined!');
+      return;
+    }
+    try {
+      const parsed = JSON.parse(rawConfig) as SurveyConfig;
+      setSurveyConfig(parsed);
+    } catch (err) {
+      console.error('Failed to parse REACT_APP_SURVEY_CONFIG:', err);
+    }
+  }, []);
+
+  // 3. 日付等のステート管理
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0'); // 月は0ベースなので+1
+  const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
   const currentDay = String(currentDate.getDate()).padStart(2, '0');
 
-  // 初期値として本日の日付を設定
   const [visitDate, setVisitDate] = useState({
     year: String(currentYear),
     month: currentMonth,
     day: currentDay,
   });
 
+  // 4. 「当施設をどこで知ったか」の選択リスト
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
-  const [usagePurpose, setUsagePurpose] = useState<PurposeType[]>(state?.usagePurpose || []);
-  const [satisfaction, setSatisfaction] = useState<number | null>(4.0);
 
-  type SatisfactionData = {
-    [key in PurposeType]?: string[];
-  };
+  // 5. サービス（利用目的）の選択
+  const [usageServices, setUsageServices] = useState<ServiceKey[]>(state?.usageServices || []);
 
-  const [satisfiedPoints, setSatisfiedPoints] = useState<SatisfactionData>({});
-  const [improvementPoints, setImprovementPoints] = useState<SatisfactionData>({});
+  // 6. 満足度
+  const [satisfaction, setSatisfaction] = useState<number | null>(4);
 
-  const navigate = useNavigate();
+  // 7. サービスごとの満足点/改善点
+  // --- ここを Partial<Record<ServiceKey, string[]>> に変更 ---
+  const [satisfiedPoints, setSatisfiedPoints] = useState<
+    Partial<Record<ServiceKey, string[]>>
+  >({});
+  const [improvementPoints, setImprovementPoints] = useState<
+    Partial<Record<ServiceKey, string[]>>
+  >({});
 
-  // 単純な配列を扱う handleSimpleCheckboxChange をジェネリックにする
+  /**
+   * 8. チェックボックス変更ハンドラ
+   */
+  // (A) シンプル配列
   const handleSimpleCheckboxChange = <T extends string>(
     event: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<T[]>>
@@ -55,37 +99,43 @@ const SurveyForm: React.FC = () => {
     );
   };
 
-  // 目的別のデータを扱う handlePurposeCheckboxChange
-  const handlePurposeCheckboxChange = (
+  // (B) サービスごと
+  // --- ここを Partial<Record<ServiceKey, string[]>> に変更 ---
+  const handleServicePointsCheckboxChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    purpose: PurposeType,
-    setter: React.Dispatch<React.SetStateAction<SatisfactionData>>
+    serviceKey: ServiceKey,
+    setter: React.Dispatch<React.SetStateAction<Partial<Record<ServiceKey, string[]>>>> // ← 変更
   ) => {
     const value = event.target.value;
     setter((prev) => {
-      const prevValues = prev[purpose] || [];
-      const newValues = prevValues.includes(value)
-        ? prevValues.filter((v) => v !== value)
-        : [...prevValues, value];
-      return { ...prev, [purpose]: newValues };
+      // prev は Partial<Record<ServiceKey, string[]>> なので、キーがない場合に備えて安全に取り出す
+      const currentValues = prev[serviceKey] || [];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter((v) => v !== value)
+        : [...currentValues, value];
+      return { ...prev, [serviceKey]: newValues };
     });
   };
 
+  /**
+   * 9. フォーム送信
+   */
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    // 入力チェック
+
     if (heardFrom.length === 0) {
-      alert('当施設をどこでお知りになりましたか？について1つ以上回答を選択してください。');
+      alert('当施設をどこでお知りになりましたか？を1つ以上選択してください。');
       return;
     }
     if (!visitDate.year || !visitDate.month || !visitDate.day) {
       alert('施設をご利用された日時を選択してください。');
       return;
     }
-    if (usagePurpose.length === 0) {
-      alert('ご利用目的の質問について1つ以上回答を選択してください。');
+    if (usageServices.length === 0) {
+      alert('ご利用目的を1つ以上選択してください。');
       return;
     }
+    // Partial<Record<ServiceKey, string[]>> を使っているので、キーの有無をしっかりチェック
     if (Object.keys(satisfiedPoints).length === 0) {
       alert('サービスの満足した点について1つ以上回答を選択してください');
       return;
@@ -99,26 +149,24 @@ const SurveyForm: React.FC = () => {
       return;
     }
 
-    // 満足度に応じて遷移先を決定
+    // 満足度で遷移先を分岐
     if (satisfaction >= 4) {
-      // 満足度が4または5の場合、GoogleAccount.tsx へ遷移
       navigate('/googleaccount', {
         state: {
           visitDate,
           heardFrom,
-          usagePurpose,
+          usageServices,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
         },
       });
     } else {
-      // 満足度が1～3の場合、ReviewForm.tsx へ遷移
       navigate('/nreviewform', {
         state: {
           visitDate,
           heardFrom,
-          usagePurpose,
+          usageServices,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -127,75 +175,26 @@ const SurveyForm: React.FC = () => {
     }
   };
 
-  // 年、月、日を生成するための配列を作成
+  /**
+   * 10. 年月日のセレクト用配列
+   */
   const years = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => String(2020 + i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 
-  // 利用目的ごとの満足点と改善点の選択肢を定義
-  const purposeSpecificOptions: Record<
-    PurposeType,
-    { satisfied: string[]; improvement: string[] }
-  > = {
-    児童発達支援事業所: {
-      satisfied: [
-        "スタッフが子どもの特性をよく理解している",
-        "個別支援計画がわかりやすく、適切に実施されている",
-        "遊びや学習機会がバリエーション豊富で、子どもが楽しめる",
-        "親へのフィードバックがこまめで丁寧",
-        "安全面への配慮が行き届いている",
-        "施設内が清潔で衛生的",
-        "特になし"
-      ],
-      improvement: [
-        "スタッフ数を増やして、よりきめ細やかな対応をしてほしい",
-        "遊具や教材の更新・拡充を検討してほしい",
-        "保護者とのコミュニケーション機会を増やしてほしい",
-        "子どもの発達段階に合わせた新たなプログラムの導入を検討してほしい",
-        "利用日時や送迎サービスの選択肢を増やしてほしい",
-        "特になし"
-      ],
-    },
-    放課後等デイサービス: {
-      satisfied: [
-        "スタッフの対応が親切で明るい",
-        "リハビリの提供が充実している",
-        "医療的ケアへの対応が適切に行われている",
-        "送迎があって安心できる",
-        "施設内が清潔で快適",
-        "学習支援や生活指導が丁寧で、学校生活との連動がある",
-        "コミュニケーションスキルを育むプログラムが豊富",
-        "特になし"
-      ],
-      improvement: [
-        "スタッフが不足しており、個別対応が難しい状況を改善してほしい",
-        "送迎時間やルートの選択肢を増やしてほしい",
-        "施設や設備の老朽化箇所を整備してほしい",
-        "プログラム内容のマンネリ化を防ぐ取り組みを強化してほしい",
-        "保護者へ活動内容をより分かりやすく発信してほしい",
-        "特になし"
-      ],
-    },
-    生活介護: {
-      satisfied: [
-        "スタッフが利用者一人ひとりに寄り添い、個別ニーズに対応してくれる",
-        "医療的対応や健康管理が適切に行われている",
-        "日中活動やレクリエーションが充実しており楽しめる",
-        "衛生環境が整っていて清潔感がある",
-        "家族やケアマネージャーとの連携が円滑である",
-        "食事が栄養バランスに配慮されており選択肢が豊富",
-        "特になし"
-      ],
-      improvement: [
-        "スタッフ数やシフト体制の見直しで、よりきめ細やかな対応をしてほしい",
-        "バリアフリー化を進め、利用者の移動・介助をしやすくしてほしい",
-        "プライバシー確保のための環境改善が必要",
-        "利用者の関心に合わせた日中活動のバリエーションを増やしてほしい",
-        "外部機関（病院・地域施設）との連携を強化し、外出行事を充実させてほしい",
-        "特になし"
-      ],
-    },
-  };
+  /**
+   * 11. レンダリング
+   */
+  // SSMパラメータ（REACT_APP_SURVEY_CONFIG）の読み込みがまだならローディングやエラー表示
+  if (!surveyConfig) {
+    return (
+      <Box textAlign="center" mt={10}>
+        <Typography variant="h6" color="error">
+          アンケートを読み込んでいます...
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -210,18 +209,15 @@ const SurveyForm: React.FC = () => {
       }}
     >
       {/* タイトル */}
-      <Typography variant="h4" component="h1" textAlign="center" mb={4} className="text">
-        {"当施設利用後の\nアンケート"}
+      <Typography variant="h4" component="h1" textAlign="center" mb={4}>
+        当施設利用後のアンケート
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>
-        <div>
-          この度は当施設をご利用いただきありがとうございました。
-        </div>
+        <div>この度は当施設をご利用いただきありがとうございます。</div>
         <div>
           お客様からのご意見を今後のサービス向上に役立てたいと考えておりますので、以下のアンケートにご協力いただけますと幸いです。
         </div>
-        {/* アンケートが短時間で終わることを強調するメッセージを追加 */}
         <Typography variant="body2" color="textSecondary" mt={2}>
           ※ アンケートは約1分で完了します。
         </Typography>
@@ -238,7 +234,7 @@ const SurveyForm: React.FC = () => {
         }}
       >
         <FormControl fullWidth margin="normal" required>
-          <FormLabel sx={{ textAlign: 'left' }}>
+          <FormLabel>
             当施設をどこでお知りになりましたか？
             <Typography
               component="span"
@@ -248,7 +244,6 @@ const SurveyForm: React.FC = () => {
                 borderRadius: 1,
                 padding: '0 4px',
                 marginLeft: 1,
-                display: 'inline-block',
                 fontSize: '0.8rem',
               }}
             >
@@ -256,56 +251,19 @@ const SurveyForm: React.FC = () => {
             </Typography>
           </FormLabel>
           <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="Webサイト"
-                  onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
-                  checked={heardFrom.includes('Webサイト')}
-                />
-              }
-              label="Webサイト"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="SNS(インスタグラム、Xなど)"
-                  onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
-                  checked={heardFrom.includes('SNS(インスタグラム、Xなど)')}
-                />
-              }
-              label="SNS(インスタグラム、Xなど)"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="相談員からのご紹介"
-                  onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
-                  checked={heardFrom.includes('相談員からのご紹介')}
-                />
-              }
-              label="相談員からのご紹介"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="ご友人・知人からのご紹介"
-                  onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
-                  checked={heardFrom.includes('ご友人・知人からのご紹介')}
-                />
-              }
-              label="ご友人・知人からのご紹介"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="広告"
-                  onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
-                  checked={heardFrom.includes('広告')}
-                />
-              }
-              label="広告"
-            />
+            {surveyConfig.heardFromOptions.map((option) => (
+              <FormControlLabel
+                key={option}
+                control={
+                  <Checkbox
+                    value={option}
+                    checked={heardFrom.includes(option)}
+                    onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
+                  />
+                }
+                label={option}
+              />
+            ))}
           </FormGroup>
         </FormControl>
       </Box>
@@ -321,7 +279,7 @@ const SurveyForm: React.FC = () => {
         }}
       >
         <FormControl fullWidth margin="normal" required>
-          <FormLabel sx={{ textAlign: 'left' }}>
+          <FormLabel>
             施設をご利用された日時
             <Typography
               component="span"
@@ -331,7 +289,6 @@ const SurveyForm: React.FC = () => {
                 borderRadius: 1,
                 padding: '0 4px',
                 marginLeft: 1,
-                display: 'inline-block',
                 fontSize: '0.8rem',
               }}
             >
@@ -339,14 +296,14 @@ const SurveyForm: React.FC = () => {
             </Typography>
           </FormLabel>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {/* 年 */}
             <Select
               value={visitDate.year}
               onChange={(e) => setVisitDate({ ...visitDate, year: e.target.value })}
-              displayEmpty
               sx={{ flex: 1, mr: 1 }}
             >
-              <MenuItem value=""></MenuItem>
+              <MenuItem value="">
+                <em>選択</em>
+              </MenuItem>
               {years.map((year) => (
                 <MenuItem key={year} value={year}>
                   {year}
@@ -355,14 +312,14 @@ const SurveyForm: React.FC = () => {
             </Select>
             <Typography>年</Typography>
 
-            {/* 月 */}
             <Select
               value={visitDate.month}
               onChange={(e) => setVisitDate({ ...visitDate, month: e.target.value })}
-              displayEmpty
               sx={{ flex: 1, mx: 1 }}
             >
-              <MenuItem value=""></MenuItem>
+              <MenuItem value="">
+                <em>選択</em>
+              </MenuItem>
               {months.map((month) => (
                 <MenuItem key={month} value={month}>
                   {month}
@@ -371,14 +328,14 @@ const SurveyForm: React.FC = () => {
             </Select>
             <Typography>月</Typography>
 
-            {/* 日 */}
             <Select
               value={visitDate.day}
               onChange={(e) => setVisitDate({ ...visitDate, day: e.target.value })}
-              displayEmpty
               sx={{ flex: 1, ml: 1 }}
             >
-              <MenuItem value=""></MenuItem>
+              <MenuItem value="">
+                <em>選択</em>
+              </MenuItem>
               {days.map((day) => (
                 <MenuItem key={day} value={day}>
                   {day}
@@ -390,10 +347,10 @@ const SurveyForm: React.FC = () => {
         </FormControl>
       </Box>
 
-      {/* 利用目的 */}
+      {/* 利用目的(サービス) */}
       <Box
         sx={{
-          backgroundColor: '#fff', // 白色で塗りつぶし
+          backgroundColor: '#fff',
           padding: 2,
           borderRadius: 2,
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
@@ -401,7 +358,7 @@ const SurveyForm: React.FC = () => {
         }}
       >
         <FormControl fullWidth margin="normal" required>
-          <FormLabel sx={{ textAlign: 'left' }}>
+          <FormLabel>
             どのような用途で当施設をご利用されましたか？ (複数選択可)
             <Typography
               component="span"
@@ -411,7 +368,6 @@ const SurveyForm: React.FC = () => {
                 borderRadius: 1,
                 padding: '0 4px',
                 marginLeft: 1,
-                display: 'inline-block',
                 fontSize: '0.8rem',
               }}
             >
@@ -419,46 +375,31 @@ const SurveyForm: React.FC = () => {
             </Typography>
           </FormLabel>
           <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="児童発達支援事業所"
-                  onChange={(e) => handleSimpleCheckboxChange<PurposeType>(e, setUsagePurpose)}
-                  checked={usagePurpose.includes('児童発達支援事業所')}
-                />
-              }
-              label="児童発達支援事業所"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="放課後等デイサービス"
-                  onChange={(e) => handleSimpleCheckboxChange<PurposeType>(e, setUsagePurpose)}
-                  checked={usagePurpose.includes('放課後等デイサービス')}
-                />
-              }
-              label="放課後等デイサービス"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="生活介護"
-                  onChange={(e) => handleSimpleCheckboxChange<PurposeType>(e, setUsagePurpose)}
-                  checked={usagePurpose.includes('生活介護')}
-                />
-              }
-              label="生活介護"
-            />
+            {surveyConfig.serviceDefinitions.map((service) => (
+              <FormControlLabel
+                key={service.key}
+                control={
+                  <Checkbox
+                    value={service.key}
+                    checked={usageServices.includes(service.key)}
+                    onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsageServices)}
+                  />
+                }
+                label={service.label}
+              />
+            ))}
           </FormGroup>
         </FormControl>
       </Box>
 
-      {/* 利用目的に応じた満足点と改善点 */}
-      {usagePurpose.map((purpose: PurposeType) => {
-        const options = purposeSpecificOptions[purpose];
+      {/* 選択されたサービスごとの満足点・改善点 */}
+      {usageServices.map((serviceKey) => {
+        const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
+        if (!service) return null; // キー不一致の場合はスキップ
+
         return (
           <Box
-            key={purpose}
+            key={service.key}
             sx={{
               backgroundColor: '#fff',
               padding: 2,
@@ -470,7 +411,7 @@ const SurveyForm: React.FC = () => {
             {/* 満足した点 */}
             <FormControl component="fieldset" fullWidth margin="normal" required>
               <FormLabel component="legend">
-                {`${purpose}のサービスで満足した点を選択してください (複数選択可)`}
+                {`${service.label}のサービスで満足した点 (複数選択可)`}
                 <Typography
                   component="span"
                   sx={{
@@ -479,7 +420,6 @@ const SurveyForm: React.FC = () => {
                     borderRadius: 1,
                     padding: '0 4px',
                     marginLeft: 1,
-                    display: 'inline-block',
                     fontSize: '0.8rem',
                   }}
                 >
@@ -487,16 +427,16 @@ const SurveyForm: React.FC = () => {
                 </Typography>
               </FormLabel>
               <FormGroup>
-                {options.satisfied.map((option) => (
+                {service.satisfiedOptions.map((option) => (
                   <FormControlLabel
                     key={option}
                     control={
                       <Checkbox
                         value={option}
+                        checked={satisfiedPoints[serviceKey]?.includes(option) || false}
                         onChange={(e) =>
-                          handlePurposeCheckboxChange(e, purpose, setSatisfiedPoints)
+                          handleServicePointsCheckboxChange(e, serviceKey, setSatisfiedPoints)
                         }
-                        checked={satisfiedPoints[purpose]?.includes(option) || false}
                       />
                     }
                     label={option}
@@ -508,7 +448,7 @@ const SurveyForm: React.FC = () => {
             {/* 改善してほしい点 */}
             <FormControl component="fieldset" fullWidth margin="normal" required>
               <FormLabel component="legend">
-                {`${purpose}のサービスで改善してほしい点を選択してください（複数選択可）`}
+                {`${service.label}のサービスで改善してほしい点 (複数選択可)`}
                 <Typography
                   component="span"
                   sx={{
@@ -517,7 +457,6 @@ const SurveyForm: React.FC = () => {
                     borderRadius: 1,
                     padding: '0 4px',
                     marginLeft: 1,
-                    display: 'inline-block',
                     fontSize: '0.8rem',
                   }}
                 >
@@ -525,16 +464,16 @@ const SurveyForm: React.FC = () => {
                 </Typography>
               </FormLabel>
               <FormGroup>
-                {options.improvement.map((option) => (
+                {service.improvementOptions.map((option) => (
                   <FormControlLabel
                     key={option}
                     control={
                       <Checkbox
                         value={option}
+                        checked={improvementPoints[serviceKey]?.includes(option) || false}
                         onChange={(e) =>
-                          handlePurposeCheckboxChange(e, purpose, setImprovementPoints)
+                          handleServicePointsCheckboxChange(e, serviceKey, setImprovementPoints)
                         }
-                        checked={improvementPoints[purpose]?.includes(option) || false}
                       />
                     }
                     label={option}
@@ -567,26 +506,24 @@ const SurveyForm: React.FC = () => {
                 borderRadius: 1,
                 padding: '0 4px',
                 marginLeft: 1,
-                display: 'inline-block',
                 fontSize: '0.8rem',
               }}
             >
               必須
             </Typography>
           </FormLabel>
-          {/* 満足度の評価方法を説明する注釈を追加 */}
           <Typography variant="body2" color="textSecondary" gutterBottom>
             ※ 5に近いほど満足度が高いことを示します。
           </Typography>
           <Rating
             name="satisfaction-rating"
             value={satisfaction}
-            onChange={(event, newValue) => setSatisfaction(newValue)}
-            precision={1.0} // 1.0刻みで評価
+            onChange={(_, newValue) => setSatisfaction(newValue)}
+            precision={1}
             size="large"
           />
           <Typography component="legend">
-            現在の満足度: {satisfaction ? satisfaction : '未評価'}
+            現在の満足度: {satisfaction ?? '未評価'}
           </Typography>
         </FormControl>
       </Box>

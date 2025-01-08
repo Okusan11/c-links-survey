@@ -58,8 +58,8 @@ const SurveyForm: React.FC = () => {
   // 3. 日付等のステート管理
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
-  const currentDay = String(currentDate.getDate()).padStart(2, '0');
+  const currentMonth = String(currentDate.getMonth() + 1);
+  const currentDay = String(currentDate.getDate());
 
   const [visitDate, setVisitDate] = useState({
     year: String(currentYear),

@@ -71,7 +71,7 @@ const SurveyForm: React.FC = () => {
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
 
   // 5. サービス（利用目的）の選択
-  const [usageServices, setUsageServices] = useState<ServiceKey[]>(state?.usageServices || []);
+  const [usagePurpose, setusagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
 
   // 6. 満足度
   const [satisfaction, setSatisfaction] = useState<number | null>(4);
@@ -131,7 +131,7 @@ const SurveyForm: React.FC = () => {
       alert('施設をご利用された日時を選択してください。');
       return;
     }
-    if (usageServices.length === 0) {
+    if (usagePurpose.length === 0) {
       alert('ご利用目的を1つ以上選択してください。');
       return;
     }
@@ -155,7 +155,7 @@ const SurveyForm: React.FC = () => {
         state: {
           visitDate,
           heardFrom,
-          usageServices,
+          usagePurpose,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -166,7 +166,7 @@ const SurveyForm: React.FC = () => {
         state: {
           visitDate,
           heardFrom,
-          usageServices,
+          usagePurpose,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -381,8 +381,8 @@ const SurveyForm: React.FC = () => {
                 control={
                   <Checkbox
                     value={service.key}
-                    checked={usageServices.includes(service.key)}
-                    onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsageServices)}
+                    checked={usagePurpose.includes(service.key)}
+                    onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setusagePurpose)}
                   />
                 }
                 label={service.label}
@@ -393,7 +393,7 @@ const SurveyForm: React.FC = () => {
       </Box>
 
       {/* 選択されたサービスごとの満足点・改善点 */}
-      {usageServices.map((serviceKey) => {
+      {usagePurpose.map((serviceKey) => {
         const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
         if (!service) return null; // キー不一致の場合はスキップ
 

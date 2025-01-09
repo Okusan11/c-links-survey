@@ -144,6 +144,7 @@ const SurveyForm: React.FC = () => {
         state: {
           visitDate,
           heardFrom,
+
           usagePurpose: usagePurposeLabels,
           satisfiedPoints,
           improvementPoints,

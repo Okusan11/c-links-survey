@@ -14,8 +14,13 @@ import {
   Typography,
 } from '@mui/material';
 
+/**
+ * 1. 型定義
+ */
+// 1-1. サービスキーの型
 type ServiceKey = 'childDevelopmentSupport' | 'afterSchoolDayService' | 'lifeCare';
 
+// 1-2. サービスごとの定義
 interface ServiceDefinition {
   key: ServiceKey;
   label: string;
@@ -23,6 +28,7 @@ interface ServiceDefinition {
   improvementOptions: string[];
 }
 
+// 1-3. SSMに格納したJSON全体を受け取るための型
 interface SurveyConfig {
   heardFromOptions: string[];
   serviceDefinitions: ServiceDefinition[];
@@ -32,6 +38,7 @@ const SurveyForm: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
+  // 2. SSMパラメータ（JSON）をパースして保持
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
 
   useEffect(() => {
@@ -48,6 +55,7 @@ const SurveyForm: React.FC = () => {
     }
   }, []);
 
+  // 3. 日付等のステート管理
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = String(currentDate.getMonth() + 1);
@@ -59,20 +67,28 @@ const SurveyForm: React.FC = () => {
     day: currentDay,
   });
 
-  // 当施設をどこで知ったか
+  // 4. 「当施設をどこで知ったか」の選択リスト
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
 
-  // サービスキーをステートで保持
+  // 5. サービス（利用目的）の選択
   const [usagePurpose, setusagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
 
-  // 満足度
+  // 6. 満足度
   const [satisfaction, setSatisfaction] = useState<number | null>(4);
 
-  // サービスごとの 満足点/改善点
-  const [satisfiedPoints, setSatisfiedPoints] = useState<Partial<Record<ServiceKey, string[]>>>({});
-  const [improvementPoints, setImprovementPoints] =
-    useState<Partial<Record<ServiceKey, string[]>>>({});
+  // 7. サービスごとの満足点/改善点
+  // --- ここを Partial<Record<ServiceKey, string[]>> に変更 ---
+  const [satisfiedPoints, setSatisfiedPoints] = useState<
+    Partial<Record<ServiceKey, string[]>>
+  >({});
+  const [improvementPoints, setImprovementPoints] = useState<
+    Partial<Record<ServiceKey, string[]>>
+  >({});
 
+  /**
+   * 8. チェックボックス変更ハンドラ
+   */
+  // (A) シンプル配列
   const handleSimpleCheckboxChange = <T extends string>(
     event: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<T[]>>
@@ -83,13 +99,16 @@ const SurveyForm: React.FC = () => {
     );
   };
 
+  // (B) サービスごと
+  // --- ここを Partial<Record<ServiceKey, string[]>> に変更 ---
   const handleServicePointsCheckboxChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     serviceKey: ServiceKey,
-    setter: React.Dispatch<React.SetStateAction<Partial<Record<ServiceKey, string[]>>>>
+    setter: React.Dispatch<React.SetStateAction<Partial<Record<ServiceKey, string[]>>>> // ← 変更
   ) => {
     const value = event.target.value;
     setter((prev) => {
+      // prev は Partial<Record<ServiceKey, string[]>> なので、キーがない場合に備えて安全に取り出す
       const currentValues = prev[serviceKey] || [];
       const newValues = currentValues.includes(value)
         ? currentValues.filter((v) => v !== value)
@@ -98,9 +117,9 @@ const SurveyForm: React.FC = () => {
     });
   };
 
-  // ------------------------------
-  // ここからフォーム送信の部分を修正
-  // ------------------------------
+  /**
+   * 9. フォーム送信
+   */
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -116,6 +135,7 @@ const SurveyForm: React.FC = () => {
       alert('ご利用目的を1つ以上選択してください。');
       return;
     }
+    // Partial<Record<ServiceKey, string[]>> を使っているので、キーの有無をしっかりチェック
     if (Object.keys(satisfiedPoints).length === 0) {
       alert('サービスの満足した点について1つ以上回答を選択してください');
       return;
@@ -129,23 +149,22 @@ const SurveyForm: React.FC = () => {
       return;
     }
 
-    // (A) usagePurpose (ServiceKey配列) を label配列 に変換
-    // ----------------------------------------------------
-    const usagePurposeLabels = usagePurpose.map((key) => {
-      const service = surveyConfig?.serviceDefinitions.find((s) => s.key === key);
-      // 該当が見つからない場合は空文字などを返す (基本的には想定しないケース)
-      return service ? service.label : '';
+    console.log('送信するstateの中身', {
+      visitDate,
+      heardFrom,
+      usagePurpose,
+      satisfiedPoints,
+      improvementPoints,
+      satisfaction,
     });
 
-    // (B) navigate で serviceKey ではなく label を送るように変更
-    // ----------------------------------------------------
+    // 満足度で遷移先を分岐
     if (satisfaction >= 4) {
       navigate('/googleaccount', {
         state: {
           visitDate,
           heardFrom,
-
-          usagePurpose: usagePurposeLabels,
+          usagePurpose,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -156,7 +175,7 @@ const SurveyForm: React.FC = () => {
         state: {
           visitDate,
           heardFrom,
-          usagePurpose: usagePurposeLabels,
+          usagePurpose,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -165,10 +184,17 @@ const SurveyForm: React.FC = () => {
     }
   };
 
+  /**
+   * 10. 年月日のセレクト用配列
+   */
   const years = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => String(2020 + i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 
+  /**
+   * 11. レンダリング
+   */
+  // SSMパラメータ（REACT_APP_SURVEY_CONFIG）の読み込みがまだならローディングやエラー表示
   if (!surveyConfig) {
     return (
       <Box textAlign="center" mt={10}>
@@ -191,6 +217,7 @@ const SurveyForm: React.FC = () => {
         borderRadius: 2,
       }}
     >
+      {/* タイトル */}
       <Typography variant="h4" component="h1" textAlign="center" mb={4}>
         当施設利用後のアンケート
       </Typography>
@@ -377,7 +404,7 @@ const SurveyForm: React.FC = () => {
       {/* 選択されたサービスごとの満足点・改善点 */}
       {usagePurpose.map((serviceKey) => {
         const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
-        if (!service) return null;
+        if (!service) return null; // キー不一致の場合はスキップ
 
         return (
           <Box
@@ -390,6 +417,7 @@ const SurveyForm: React.FC = () => {
               marginBottom: 3,
             }}
           >
+            {/* 満足した点 */}
             <FormControl component="fieldset" fullWidth margin="normal" required>
               <FormLabel component="legend">
                 {`${service.label}のサービスで満足した点 (複数選択可)`}
@@ -426,6 +454,7 @@ const SurveyForm: React.FC = () => {
               </FormGroup>
             </FormControl>
 
+            {/* 改善してほしい点 */}
             <FormControl component="fieldset" fullWidth margin="normal" required>
               <FormLabel component="legend">
                 {`${service.label}のサービスで改善してほしい点 (複数選択可)`}
@@ -508,6 +537,7 @@ const SurveyForm: React.FC = () => {
         </FormControl>
       </Box>
 
+      {/* ボタン */}
       <Box display="flex" justifyContent="space-between" mt={4}>
         <Button variant="outlined" color="secondary">
           戻る

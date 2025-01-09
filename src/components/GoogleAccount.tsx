@@ -13,6 +13,7 @@ import {
 
 const GoogleAccount: React.FC = () => {
   const { state } = useLocation();
+  const { visitDate, heardFrom, usagePurpose, satisfiedPoints, improvementPoints, satisfaction } = state || {}; // SurveyFormから渡されたデータ
   const navigate = useNavigate();
 
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>('');
@@ -29,6 +30,15 @@ const GoogleAccount: React.FC = () => {
       alert('Googleアカウントをお持ちですか？の質問に回答してください。');
       return;
     }
+
+    console.log('送信するstateの中身', {
+      visitDate,
+      heardFrom,
+      usagePurpose,
+      satisfiedPoints,
+      improvementPoints,
+      satisfaction,
+    });
 
     // 回答に応じて次の画面へ遷移
     if (hasGoogleAccount === 'yes') {

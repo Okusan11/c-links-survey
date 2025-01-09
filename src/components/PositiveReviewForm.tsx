@@ -12,7 +12,7 @@ import {
 
 const PositiveReviewForm: React.FC = () => {
   const { state } = useLocation();
-  const { visitDate, heardFrom, usagePurpose, satisfiedPoints, improvementPoints, satisfaction } = state || {}; // SurveyFormから渡されたデータ
+  const { visitDate, heardFrom, usagePurpose, satisfiedPoints, improvementPoints, satisfaction } = state || {}; // GoogleAccountから渡されたデータ
   const navigate = useNavigate();
   const [Feedback, setFeedback] = useState('');
 
@@ -37,6 +37,16 @@ const PositiveReviewForm: React.FC = () => {
       alert('当施設への満足度を選択してください。');
       return;
     }
+
+    console.log('送信するstateの中身', {
+      visitDate,
+      heardFrom,
+      usagePurpose,
+      satisfiedPoints,
+      improvementPoints,
+      satisfaction,
+      Feedback,
+    });
 
     // SurveyFormとReviewFormのデータをすべてConfirmationに渡す
     navigate('/confirmation', {

@@ -111,7 +111,8 @@ const Confirmation: React.FC = () => {
     const data = {
       visitDate: state.visitDate,
       heardFrom: state.heardFrom,
-      usagePurpose: usagePurposeLabels,          // Labelで送信
+      usagePurposeKeys: usagePurposeKeys,          // Labelで送信
+      usagePurposeLabels: usagePurposeLabels,          // Labelで送信
       satisfiedPoints: state.satisfiedPoints,  // keyとオプションの紐付け
       improvementPoints: state.improvementPoints,
       satisfaction: state.satisfaction,

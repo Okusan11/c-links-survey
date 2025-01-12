@@ -13,17 +13,26 @@ import {
 
 const GoogleAccount: React.FC = () => {
   const { state } = useLocation();
-  const { visitDate, heardFrom, usagePurpose, satisfiedPoints, improvementPoints, satisfaction } = state || {}; // SurveyFormから渡されたデータ
-  const navigate = useNavigate();
+  const {
+    visitDate,
+    heardFrom,
+    usagePurposeKey,
+    usagePurposeLabel,
+    satisfiedPoints,
+    improvementPoints,
+    satisfaction,
+  } = state || {}; // SurveyFormから渡されたデータ
 
+  const navigate = useNavigate();
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>('');
 
-  // ① ここで SSM パラメータをビルド時に埋め込んだ環境変数を参照
+  // ① 環境変数からURL/エンドポイントを取得 (ビルド時にSSMパラメータを埋め込んだ想定)
   const googleReviewUrl =
-    process.env.REACT_APP_GMAP_REVIEW_URL ||
-    'https://www.google.com/maps'; // デフォルト値(SSM取得失敗時のフォールバック)
+    process.env.REACT_APP_GMAP_REVIEW_URL || 'https://www.google.com/maps'; // デフォルト値
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || ''; // 追加: API Gatewayのエンドポイント
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!hasGoogleAccount) {
@@ -31,21 +40,60 @@ const GoogleAccount: React.FC = () => {
       return;
     }
 
+    // state に何が入っているか確認
     console.log('送信するstateの中身', {
       visitDate,
       heardFrom,
-      usagePurpose,
+      usagePurposeKey,
+      usagePurposeLabel,
       satisfiedPoints,
       improvementPoints,
       satisfaction,
     });
 
-    // 回答に応じて次の画面へ遷移
     if (hasGoogleAccount === 'yes') {
-      // ② SSMから取得したURLへ遷移
-      window.location.href = googleReviewUrl;
+      // ② API Gateway へデータを送信してから GoogleMap 口コミ投稿ページへ遷移
+      if (!apiEndpoint) {
+        alert('APIエンドポイントが設定されていません。');
+        return;
+      }
+
+      // 送信するデータの例
+      const requestData = {
+        hasGoogleAccount,
+        visitDate,
+        heardFrom,
+        usagePurposeKey,
+        usagePurposeLabel,
+        satisfiedPoints,
+        improvementPoints,
+        satisfaction,
+      };
+
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        if (!response.ok) {
+          // サーバーが 200系以外を返した場合
+          console.error('サーバーエラー:', response.statusText);
+          alert('データ送信中にエラーが発生しました。');
+          return;
+        }
+
+        // 送信成功後に GoogleMap 口コミ投稿ページへ遷移
+        window.location.href = googleReviewUrl;
+      } catch (error) {
+        console.error('ネットワークエラー:', error);
+        alert('ネットワークエラーが発生しました。');
+      }
     } else {
-      // 持っていない場合、感想入力画面へ
+      // Googleアカウントがない場合は感想入力画面へ遷移
       navigate('/previewform', {
         state: {
           ...state,

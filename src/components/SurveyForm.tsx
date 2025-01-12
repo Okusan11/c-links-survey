@@ -71,13 +71,12 @@ const SurveyForm: React.FC = () => {
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
 
   // 5. サービス（利用目的）の選択
-  const [usagePurpose, setusagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
+  const [usagePurposeKey, setUsagePurposeKey] = useState<ServiceKey[]>(state?.usagePurpose || []);
 
   // 6. 満足度
   const [satisfaction, setSatisfaction] = useState<number | null>(4);
 
   // 7. サービスごとの満足点/改善点
-  // --- ここを Partial<Record<ServiceKey, string[]>> に変更 ---
   const [satisfiedPoints, setSatisfiedPoints] = useState<
     Partial<Record<ServiceKey, string[]>>
   >({});
@@ -100,15 +99,13 @@ const SurveyForm: React.FC = () => {
   };
 
   // (B) サービスごと
-  // --- ここを Partial<Record<ServiceKey, string[]>> に変更 ---
   const handleServicePointsCheckboxChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     serviceKey: ServiceKey,
-    setter: React.Dispatch<React.SetStateAction<Partial<Record<ServiceKey, string[]>>>> // ← 変更
+    setter: React.Dispatch<React.SetStateAction<Partial<Record<ServiceKey, string[]>>>> 
   ) => {
     const value = event.target.value;
     setter((prev) => {
-      // prev は Partial<Record<ServiceKey, string[]>> なので、キーがない場合に備えて安全に取り出す
       const currentValues = prev[serviceKey] || [];
       const newValues = currentValues.includes(value)
         ? currentValues.filter((v) => v !== value)
@@ -131,11 +128,10 @@ const SurveyForm: React.FC = () => {
       alert('施設をご利用された日時を選択してください。');
       return;
     }
-    if (usagePurpose.length === 0) {
+    if (usagePurposeKey.length === 0) {
       alert('ご利用目的を1つ以上選択してください。');
       return;
     }
-    // Partial<Record<ServiceKey, string[]>> を使っているので、キーの有無をしっかりチェック
     if (Object.keys(satisfiedPoints).length === 0) {
       alert('サービスの満足した点について1つ以上回答を選択してください');
       return;
@@ -149,10 +145,17 @@ const SurveyForm: React.FC = () => {
       return;
     }
 
+    // ここで usagePurpose の key に対応するラベルを配列に変換
+    const usagePurposeLabel = usagePurposeKey.map((key) => {
+      const service = surveyConfig?.serviceDefinitions.find((sd) => sd.key === key);
+      return service ? service.label : key;
+    });
+
     console.log('送信するstateの中身', {
       visitDate,
       heardFrom,
-      usagePurpose,
+      usagePurposeKey,
+      usagePurposeLabel, // 追加
       satisfiedPoints,
       improvementPoints,
       satisfaction,
@@ -164,7 +167,8 @@ const SurveyForm: React.FC = () => {
         state: {
           visitDate,
           heardFrom,
-          usagePurpose,
+          usagePurposeKey,
+          usagePurposeLabel, // 追加
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -175,7 +179,8 @@ const SurveyForm: React.FC = () => {
         state: {
           visitDate,
           heardFrom,
-          usagePurpose,
+          usagePurposeKey,
+          usagePurposeLabel, // 追加
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -194,7 +199,6 @@ const SurveyForm: React.FC = () => {
   /**
    * 11. レンダリング
    */
-  // SSMパラメータ（REACT_APP_SURVEY_CONFIG）の読み込みがまだならローディングやエラー表示
   if (!surveyConfig) {
     return (
       <Box textAlign="center" mt={10}>
@@ -390,8 +394,8 @@ const SurveyForm: React.FC = () => {
                 control={
                   <Checkbox
                     value={service.key}
-                    checked={usagePurpose.includes(service.key)}
-                    onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setusagePurpose)}
+                    checked={usagePurposeKey.includes(service.key)}
+                    onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsagePurposeKey)}
                   />
                 }
                 label={service.label}
@@ -402,9 +406,9 @@ const SurveyForm: React.FC = () => {
       </Box>
 
       {/* 選択されたサービスごとの満足点・改善点 */}
-      {usagePurpose.map((serviceKey) => {
+      {usagePurposeKey.map((serviceKey) => {
         const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
-        if (!service) return null; // キー不一致の場合はスキップ
+        if (!service) return null;
 
         return (
           <Box

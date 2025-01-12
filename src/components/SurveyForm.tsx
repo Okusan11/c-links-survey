@@ -71,7 +71,7 @@ const SurveyForm: React.FC = () => {
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
 
   // 5. サービス（利用目的）の選択
-  const [usagePurposeKey, setUsagePurposeKey] = useState<ServiceKey[]>(state?.usagePurpose || []);
+  const [usagePurpose, setUsagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
 
   // 6. 満足度
   const [satisfaction, setSatisfaction] = useState<number | null>(4);
@@ -128,7 +128,7 @@ const SurveyForm: React.FC = () => {
       alert('施設をご利用された日時を選択してください。');
       return;
     }
-    if (usagePurposeKey.length === 0) {
+    if (usagePurpose.length === 0) {
       alert('ご利用目的を1つ以上選択してください。');
       return;
     }
@@ -146,7 +146,7 @@ const SurveyForm: React.FC = () => {
     }
 
     // ここで usagePurpose の key に対応するラベルを配列に変換
-    const usagePurposeLabel = usagePurposeKey.map((key) => {
+    const usagePurposeLabels = usagePurpose.map((key) => {
       const service = surveyConfig?.serviceDefinitions.find((sd) => sd.key === key);
       return service ? service.label : key;
     });
@@ -154,8 +154,8 @@ const SurveyForm: React.FC = () => {
     console.log('送信するstateの中身', {
       visitDate,
       heardFrom,
-      usagePurposeKey,
-      usagePurposeLabel, // 追加
+      usagePurpose,
+      usagePurposeLabels, // 追加
       satisfiedPoints,
       improvementPoints,
       satisfaction,
@@ -167,8 +167,8 @@ const SurveyForm: React.FC = () => {
         state: {
           visitDate,
           heardFrom,
-          usagePurposeKey,
-          usagePurposeLabel, // 追加
+          usagePurpose,
+          usagePurposeLabels, // 追加
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -179,8 +179,8 @@ const SurveyForm: React.FC = () => {
         state: {
           visitDate,
           heardFrom,
-          usagePurposeKey,
-          usagePurposeLabel, // 追加
+          usagePurpose,
+          usagePurposeLabels, // 追加
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -394,8 +394,8 @@ const SurveyForm: React.FC = () => {
                 control={
                   <Checkbox
                     value={service.key}
-                    checked={usagePurposeKey.includes(service.key)}
-                    onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsagePurposeKey)}
+                    checked={usagePurpose.includes(service.key)}
+                    onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsagePurpose)}
                   />
                 }
                 label={service.label}
@@ -406,7 +406,7 @@ const SurveyForm: React.FC = () => {
       </Box>
 
       {/* 選択されたサービスごとの満足点・改善点 */}
-      {usagePurposeKey.map((serviceKey) => {
+      {usagePurpose.map((serviceKey) => {
         const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
         if (!service) return null;
 

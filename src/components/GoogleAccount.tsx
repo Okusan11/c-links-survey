@@ -33,13 +33,13 @@ const GoogleAccount: React.FC = () => {
   const navigate = useNavigate();
 
   // ① 環境変数からURL/エンドポイントを取得
-  const googleReviewUrl = process.env.REACT_APP_GMAP_REVIEW_URL || 'https://www.google.com/maps';
+  const googleReviewUrl =
+    process.env.REACT_APP_GMAP_REVIEW_URL || 'https://www.google.com/maps';
   const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
 
   // SurveyConfigを読み込み(SSMパラメータをビルド時に埋め込んだもの)
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
 
-  // マウント時にREACT_APP_SURVEY_CONFIGをパース
   useEffect(() => {
     const rawConfig = process.env.REACT_APP_SURVEY_CONFIG;
     if (!rawConfig) {
@@ -64,7 +64,7 @@ const GoogleAccount: React.FC = () => {
   // usagePurpose は serviceKey[] (SurveyForm.tsx でそう送ってきた想定)
   const usagePurposeKeys: ServiceKey[] = state?.usagePurpose || [];
 
-  // usagePurposeKeys をラベルに変換した配列を作る
+  // usagePurposeKeys をラベルに変換した配列
   const usagePurposeLabels = usagePurposeKeys.map((key) => getLabelFromKey(key));
 
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>('');
@@ -82,7 +82,6 @@ const GoogleAccount: React.FC = () => {
     event.preventDefault();
 
     const data = {
-      // state から取得した各種値を使う
       visitDate,
       heardFrom,
       usagePurposeKeys,
@@ -98,45 +97,29 @@ const GoogleAccount: React.FC = () => {
     }
 
     // 送信データの確認
-    console.log('送信するstateの中身', {
-      visitDate,
-      heardFrom,
-      usagePurposeKeys,
-      usagePurposeLabels,
-      satisfiedPoints,
-      improvementPoints,
-      satisfaction,
-    });
+    console.log('送信するstateの中身', data);
 
     if (hasGoogleAccount === 'yes') {
-      // ② API Gateway へデータを送信
+      // ② API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
       if (!apiEndpoint) {
         alert('APIエンドポイントが設定されていません。');
         return;
       }
 
-      try {
-        const response = await fetch(apiEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+      // --- 【ポイント】fetchは投げるがawaitしない ---
+      fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }).catch((error) => {
+        // 失敗した場合も、一旦はコンソールエラーのみ表示
+        console.error('データ送信中にエラーが発生しました:', error);
+      });
 
-        if (!response.ok) {
-          // サーバーが 200系以外を返した場合
-          console.error('サーバーエラー:', response.statusText);
-          alert('データ送信中にエラーが発生しました。');
-          return;
-        }
-
-        // 送信成功後に GoogleMap 口コミ投稿ページへ遷移
-        window.location.href = googleReviewUrl;
-      } catch (error) {
-        console.error('ネットワークエラー:', error);
-        alert('ネットワークエラーが発生しました。');
-      }
+      // 非同期のAPI送信を待たずに、すぐにGoogleMapへ
+      window.location.href = googleReviewUrl;
     } else {
       // Googleアカウントがない場合は感想入力画面へ遷移
       navigate('/previewform', {

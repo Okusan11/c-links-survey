@@ -14,13 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 
-/**
- * 1. 型定義
- */
-// 1-1. サービスキーの型
 type ServiceKey = 'childDevelopmentSupport' | 'afterSchoolDayService' | 'lifeCare';
 
-// 1-2. サービスごとの定義
 interface ServiceDefinition {
   key: ServiceKey;
   label: string;
@@ -28,7 +23,6 @@ interface ServiceDefinition {
   improvementOptions: string[];
 }
 
-// 1-3. SSMに格納したJSON全体を受け取るための型
 interface SurveyConfig {
   heardFromOptions: string[];
   serviceDefinitions: ServiceDefinition[];
@@ -38,7 +32,6 @@ const SurveyForm: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  // 2. SSMパラメータ（JSON）をパースして保持
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
 
   useEffect(() => {
@@ -55,7 +48,6 @@ const SurveyForm: React.FC = () => {
     }
   }, []);
 
-  // 3. 日付等のステート管理
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = String(currentDate.getMonth() + 1);
@@ -67,16 +59,10 @@ const SurveyForm: React.FC = () => {
     day: currentDay,
   });
 
-  // 4. 「当施設をどこで知ったか」の選択リスト
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
-
-  // 5. サービス（利用目的）の選択
   const [usagePurpose, setUsagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
-
-  // 6. 満足度
   const [satisfaction, setSatisfaction] = useState<number | null>(4);
 
-  // 7. サービスごとの満足点/改善点
   const [satisfiedPoints, setSatisfiedPoints] = useState<
     Partial<Record<ServiceKey, string[]>>
   >({});
@@ -84,9 +70,9 @@ const SurveyForm: React.FC = () => {
     Partial<Record<ServiceKey, string[]>>
   >({});
 
-  /**
-   * 8. チェックボックス変更ハンドラ
-   */
+  // -----------------------------
+  // チェックボックスの変更ハンドラ
+  // -----------------------------
   // (A) シンプル配列
   const handleSimpleCheckboxChange = <T extends string>(
     event: React.ChangeEvent<HTMLInputElement>,
@@ -114,9 +100,9 @@ const SurveyForm: React.FC = () => {
     });
   };
 
-  /**
-   * 9. フォーム送信
-   */
+  // -----------------------------
+  // フォーム送信
+  // -----------------------------
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -145,7 +131,6 @@ const SurveyForm: React.FC = () => {
       return;
     }
 
-    // ここで usagePurpose の key に対応するラベルを配列に変換
     const usagePurposeLabels = usagePurpose.map((key) => {
       const service = surveyConfig?.serviceDefinitions.find((sd) => sd.key === key);
       return service ? service.label : key;
@@ -155,20 +140,19 @@ const SurveyForm: React.FC = () => {
       visitDate,
       heardFrom,
       usagePurpose,
-      usagePurposeLabels, // 追加
+      usagePurposeLabels,
       satisfiedPoints,
       improvementPoints,
       satisfaction,
     });
 
-    // 満足度で遷移先を分岐
     if (satisfaction >= 4) {
       navigate('/googleaccount', {
         state: {
           visitDate,
           heardFrom,
           usagePurpose,
-          usagePurposeLabels, // 追加
+          usagePurposeLabels,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -180,7 +164,7 @@ const SurveyForm: React.FC = () => {
           visitDate,
           heardFrom,
           usagePurpose,
-          usagePurposeLabels, // 追加
+          usagePurposeLabels,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -189,16 +173,13 @@ const SurveyForm: React.FC = () => {
     }
   };
 
-  /**
-   * 10. 年月日のセレクト用配列
-   */
+  // -----------------------------
+  // セレクトボックス用のデータ
+  // -----------------------------
   const years = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => String(2020 + i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 
-  /**
-   * 11. レンダリング
-   */
   if (!surveyConfig) {
     return (
       <Box textAlign="center" mt={10}>
@@ -209,6 +190,9 @@ const SurveyForm: React.FC = () => {
     );
   }
 
+  // -----------------------------
+  // レンダリング
+  // -----------------------------
   return (
     <Box
       component="form"
@@ -263,7 +247,17 @@ const SurveyForm: React.FC = () => {
               必須
             </Typography>
           </FormLabel>
-          <FormGroup>
+          <FormGroup
+            sx={{
+              '& .MuiFormControlLabel-root': {
+                alignItems: 'flex-start', // アイコンを上揃え
+              },
+              '& .MuiFormControlLabel-label': {
+                whiteSpace: 'normal', // 折り返しを許可
+                lineHeight: 1.2,      // 選択肢の中の文章の行間をやや狭く
+              },
+            }}
+          >
             {surveyConfig.heardFromOptions.map((option) => (
               <FormControlLabel
                 key={option}
@@ -387,7 +381,17 @@ const SurveyForm: React.FC = () => {
               必須
             </Typography>
           </FormLabel>
-          <FormGroup>
+          <FormGroup
+            sx={{
+              '& .MuiFormControlLabel-root': {
+                alignItems: 'flex-start',
+              },
+              '& .MuiFormControlLabel-label': {
+                whiteSpace: 'normal',
+                lineHeight: 1.2,
+              },
+            }}
+          >
             {surveyConfig.serviceDefinitions.map((service) => (
               <FormControlLabel
                 key={service.key}
@@ -439,7 +443,17 @@ const SurveyForm: React.FC = () => {
                   必須
                 </Typography>
               </FormLabel>
-              <FormGroup>
+              <FormGroup
+                sx={{
+                  '& .MuiFormControlLabel-root': {
+                    alignItems: 'flex-start',
+                  },
+                  '& .MuiFormControlLabel-label': {
+                    whiteSpace: 'normal',
+                    lineHeight: 1.2,
+                  },
+                }}
+              >
                 {service.satisfiedOptions.map((option) => (
                   <FormControlLabel
                     key={option}
@@ -476,7 +490,17 @@ const SurveyForm: React.FC = () => {
                   必須
                 </Typography>
               </FormLabel>
-              <FormGroup>
+              <FormGroup
+                sx={{
+                  '& .MuiFormControlLabel-root': {
+                    alignItems: 'flex-start',
+                  },
+                  '& .MuiFormControlLabel-label': {
+                    whiteSpace: 'normal',
+                    lineHeight: 1.2,
+                  },
+                }}
+              >
                 {service.improvementOptions.map((option) => (
                   <FormControlLabel
                     key={option}

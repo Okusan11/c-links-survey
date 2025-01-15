@@ -8,9 +8,12 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
+  Grid,
   MenuItem,
+  Paper,
   Rating,
   Select,
+  Stack,
   Typography,
 } from '@mui/material';
 
@@ -145,7 +148,7 @@ const SurveyForm: React.FC = () => {
       return;
     }
 
-    // ここで usagePurpose の key に対応するラベルを配列に変換
+    // usagePurpose の key に対応するラベルを変換
     const usagePurposeLabels = usagePurpose.map((key) => {
       const service = surveyConfig?.serviceDefinitions.find((sd) => sd.key === key);
       return service ? service.label : key;
@@ -155,7 +158,7 @@ const SurveyForm: React.FC = () => {
       visitDate,
       heardFrom,
       usagePurpose,
-      usagePurposeLabels, // 追加
+      usagePurposeLabels,
       satisfiedPoints,
       improvementPoints,
       satisfaction,
@@ -168,7 +171,7 @@ const SurveyForm: React.FC = () => {
           visitDate,
           heardFrom,
           usagePurpose,
-          usagePurposeLabels, // 追加
+          usagePurposeLabels,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -180,7 +183,7 @@ const SurveyForm: React.FC = () => {
           visitDate,
           heardFrom,
           usagePurpose,
-          usagePurposeLabels, // 追加
+          usagePurposeLabels,
           satisfiedPoints,
           improvementPoints,
           satisfaction,
@@ -197,7 +200,7 @@ const SurveyForm: React.FC = () => {
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 
   /**
-   * 11. レンダリング
+   * 11. ローディング状態
    */
   if (!surveyConfig) {
     return (
@@ -210,346 +213,354 @@ const SurveyForm: React.FC = () => {
   }
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        maxWidth: 600,
-        margin: '0 auto',
-        backgroundColor: '#e0f7fa',
-        padding: 3,
-        borderRadius: 2,
-      }}
-    >
-      {/* タイトル */}
-      <Typography variant="h4" component="h1" textAlign="center" mb={4}>
-        当施設利用後のアンケート
-      </Typography>
+    // メインフォームをStackで全体管理し、各セクションをPaperでラッピング
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, margin: '0 auto' }}>
+      <Stack spacing={3}>
+        {/* タイトルセクション */}
+        <Box textAlign="center" sx={{ mt: 2 }}>
+          <Typography variant="h4" component="h1" mb={1}>
+            当施設利用後のアンケート
+          </Typography>
+          <Typography variant="body1" mb={2}>
+            この度は当施設をご利用いただきありがとうございます。お客様からのご意見を今後のサービス向上に役立てたいと考えておりますので、以下のアンケートにご協力いただけますと幸いです。
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            ※ アンケートは約1分で完了します。
+          </Typography>
+        </Box>
 
-      <Typography variant="body1" textAlign="left" mb={4}>
-        <div>この度は当施設をご利用いただきありがとうございます。</div>
-        <div>
-          お客様からのご意見を今後のサービス向上に役立てたいと考えておりますので、以下のアンケートにご協力いただけますと幸いです。
-        </div>
-        <Typography variant="body2" color="textSecondary" mt={2}>
-          ※ アンケートは約1分で完了します。
-        </Typography>
-      </Typography>
-
-      {/* 当施設をどこでお知りになりましたか */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
-      >
-        <FormControl fullWidth margin="normal" required>
-          <FormLabel>
-            当施設をどこでお知りになりましたか？
-            <Typography
-              component="span"
+        {/* 「当施設をどこでお知りになりましたか？」 */}
+        <Paper elevation={2} sx={{ p: 2 }}>
+          <FormControl component="fieldset" required>
+            <FormLabel>
+              当施設をどこでお知りになりましたか？
+              <Typography
+                component="span"
+                sx={{
+                  color: '#fff',
+                  backgroundColor: 'red',
+                  borderRadius: 1,
+                  padding: '0 4px',
+                  marginLeft: 1,
+                  fontSize: '0.8rem',
+                }}
+              >
+                必須
+              </Typography>
+            </FormLabel>
+            <FormGroup
               sx={{
-                color: 'white',
-                backgroundColor: 'red',
-                borderRadius: 1,
-                padding: '0 4px',
-                marginLeft: 1,
-                fontSize: '0.8rem',
+                mt: 1,
+                '& .MuiFormControlLabel-root': {
+                  alignItems: 'flex-start',
+                },
+                '& .MuiFormControlLabel-label': {
+                  whiteSpace: 'normal',
+                  lineHeight: 1.2,
+                },
               }}
             >
-              必須
-            </Typography>
-          </FormLabel>
-          <FormGroup>
-            {surveyConfig.heardFromOptions.map((option) => (
-              <FormControlLabel
-                key={option}
-                control={
-                  <Checkbox
-                    value={option}
-                    checked={heardFrom.includes(option)}
-                    onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
-                  />
-                }
-                label={option}
-              />
-            ))}
-          </FormGroup>
-        </FormControl>
-      </Box>
+              {surveyConfig.heardFromOptions.map((option) => (
+                <FormControlLabel
+                  key={option}
+                  control={
+                    <Checkbox
+                      value={option}
+                      checked={heardFrom.includes(option)}
+                      onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
+                    />
+                  }
+                  label={option}
+                />
+              ))}
+            </FormGroup>
+          </FormControl>
+        </Paper>
 
-      {/* 施設をご利用された日時 */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
-      >
-        <FormControl fullWidth margin="normal" required>
-          <FormLabel>
-            施設をご利用された日時
-            <Typography
-              component="span"
+        {/* 施設をご利用された日時 */}
+        <Paper elevation={2} sx={{ p: 2 }}>
+          <FormControl component="fieldset" required>
+            <FormLabel>
+              施設をご利用された日時
+              <Typography
+                component="span"
+                sx={{
+                  color: '#fff',
+                  backgroundColor: 'red',
+                  borderRadius: 1,
+                  padding: '0 4px',
+                  marginLeft: 1,
+                  fontSize: '0.8rem',
+                }}
+              >
+                必須
+              </Typography>
+            </FormLabel>
+            <Box sx={{ mt: 1 }}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={4}>
+                  <Select
+                    value={visitDate.year}
+                    onChange={(e) => setVisitDate({ ...visitDate, year: e.target.value })}
+                    fullWidth
+                  >
+                    <MenuItem value="">
+                      <em>選択</em>
+                    </MenuItem>
+                    {years.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+                <Grid item>
+                  <Typography>年</Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Select
+                    value={visitDate.month}
+                    onChange={(e) => setVisitDate({ ...visitDate, month: e.target.value })}
+                    fullWidth
+                  >
+                    <MenuItem value="">
+                      <em>選択</em>
+                    </MenuItem>
+                    {months.map((month) => (
+                      <MenuItem key={month} value={month}>
+                        {month}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+                <Grid item>
+                  <Typography>月</Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Select
+                    value={visitDate.day}
+                    onChange={(e) => setVisitDate({ ...visitDate, day: e.target.value })}
+                    fullWidth
+                  >
+                    <MenuItem value="">
+                      <em>選択</em>
+                    </MenuItem>
+                    {days.map((day) => (
+                      <MenuItem key={day} value={day}>
+                        {day}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+                <Grid item>
+                  <Typography>日</Typography>
+                </Grid>
+              </Grid>
+            </Box>
+          </FormControl>
+        </Paper>
+
+        {/* 利用目的(サービス) */}
+        <Paper elevation={2} sx={{ p: 2 }}>
+          <FormControl component="fieldset" required>
+            <FormLabel>
+              どのような用途で当施設をご利用されましたか？ (複数選択可)
+              <Typography
+                component="span"
+                sx={{
+                  color: '#fff',
+                  backgroundColor: 'red',
+                  borderRadius: 1,
+                  padding: '0 4px',
+                  marginLeft: 1,
+                  fontSize: '0.8rem',
+                }}
+              >
+                必須
+              </Typography>
+            </FormLabel>
+            <FormGroup
               sx={{
-                color: 'white',
-                backgroundColor: 'red',
-                borderRadius: 1,
-                padding: '0 4px',
-                marginLeft: 1,
-                fontSize: '0.8rem',
+                mt: 1,
+                '& .MuiFormControlLabel-root': {
+                  alignItems: 'flex-start',
+                },
+                '& .MuiFormControlLabel-label': {
+                  whiteSpace: 'normal',
+                  lineHeight: 1.2,
+                },
               }}
             >
-              必須
-            </Typography>
-          </FormLabel>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Select
-              value={visitDate.year}
-              onChange={(e) => setVisitDate({ ...visitDate, year: e.target.value })}
-              sx={{ flex: 1, mr: 1 }}
-            >
-              <MenuItem value="">
-                <em>選択</em>
-              </MenuItem>
-              {years.map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
+              {surveyConfig.serviceDefinitions.map((service) => (
+                <FormControlLabel
+                  key={service.key}
+                  control={
+                    <Checkbox
+                      value={service.key}
+                      checked={usagePurpose.includes(service.key)}
+                      onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsagePurpose)}
+                    />
+                  }
+                  label={service.label}
+                />
               ))}
-            </Select>
-            <Typography>年</Typography>
+            </FormGroup>
+          </FormControl>
+        </Paper>
 
-            <Select
-              value={visitDate.month}
-              onChange={(e) => setVisitDate({ ...visitDate, month: e.target.value })}
-              sx={{ flex: 1, mx: 1 }}
-            >
-              <MenuItem value="">
-                <em>選択</em>
-              </MenuItem>
-              {months.map((month) => (
-                <MenuItem key={month} value={month}>
-                  {month}
-                </MenuItem>
-              ))}
-            </Select>
-            <Typography>月</Typography>
+        {/* 選択されたサービスごとの満足点・改善点 */}
+        {usagePurpose.map((serviceKey) => {
+          const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
+          if (!service) return null;
 
-            <Select
-              value={visitDate.day}
-              onChange={(e) => setVisitDate({ ...visitDate, day: e.target.value })}
-              sx={{ flex: 1, ml: 1 }}
-            >
-              <MenuItem value="">
-                <em>選択</em>
-              </MenuItem>
-              {days.map((day) => (
-                <MenuItem key={day} value={day}>
-                  {day}
-                </MenuItem>
-              ))}
-            </Select>
-            <Typography>日</Typography>
-          </Box>
-        </FormControl>
-      </Box>
-
-      {/* 利用目的(サービス) */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
-      >
-        <FormControl fullWidth margin="normal" required>
-          <FormLabel>
-            どのような用途で当施設をご利用されましたか？ (複数選択可)
-            <Typography
-              component="span"
-              sx={{
-                color: 'white',
-                backgroundColor: 'red',
-                borderRadius: 1,
-                padding: '0 4px',
-                marginLeft: 1,
-                fontSize: '0.8rem',
-              }}
-            >
-              必須
-            </Typography>
-          </FormLabel>
-          <FormGroup>
-            {surveyConfig.serviceDefinitions.map((service) => (
-              <FormControlLabel
-                key={service.key}
-                control={
-                  <Checkbox
-                    value={service.key}
-                    checked={usagePurpose.includes(service.key)}
-                    onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsagePurpose)}
-                  />
-                }
-                label={service.label}
-              />
-            ))}
-          </FormGroup>
-        </FormControl>
-      </Box>
-
-      {/* 選択されたサービスごとの満足点・改善点 */}
-      {usagePurpose.map((serviceKey) => {
-        const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
-        if (!service) return null;
-
-        return (
-          <Box
-            key={service.key}
-            sx={{
-              backgroundColor: '#fff',
-              padding: 2,
-              borderRadius: 2,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-              marginBottom: 3,
-            }}
-          >
-            {/* 満足した点 */}
-            <FormControl component="fieldset" fullWidth margin="normal" required>
-              <FormLabel component="legend">
-                {`${service.label}のサービスで満足した点 (複数選択可)`}
-                <Typography
-                  component="span"
+          return (
+            <Paper key={service.key} elevation={2} sx={{ p: 2 }}>
+              {/* 満足した点 */}
+              <FormControl component="fieldset" required>
+                <FormLabel>
+                  {`${service.label}のサービスで満足した点 (複数選択可)`}
+                  <Typography
+                    component="span"
+                    sx={{
+                      color: '#fff',
+                      backgroundColor: 'red',
+                      borderRadius: 1,
+                      padding: '0 4px',
+                      marginLeft: 1,
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    必須
+                  </Typography>
+                </FormLabel>
+                <FormGroup
                   sx={{
-                    color: 'white',
-                    backgroundColor: 'red',
-                    borderRadius: 1,
-                    padding: '0 4px',
-                    marginLeft: 1,
-                    fontSize: '0.8rem',
+                    mt: 1,
+                    '& .MuiFormControlLabel-root': {
+                      alignItems: 'flex-start',
+                    },
+                    '& .MuiFormControlLabel-label': {
+                      whiteSpace: 'normal',
+                      lineHeight: 1.2,
+                    },
                   }}
                 >
-                  必須
-                </Typography>
-              </FormLabel>
-              <FormGroup>
-                {service.satisfiedOptions.map((option) => (
-                  <FormControlLabel
-                    key={option}
-                    control={
-                      <Checkbox
-                        value={option}
-                        checked={satisfiedPoints[serviceKey]?.includes(option) || false}
-                        onChange={(e) =>
-                          handleServicePointsCheckboxChange(e, serviceKey, setSatisfiedPoints)
-                        }
-                      />
-                    }
-                    label={option}
-                  />
-                ))}
-              </FormGroup>
-            </FormControl>
+                  {service.satisfiedOptions.map((option) => (
+                    <FormControlLabel
+                      key={option}
+                      control={
+                        <Checkbox
+                          value={option}
+                          checked={satisfiedPoints[serviceKey]?.includes(option) || false}
+                          onChange={(e) =>
+                            handleServicePointsCheckboxChange(e, serviceKey, setSatisfiedPoints)
+                          }
+                        />
+                      }
+                      label={option}
+                    />
+                  ))}
+                </FormGroup>
+              </FormControl>
 
-            {/* 改善してほしい点 */}
-            <FormControl component="fieldset" fullWidth margin="normal" required>
-              <FormLabel component="legend">
-                {`${service.label}のサービスで改善してほしい点 (複数選択可)`}
-                <Typography
-                  component="span"
+              {/* 改善してほしい点 */}
+              <FormControl component="fieldset" required sx={{ mt: 2 }}>
+                <FormLabel>
+                  {`${service.label}のサービスで改善してほしい点 (複数選択可)`}
+                  <Typography
+                    component="span"
+                    sx={{
+                      color: '#fff',
+                      backgroundColor: 'red',
+                      borderRadius: 1,
+                      padding: '0 4px',
+                      marginLeft: 1,
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    必須
+                  </Typography>
+                </FormLabel>
+                <FormGroup
                   sx={{
-                    color: 'white',
-                    backgroundColor: 'red',
-                    borderRadius: 1,
-                    padding: '0 4px',
-                    marginLeft: 1,
-                    fontSize: '0.8rem',
+                    mt: 1,
+                    '& .MuiFormControlLabel-root': {
+                      alignItems: 'flex-start',
+                    },
+                    '& .MuiFormControlLabel-label': {
+                      whiteSpace: 'normal',
+                      lineHeight: 1.2,
+                    },
                   }}
                 >
-                  必須
-                </Typography>
-              </FormLabel>
-              <FormGroup>
-                {service.improvementOptions.map((option) => (
-                  <FormControlLabel
-                    key={option}
-                    control={
-                      <Checkbox
-                        value={option}
-                        checked={improvementPoints[serviceKey]?.includes(option) || false}
-                        onChange={(e) =>
-                          handleServicePointsCheckboxChange(e, serviceKey, setImprovementPoints)
-                        }
-                      />
-                    }
-                    label={option}
-                  />
-                ))}
-              </FormGroup>
-            </FormControl>
-          </Box>
-        );
-      })}
+                  {service.improvementOptions.map((option) => (
+                    <FormControlLabel
+                      key={option}
+                      control={
+                        <Checkbox
+                          value={option}
+                          checked={improvementPoints[serviceKey]?.includes(option) || false}
+                          onChange={(e) =>
+                            handleServicePointsCheckboxChange(e, serviceKey, setImprovementPoints)
+                          }
+                        />
+                      }
+                      label={option}
+                    />
+                  ))}
+                </FormGroup>
+              </FormControl>
+            </Paper>
+          );
+        })}
 
-      {/* 満足度評価 */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
-      >
-        <FormControl fullWidth margin="normal" required>
-          <FormLabel>
-            当施設のサービスへの満足度を教えてください。
-            <Typography
-              component="span"
-              sx={{
-                color: 'white',
-                backgroundColor: 'red',
-                borderRadius: 1,
-                padding: '0 4px',
-                marginLeft: 1,
-                fontSize: '0.8rem',
-              }}
-            >
-              必須
+        {/* 満足度評価 */}
+        <Paper elevation={2} sx={{ p: 2 }}>
+          <FormControl component="fieldset" required>
+            <FormLabel>
+              当施設のサービスへの満足度を教えてください。
+              <Typography
+                component="span"
+                sx={{
+                  color: '#fff',
+                  backgroundColor: 'red',
+                  borderRadius: 1,
+                  padding: '0 4px',
+                  marginLeft: 1,
+                  fontSize: '0.8rem',
+                }}
+              >
+                必須
+              </Typography>
+            </FormLabel>
+            <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mt: 1 }}>
+              ※ 5に近いほど満足度が高いことを示します。
             </Typography>
-          </FormLabel>
-          <Typography variant="body2" color="textSecondary" gutterBottom>
-            ※ 5に近いほど満足度が高いことを示します。
-          </Typography>
-          <Rating
-            name="satisfaction-rating"
-            value={satisfaction}
-            onChange={(_, newValue) => setSatisfaction(newValue)}
-            precision={1}
-            size="large"
-          />
-          <Typography component="legend">
-            現在の満足度: {satisfaction ?? '未評価'}
-          </Typography>
-        </FormControl>
-      </Box>
+            <Rating
+              name="satisfaction-rating"
+              value={satisfaction}
+              onChange={(_, newValue) => setSatisfaction(newValue)}
+              precision={1}
+              size="large"
+            />
+            <Typography component="legend" sx={{ mt: 1 }}>
+              現在の満足度: {satisfaction ?? '未評価'}
+            </Typography>
+          </FormControl>
+        </Paper>
 
-      {/* ボタン */}
-      <Box display="flex" justifyContent="space-between" mt={4}>
-        <Button variant="outlined" color="secondary">
-          戻る
-        </Button>
-        <Button variant="contained" color="primary" type="submit">
-          次へ
-        </Button>
-      </Box>
+        {/* ボタンセクション */}
+        <Stack direction="row" spacing={2} justifyContent="flex-end">
+          {/* 戻るボタンはサブアクション */}
+          <Button variant="text" color="secondary">
+            戻る
+          </Button>
+          {/* 次へボタンはメインアクション */}
+          <Button variant="contained" color="primary" type="submit">
+            次へ
+          </Button>
+        </Stack>
+      </Stack>
     </Box>
   );
 };

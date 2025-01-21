@@ -18,7 +18,7 @@ import {
  * 1. 型定義
  */
 // 1-1. サービスキーの型
-type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet' | 'perm';
+type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet';
 
 // 1-2. サービスごとの定義
 interface ServiceDefinition {

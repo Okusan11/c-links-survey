@@ -34,7 +34,7 @@ const PositiveReviewForm: React.FC = () => {
   const handleNext = () => {
     // バリデーションチェック
     if (satisfaction === null) {
-      alert('当施設への満足度を選択してください。');
+      alert('当サロンへの満足度を選択してください。');
       return;
     }
 
@@ -76,15 +76,15 @@ const PositiveReviewForm: React.FC = () => {
       }}
     >
       <Typography variant="h4" component="h1" textAlign="center" mb={4} className="text">
-        {"当施設利用後の\nご感想"}
+        {"当サロン利用後の\nご感想"}
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>
         <div>
-          この度の当施設ご利用に際して感じられたことを、このページにご記入ください。
+          この度の当サロンご利用に際して感じられたことを、このページにご記入ください。
         </div>
         <div>
-          お客様からの貴重なご意見を参考に、より良い施設づくりに役立てさせていただきます。
+          お客様からの貴重なご意見を参考に、より良いサロンづくりに役立てさせていただきます。
         </div>
       </Typography>
 
@@ -99,7 +99,7 @@ const PositiveReviewForm: React.FC = () => {
       >
         <FormControl fullWidth margin="normal" required>
           <FormLabel>
-            当施設ご利用後のご感想
+            当サロンご利用後のご感想
             <Typography
               component="span"
               sx={{
@@ -118,7 +118,7 @@ const PositiveReviewForm: React.FC = () => {
           <TextField
             multiline
             rows={8}
-            placeholder="当施設ご利用後の感想をご記入ください"
+            placeholder="当サロンご利用後の感想をご記入ください"
             value={Feedback}
             onChange={(e) => setFeedback(e.target.value)}
             required

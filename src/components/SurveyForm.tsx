@@ -18,7 +18,7 @@ import {
  * 1. 型定義
  */
 // 1-1. サービスキーの型
-type ServiceKey = 'childDevelopmentSupport' | 'afterSchoolDayService' | 'lifeCare';
+type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet' | 'perm';
 
 // 1-2. サービスごとの定義
 interface ServiceDefinition {
@@ -67,7 +67,7 @@ const SurveyForm: React.FC = () => {
     day: currentDay,
   });
 
-  // 4. 「当施設をどこで知ったか」の選択リスト
+  // 4. 「当サロンをどこで知ったか」の選択リスト
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
 
   // 5. サービス（利用目的）の選択
@@ -121,11 +121,11 @@ const SurveyForm: React.FC = () => {
     event.preventDefault();
 
     if (heardFrom.length === 0) {
-      alert('当施設をどこでお知りになりましたか？を1つ以上選択してください。');
+      alert('当サロンをどこでお知りになりましたか？を1つ以上選択してください。');
       return;
     }
     if (!visitDate.year || !visitDate.month || !visitDate.day) {
-      alert('施設をご利用された日時を選択してください。');
+      alert('サロンをご利用された日時を選択してください。');
       return;
     }
     if (usagePurpose.length === 0) {
@@ -141,7 +141,7 @@ const SurveyForm: React.FC = () => {
       return;
     }
     if (!satisfaction) {
-      alert('当施設への満足度を選択してください。');
+      alert('当サロンへの満足度を選択してください。');
       return;
     }
 
@@ -223,11 +223,11 @@ const SurveyForm: React.FC = () => {
     >
       {/* タイトル */}
       <Typography variant="h4" component="h1" textAlign="center" mb={4}>
-        当施設利用後のアンケート
+        当サロン利用後のアンケート
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>
-        <div>この度は当施設をご利用いただきありがとうございます。</div>
+        <div>この度は当サロンをご利用いただきありがとうございます。</div>
         <div>
           お客様からのご意見を今後のサービス向上に役立てたいと考えておりますので、以下のアンケートにご協力いただけますと幸いです。
         </div>
@@ -236,7 +236,7 @@ const SurveyForm: React.FC = () => {
         </Typography>
       </Typography>
 
-      {/* 当施設をどこでお知りになりましたか */}
+      {/* 当サロンをどこでお知りになりましたか */}
       <Box
         sx={{
           backgroundColor: '#fff',
@@ -248,7 +248,7 @@ const SurveyForm: React.FC = () => {
       >
         <FormControl fullWidth margin="normal" required>
           <FormLabel>
-            当施設をどこでお知りになりましたか？
+            当サロンをどこでお知りになりましたか？
             <Typography
               component="span"
               sx={{
@@ -281,7 +281,7 @@ const SurveyForm: React.FC = () => {
         </FormControl>
       </Box>
 
-      {/* 施設をご利用された日時 */}
+      {/* サロンをご利用された日時 */}
       <Box
         sx={{
           backgroundColor: '#fff',
@@ -293,7 +293,7 @@ const SurveyForm: React.FC = () => {
       >
         <FormControl fullWidth margin="normal" required>
           <FormLabel>
-            施設をご利用された日時
+            当サロンをご利用された日時
             <Typography
               component="span"
               sx={{
@@ -372,7 +372,7 @@ const SurveyForm: React.FC = () => {
       >
         <FormControl fullWidth margin="normal" required>
           <FormLabel>
-            どのような用途で当施設をご利用されましたか？ (複数選択可)
+            どのサービスをご利用されましたか？ (複数選択可)
             <Typography
               component="span"
               sx={{
@@ -510,7 +510,7 @@ const SurveyForm: React.FC = () => {
       >
         <FormControl fullWidth margin="normal" required>
           <FormLabel>
-            当施設のサービスへの満足度を教えてください。
+            当サロンのサービスへの満足度を教えてください。
             <Typography
               component="span"
               sx={{

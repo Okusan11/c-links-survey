@@ -14,7 +14,7 @@ import {
 // ------------------------------
 // 1. SurveyForm.tsx と同じ型定義を用意 (serviceKeyとconfig)
 // ------------------------------
-type ServiceKey = 'childDevelopmentSupport' | 'afterSchoolDayService' | 'lifeCare';
+type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet' | 'perm';
 
 interface ServiceDefinition {
   key: ServiceKey;
@@ -149,7 +149,7 @@ const GoogleAccount: React.FC = () => {
 
       <Typography variant="body1" textAlign="left" mb={4}>
         <div>
-          当施設のサービスをご利用いただいた際の感想をぜひGoogle Mapの口コミとして投稿していただけますと幸いです！
+          当サロンのサービスをご利用いただいた際の感想をぜひGoogle Mapの口コミとして投稿していただけますと幸いです！
         </div>
       </Typography>
 

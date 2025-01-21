@@ -16,7 +16,7 @@ import SendIcon from '@mui/icons-material/Send';
 // ------------------------------
 // 1. SurveyForm.tsx と同じ型定義を用意 (serviceKeyとconfig)
 // ------------------------------
-type ServiceKey = 'childDevelopmentSupport' | 'afterSchoolDayService' | 'lifeCare';
+type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet' | 'perm';
 
 interface ServiceDefinition {
   key: ServiceKey;
@@ -184,29 +184,29 @@ const Confirmation: React.FC = () => {
           <Divider sx={{ marginBottom: 2 }} />
 
           <QuestionAnswer
-            question="当施設ご利用日"
+            question="当サロンご利用日"
             answer={`${state.visitDate.year}年 ${state.visitDate.month}月 ${state.visitDate.day}日`}
           />
 
           <QuestionAnswer
-            question="当施設を知ったきっかけ"
+            question="当サロンを知ったきっかけ"
             answer={state.heardFrom || []}
           />
 
-          {/* 当施設ご利用目的 → label配列へ変換して表示 */}
+          {/* 当サロンご利用目的 → label配列へ変換して表示 */}
           <QuestionAnswer
-            question="当施設ご利用目的"
+            question="ご利用いただいたサービス"
             answer={usagePurposeLabels}
           />
         </CardContent>
       </Card>
 
-      {/* --- 施設利用後のご感想 --- */}
+      {/* --- サロン利用後のご感想 --- */}
       <Card sx={{ marginBottom: 2, backgroundColor: '#f9f9f9' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             <StarIcon sx={{ verticalAlign: 'middle', marginRight: 1 }} />
-            施設利用後のご感想
+            サロン利用後のご感想
           </Typography>
           <Divider sx={{ marginBottom: 2 }} />
 

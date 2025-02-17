@@ -232,7 +232,6 @@ const Confirmation: React.FC = () => {
           })}
 
           <Divider sx={{ marginY: 2 }} />
-          <QuestionAnswer question="満足度" answer={String(state.satisfaction)} />
           <QuestionAnswer question="ご感想" answer={state.Feedback || 'なし'} />
         </CardContent>
       </Card>

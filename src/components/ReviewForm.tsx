@@ -18,7 +18,7 @@ const ReviewForm: React.FC = () => {
 
   const handleBack = () => {
     //　「戻る」ボタンを押した際に、入力内容を保持してSurveyFormに戻る
-    navigate('/surveyform', {
+    navigate('/googleaccount', {
       state: 
       {
         visitDate,

@@ -32,12 +32,6 @@ const GoogleAccount: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  // ① 環境変数からURL/エンドポイントを取得
-  const googleReviewUrl =
-    process.env.REACT_APP_GMAP_REVIEW_URL || 'https://www.google.com/maps';
-  const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
-
-  // SurveyConfigを読み込み(SSMパラメータをビルド時に埋め込んだもの)
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
 
   useEffect(() => {
@@ -61,78 +55,64 @@ const GoogleAccount: React.FC = () => {
     return found ? found.label : '';
   };
 
-  // usagePurpose は serviceKey[] (SurveyForm.tsx でそう送ってきた想定)
-  const usagePurposeKeys: ServiceKey[] = state?.usagePurpose || [];
-
-  // usagePurposeKeys をラベルに変換した配列
-  const usagePurposeLabels = usagePurposeKeys.map((key) => getLabelFromKey(key));
-
-  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>('');
-
-  // 必要であればデストラクチャリングしておく
+  // 受け取ったstateを必要な形にバラす
   const {
     visitDate,
     heardFrom,
+    usagePurpose = [],
     satisfiedPoints,
     improvementPoints,
   } = state || {};
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  // usagePurposeKeys をラベルに変換した配列
+  const usagePurposeLabels = usagePurpose.map((key: ServiceKey) => getLabelFromKey(key));
 
-    const data = {
-      visitDate,
-      heardFrom,
-      usagePurposeKeys,
-      usagePurposeLabels,
-      satisfiedPoints,
-      improvementPoints,
-    };
+  // Googleアカウントを持っているかどうか
+  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>('');
 
+  // 戻るボタン
+  const handleBack = () => {
+    // SurveyForm に戻り、入力内容を保持しておく
+    navigate('/surveyform', {
+      state: {
+        visitDate,
+        heardFrom,
+        usagePurpose,
+        satisfiedPoints,
+        improvementPoints,
+      },
+    });
+  };
+
+  // 次へボタン
+  const handleNext = () => {
     if (!hasGoogleAccount) {
       alert('Googleアカウントをお持ちですか？の質問に回答してください。');
       return;
     }
 
     // 送信データの確認
+    const data = {
+      visitDate,
+      heardFrom,
+      usagePurpose,
+      usagePurposeLabels,
+      satisfiedPoints,
+      improvementPoints,
+      hasGoogleAccount,
+    };
     console.log('送信するstateの中身', data);
 
-    if (hasGoogleAccount === 'yes') {
-      // ② API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
-      if (!apiEndpoint) {
-        alert('APIエンドポイントが設定されていません。');
-        return;
-      }
-
-      // --- 【ポイント】fetchは投げるがawaitしない ---
-      fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      }).catch((error) => {
-        // 失敗した場合も、一旦はコンソールエラーのみ表示
-        console.error('データ送信中にエラーが発生しました:', error);
-      });
-
-      // 非同期のAPI送信を待たずに、すぐにGoogleMapへ
-      window.location.href = googleReviewUrl;
-    } else {
-      // Googleアカウントがない場合は感想入力画面へ遷移
-      navigate('/reviewform', {
-        state: {
-          ...state,
-          hasGoogleAccount,
-        },
-      });
-    }
+    // 感想入力画面へ遷移
+    navigate('/reviewform', {
+      state: data,
+    });
   };
 
   return (
     <Box
+      // ↓フォームとしての見た目にするため component="form" だけ残し、onSubmitは削除
       component="form"
-      onSubmit={handleSubmit}
       sx={{
         maxWidth: 600,
         margin: '0 auto',
@@ -189,11 +169,11 @@ const GoogleAccount: React.FC = () => {
       </Box>
 
       <Box display="flex" justifyContent="space-between" mt={4}>
-        <Button variant="outlined" color="secondary" onClick={() => navigate(-1)}>
+        <Button variant="outlined" color="secondary" onClick={handleBack}>
           戻る
         </Button>
-        <Button variant="contained" color="primary" type="submit">
-          感想入力画面へ
+        <Button variant="contained" color="primary" onClick={handleNext}>
+          次へ
         </Button>
       </Box>
     </Box>

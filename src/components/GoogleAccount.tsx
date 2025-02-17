@@ -14,7 +14,7 @@ import {
 // ------------------------------
 // 1. SurveyForm.tsx と同じ型定義を用意 (serviceKeyとconfig)
 // ------------------------------
-type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet' | 'perm';
+type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet';
 
 interface ServiceDefinition {
   key: ServiceKey;
@@ -75,7 +75,6 @@ const GoogleAccount: React.FC = () => {
     heardFrom,
     satisfiedPoints,
     improvementPoints,
-    satisfaction,
   } = state || {};
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -88,7 +87,6 @@ const GoogleAccount: React.FC = () => {
       usagePurposeLabels,
       satisfiedPoints,
       improvementPoints,
-      satisfaction,
     };
 
     if (!hasGoogleAccount) {
@@ -122,7 +120,7 @@ const GoogleAccount: React.FC = () => {
       window.location.href = googleReviewUrl;
     } else {
       // Googleアカウントがない場合は感想入力画面へ遷移
-      navigate('/previewform', {
+      navigate('/reviewform', {
         state: {
           ...state,
           hasGoogleAccount,

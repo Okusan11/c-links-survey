@@ -16,7 +16,7 @@ import SendIcon from '@mui/icons-material/Send';
 // ------------------------------
 // 1. SurveyForm.tsx と同じ型定義を用意 (serviceKeyとconfig)
 // ------------------------------
-type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet' | 'perm';
+type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet';
 
 interface ServiceDefinition {
   key: ServiceKey;

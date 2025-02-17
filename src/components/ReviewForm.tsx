@@ -10,9 +10,9 @@ import {
 } from '@mui/material';
 
 
-const NegativeReviewForm: React.FC = () => {
+const ReviewForm: React.FC = () => {
   const { state } = useLocation();
-  const { visitDate, heardFrom, usagePurpose, satisfiedPoints, improvementPoints, satisfaction } = state || {}; // SurveyFormから渡されたデータ
+  const { visitDate, heardFrom, usagePurpose, satisfiedPoints, improvementPoints } = state || {}; // GoogleAccountから渡されたデータ
   const navigate = useNavigate();
   const [Feedback, setFeedback] = useState('');
 
@@ -26,17 +26,20 @@ const NegativeReviewForm: React.FC = () => {
         usagePurpose,
         satisfiedPoints,
         improvementPoints,
-        satisfaction,
       }
     })
   }
 
   const handleNext = () => {
-    // バリデーションチェック
-    if (satisfaction === null) {
-      alert('当サロンへの満足度を選択してください。');
-      return;
-    }
+
+    console.log('送信するstateの中身', {
+      visitDate,
+      heardFrom,
+      usagePurpose,
+      satisfiedPoints,
+      improvementPoints,
+      Feedback,
+    });
 
     // SurveyFormとReviewFormのデータをすべてConfirmationに渡す
     navigate('/confirmation', {
@@ -47,7 +50,6 @@ const NegativeReviewForm: React.FC = () => {
         usagePurpose,
         satisfiedPoints,
         improvementPoints,
-        satisfaction,
         // ReviewFormのデータ
         Feedback,
       }
@@ -128,4 +130,4 @@ const NegativeReviewForm: React.FC = () => {
   );
 };
 
-export default NegativeReviewForm;
+export default ReviewForm;

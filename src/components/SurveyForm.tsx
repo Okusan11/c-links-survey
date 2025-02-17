@@ -9,7 +9,6 @@ import {
   FormGroup,
   FormLabel,
   MenuItem,
-  Rating,
   Select,
   Typography,
 } from '@mui/material';
@@ -73,9 +72,6 @@ const SurveyForm: React.FC = () => {
   // 5. サービス（利用目的）の選択
   const [usagePurpose, setUsagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
 
-  // 6. 満足度
-  const [satisfaction, setSatisfaction] = useState<number | null>(4);
-
   // 7. サービスごとの満足点/改善点
   const [satisfiedPoints, setSatisfiedPoints] = useState<
     Partial<Record<ServiceKey, string[]>>
@@ -102,7 +98,7 @@ const SurveyForm: React.FC = () => {
   const handleServicePointsCheckboxChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     serviceKey: ServiceKey,
-    setter: React.Dispatch<React.SetStateAction<Partial<Record<ServiceKey, string[]>>>> 
+    setter: React.Dispatch<React.SetStateAction<Partial<Record<ServiceKey, string[]>>>>
   ) => {
     const value = event.target.value;
     setter((prev) => {
@@ -140,10 +136,6 @@ const SurveyForm: React.FC = () => {
       alert('サービスの改善してほしい点について1つ以上回答を選択してください');
       return;
     }
-    if (!satisfaction) {
-      alert('当サロンへの満足度を選択してください。');
-      return;
-    }
 
     // ここで usagePurpose の key に対応するラベルを配列に変換
     const usagePurposeLabels = usagePurpose.map((key) => {
@@ -155,38 +147,22 @@ const SurveyForm: React.FC = () => {
       visitDate,
       heardFrom,
       usagePurpose,
-      usagePurposeLabels, // 追加
+      usagePurposeLabels,
       satisfiedPoints,
       improvementPoints,
-      satisfaction,
     });
 
-    // 満足度で遷移先を分岐
-    if (satisfaction >= 4) {
-      navigate('/googleaccount', {
-        state: {
-          visitDate,
-          heardFrom,
-          usagePurpose,
-          usagePurposeLabels, // 追加
-          satisfiedPoints,
-          improvementPoints,
-          satisfaction,
-        },
-      });
-    } else {
-      navigate('/nreviewform', {
-        state: {
-          visitDate,
-          heardFrom,
-          usagePurpose,
-          usagePurposeLabels, // 追加
-          satisfiedPoints,
-          improvementPoints,
-          satisfaction,
-        },
-      });
-    }
+    // 画面遷移をすべて /googleaccount に統一
+    navigate('/googleaccount', {
+      state: {
+        visitDate,
+        heardFrom,
+        usagePurpose,
+        usagePurposeLabels,
+        satisfiedPoints,
+        improvementPoints,
+      },
+    });
   };
 
   /**
@@ -497,49 +473,6 @@ const SurveyForm: React.FC = () => {
           </Box>
         );
       })}
-
-      {/* 満足度評価 */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
-      >
-        <FormControl fullWidth margin="normal" required>
-          <FormLabel>
-            当サロンのサービスへの満足度を教えてください。
-            <Typography
-              component="span"
-              sx={{
-                color: 'white',
-                backgroundColor: 'red',
-                borderRadius: 1,
-                padding: '0 4px',
-                marginLeft: 1,
-                fontSize: '0.8rem',
-              }}
-            >
-              必須
-            </Typography>
-          </FormLabel>
-          <Typography variant="body2" color="textSecondary" gutterBottom>
-            ※ 5に近いほど満足度が高いことを示します。
-          </Typography>
-          <Rating
-            name="satisfaction-rating"
-            value={satisfaction}
-            onChange={(_, newValue) => setSatisfaction(newValue)}
-            precision={1}
-            size="large"
-          />
-          <Typography component="legend">
-            現在の満足度: {satisfaction ?? '未評価'}
-          </Typography>
-        </FormControl>
-      </Box>
 
       {/* ボタン */}
       <Box display="flex" justifyContent="space-between" mt={4}>

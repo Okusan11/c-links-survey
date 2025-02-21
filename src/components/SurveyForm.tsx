@@ -243,6 +243,7 @@ const SurveyForm: React.FC = () => {
             {surveyConfig.heardFromOptions.map((option) => (
               <FormControlLabel
                 key={option}
+                sx={{ mb: 2 }}
                 control={
                   <Checkbox
                     value={option}
@@ -250,7 +251,16 @@ const SurveyForm: React.FC = () => {
                     onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
                   />
                 }
-                label={option}
+                label={
+                  <Typography
+                    sx={{
+                      whiteSpace: 'pre-line',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {option}
+                  </Typography>
+                }
               />
             ))}
           </FormGroup>
@@ -367,6 +377,7 @@ const SurveyForm: React.FC = () => {
             {surveyConfig.serviceDefinitions.map((service) => (
               <FormControlLabel
                 key={service.key}
+                sx={{ mb: 2 }}
                 control={
                   <Checkbox
                     value={service.key}
@@ -374,7 +385,16 @@ const SurveyForm: React.FC = () => {
                     onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsagePurpose)}
                   />
                 }
-                label={service.label}
+                label={
+                  <Typography
+                    sx={{
+                      whiteSpace: 'pre-line',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {service.label}
+                  </Typography>
+                }
               />
             ))}
           </FormGroup>
@@ -419,6 +439,7 @@ const SurveyForm: React.FC = () => {
                 {service.satisfiedOptions.map((option) => (
                   <FormControlLabel
                     key={option}
+                    sx={{ mb: 2 }}
                     control={
                       <Checkbox
                         value={option}
@@ -428,7 +449,11 @@ const SurveyForm: React.FC = () => {
                         }
                       />
                     }
-                    label={option}
+                    label={
+                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                        {option}
+                      </Typography>
+                    }
                   />
                 ))}
               </FormGroup>
@@ -456,6 +481,7 @@ const SurveyForm: React.FC = () => {
                 {service.improvementOptions.map((option) => (
                   <FormControlLabel
                     key={option}
+                    sx={{ mb: 2 }}
                     control={
                       <Checkbox
                         value={option}
@@ -465,7 +491,11 @@ const SurveyForm: React.FC = () => {
                         }
                       />
                     }
-                    label={option}
+                    label={
+                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                        {option}
+                      </Typography>
+                    }
                   />
                 ))}
               </FormGroup>

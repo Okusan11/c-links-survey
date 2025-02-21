@@ -201,7 +201,9 @@ const SurveyForm: React.FC = () => {
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>
-        <div>この度は当サロンをご利用いただきありがとうございます。</div>
+        <div>
+          この度は当サロンをご利用いただきありがとうございます。
+        </div>
         <div>
           お客様からのご意見を今後のサービス向上に役立てたいと考えておりますので、以下のアンケートにご協力いただけますと幸いです。
         </div>
@@ -221,7 +223,7 @@ const SurveyForm: React.FC = () => {
         }}
       >
         <FormControl fullWidth margin="normal" required>
-          <FormLabel>
+          <FormLabel sx={{ textAlign:'left'}}>
             当サロンをどこでお知りになりましたか？
             <Typography
               component="span"
@@ -231,6 +233,7 @@ const SurveyForm: React.FC = () => {
                 borderRadius: 1,
                 padding: '0 4px',
                 marginLeft: 1,
+                display:'inline-block',
                 fontSize: '0.8rem',
               }}
             >
@@ -286,6 +289,7 @@ const SurveyForm: React.FC = () => {
                 borderRadius: 1,
                 padding: '0 4px',
                 marginLeft: 1,
+                display: 'inline-block',
                 fontSize: '0.8rem',
               }}
             >
@@ -355,8 +359,8 @@ const SurveyForm: React.FC = () => {
         }}
       >
         <FormControl fullWidth margin="normal" required>
-          <FormLabel>
-            どのサービスをご利用されましたか？ (複数選択可)
+          <FormLabel sx={{ textAlign:'left'}}>
+            どのサービスをご利用されましたか？（複数選択可）
             <Typography
               component="span"
               sx={{
@@ -365,6 +369,7 @@ const SurveyForm: React.FC = () => {
                 borderRadius: 1,
                 padding: '0 4px',
                 marginLeft: 1,
+                display: 'inline-block',
                 fontSize: '0.8rem',
               }}
             >
@@ -418,7 +423,7 @@ const SurveyForm: React.FC = () => {
             {/* 満足した点 */}
             <FormControl component="fieldset" fullWidth margin="normal" required>
               <FormLabel component="legend">
-                {`${service.label}のサービスで満足した点 (複数選択可)`}
+                {`${service.label}のサービスで満足した点を選択してください（複数選択可）`}
                 <Typography
                   component="span"
                   sx={{
@@ -427,6 +432,7 @@ const SurveyForm: React.FC = () => {
                     borderRadius: 1,
                     padding: '0 4px',
                     marginLeft: 1,
+                    display: 'inline-block',
                     fontSize: '0.8rem',
                   }}
                 >
@@ -460,7 +466,7 @@ const SurveyForm: React.FC = () => {
             {/* 改善してほしい点 */}
             <FormControl component="fieldset" fullWidth margin="normal" required>
               <FormLabel component="legend">
-                {`${service.label}のサービスで改善してほしい点 (複数選択可)`}
+                {`${service.label}のサービスで改善してほしい点を選択してください（複数選択可）`}
                 <Typography
                   component="span"
                   sx={{
@@ -469,6 +475,7 @@ const SurveyForm: React.FC = () => {
                     borderRadius: 1,
                     padding: '0 4px',
                     marginLeft: 1,
+                    display: 'inline-block',
                     fontSize: '0.8rem',
                   }}
                 >

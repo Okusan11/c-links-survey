@@ -171,7 +171,18 @@ const SurveyForm: React.FC = () => {
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 
   /**
-   * 11. レンダリング
+   * 11. 共通スタイルオブジェクト
+   */
+  const questionBoxStyle = {
+    backgroundColor: '#fff',
+    padding: 1,
+    borderRadius: 2,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    marginBottom: 3,
+  } as const;
+
+  /**
+   * 12. レンダリング
    */
   if (!surveyConfig) {
     return (
@@ -201,9 +212,7 @@ const SurveyForm: React.FC = () => {
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>
-        <div>
-          この度は当サロンをご利用いただきありがとうございます。
-        </div>
+        <div>この度は当サロンをご利用いただきありがとうございます。</div>
         <div>
           お客様からのご意見を今後のサービス向上に役立てたいと考えておりますので、以下のアンケートにご協力いただけますと幸いです。
         </div>
@@ -213,17 +222,14 @@ const SurveyForm: React.FC = () => {
       </Typography>
 
       {/* 当サロンをどこでお知りになりましたか */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
-      >
+      <Box sx={questionBoxStyle}>
         <FormControl fullWidth margin="normal" required>
-          <FormLabel sx={{ textAlign:'left'}}>
+          <FormLabel 
+            sx={{ 
+              textAlign: 'left',
+              marginBottom: 1,
+               }}
+          >
             当サロンをどこでお知りになりましたか？
             <Typography
               component="span"
@@ -233,7 +239,7 @@ const SurveyForm: React.FC = () => {
                 borderRadius: 1,
                 padding: '0 4px',
                 marginLeft: 1,
-                display:'inline-block',
+                display: 'inline-block',
                 fontSize: '0.8rem',
               }}
             >
@@ -269,17 +275,14 @@ const SurveyForm: React.FC = () => {
       </Box>
 
       {/* サロンをご利用された日時 */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
-      >
+      <Box sx={questionBoxStyle}>
         <FormControl fullWidth margin="normal" required>
-          <FormLabel>
+          <FormLabel 
+            sx={{ 
+              textAlign: 'left',
+              marginBottom: 1,
+               }}
+          >
             当サロンをご利用された日時
             <Typography
               component="span"
@@ -349,17 +352,14 @@ const SurveyForm: React.FC = () => {
       </Box>
 
       {/* 利用目的(サービス) */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
-      >
+      <Box sx={questionBoxStyle}>
         <FormControl fullWidth margin="normal" required>
-          <FormLabel sx={{ textAlign:'left'}}>
+        <FormLabel 
+            sx={{ 
+              textAlign: 'left',
+              marginBottom: 1,
+               }}
+          >
             どのサービスをご利用されましたか？（複数選択可）
             <Typography
               component="span"
@@ -410,19 +410,15 @@ const SurveyForm: React.FC = () => {
         if (!service) return null;
 
         return (
-          <Box
-            key={service.key}
-            sx={{
-              backgroundColor: '#fff',
-              padding: 2,
-              borderRadius: 2,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-              marginBottom: 3,
-            }}
-          >
+          <Box key={service.key} sx={questionBoxStyle}>
             {/* 満足した点 */}
             <FormControl component="fieldset" fullWidth margin="normal" required>
-              <FormLabel component="legend">
+              <FormLabel 
+                component="legend"
+                sx={{
+                  marginBottom: 1, //質問文の下に余白を入れる
+                }}
+              >
                 {`${service.label}のサービスで満足した点を選択してください（複数選択可）`}
                 <Typography
                   component="span"
@@ -465,7 +461,12 @@ const SurveyForm: React.FC = () => {
 
             {/* 改善してほしい点 */}
             <FormControl component="fieldset" fullWidth margin="normal" required>
-              <FormLabel component="legend">
+              <FormLabel 
+                  component="legend"
+                  sx={{
+                    marginBottom: 1, //質問文の下に余白を入れる
+                  }}
+              >
                 {`${service.label}のサービスで改善してほしい点を選択してください（複数選択可）`}
                 <Typography
                   component="span"

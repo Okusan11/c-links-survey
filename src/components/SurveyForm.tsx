@@ -73,12 +73,10 @@ const SurveyForm: React.FC = () => {
   const [usagePurpose, setUsagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
 
   // 7. サービスごとの満足点/改善点
-  const [satisfiedPoints, setSatisfiedPoints] = useState<
-    Partial<Record<ServiceKey, string[]>>
-  >({});
-  const [improvementPoints, setImprovementPoints] = useState<
-    Partial<Record<ServiceKey, string[]>>
-  >({});
+  const [satisfiedPoints, setSatisfiedPoints] = useState<Partial<Record<ServiceKey, string[]>>>({});
+  const [improvementPoints, setImprovementPoints] = useState<Partial<Record<ServiceKey, string[]>>>(
+    {}
+  );
 
   /**
    * 8. チェックボックス変更ハンドラ
@@ -243,7 +241,7 @@ const SurveyForm: React.FC = () => {
             {surveyConfig.heardFromOptions.map((option) => (
               <FormControlLabel
                 key={option}
-                sx={{ mb: 2 }}
+                sx={{ mb: 1 }}
                 control={
                   <Checkbox
                     value={option}
@@ -255,7 +253,7 @@ const SurveyForm: React.FC = () => {
                   <Typography
                     sx={{
                       whiteSpace: 'pre-line',
-                      lineHeight: 1.5,
+                      lineHeight: 1,
                     }}
                   >
                     {option}
@@ -377,7 +375,7 @@ const SurveyForm: React.FC = () => {
             {surveyConfig.serviceDefinitions.map((service) => (
               <FormControlLabel
                 key={service.key}
-                sx={{ mb: 2 }}
+                sx={{ mb: 1 }}
                 control={
                   <Checkbox
                     value={service.key}
@@ -389,7 +387,7 @@ const SurveyForm: React.FC = () => {
                   <Typography
                     sx={{
                       whiteSpace: 'pre-line',
-                      lineHeight: 1.5,
+                      lineHeight: 1,
                     }}
                   >
                     {service.label}
@@ -439,7 +437,7 @@ const SurveyForm: React.FC = () => {
                 {service.satisfiedOptions.map((option) => (
                   <FormControlLabel
                     key={option}
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 1 }}
                     control={
                       <Checkbox
                         value={option}
@@ -450,7 +448,7 @@ const SurveyForm: React.FC = () => {
                       />
                     }
                     label={
-                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1 }}>
                         {option}
                       </Typography>
                     }
@@ -481,7 +479,7 @@ const SurveyForm: React.FC = () => {
                 {service.improvementOptions.map((option) => (
                   <FormControlLabel
                     key={option}
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 1 }}
                     control={
                       <Checkbox
                         value={option}
@@ -492,7 +490,7 @@ const SurveyForm: React.FC = () => {
                       />
                     }
                     label={
-                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1 }}>
                         {option}
                       </Typography>
                     }

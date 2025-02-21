@@ -253,7 +253,7 @@ const SurveyForm: React.FC = () => {
                   <Typography
                     sx={{
                       whiteSpace: 'pre-line',
-                      lineHeight: 1.3,
+                      lineHeight: 1.5,
                     }}
                   >
                     {option}
@@ -387,7 +387,7 @@ const SurveyForm: React.FC = () => {
                   <Typography
                     sx={{
                       whiteSpace: 'pre-line',
-                      lineHeight: 1.3,
+                      lineHeight: 1.5,
                     }}
                   >
                     {service.label}
@@ -448,7 +448,7 @@ const SurveyForm: React.FC = () => {
                       />
                     }
                     label={
-                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.3 }}>
+                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
                         {option}
                       </Typography>
                     }
@@ -490,7 +490,7 @@ const SurveyForm: React.FC = () => {
                       />
                     }
                     label={
-                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.3 }}>
+                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
                         {option}
                       </Typography>
                     }

@@ -8,14 +8,13 @@ import {
   FormControlLabel,
   FormGroup,
   FormHelperText,
-  Grid,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Typography,
   FormLabel,
+  TextField,
+  MenuItem,
+  Select,
+  Typography,
 } from '@mui/material';
+
 
 /**
  * --- 共通化された「必須ラベル」コンポーネント ---
@@ -46,11 +45,14 @@ const RequiredFormLabel: React.FC<RequiredFormLabelProps> = ({ label }) => {
   );
 };
 
+
 /**
  * 1. 型定義
  */
+// 1-1. サービスキーの型
 type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet';
 
+// 1-2. サービスごとの定義
 interface ServiceDefinition {
   key: ServiceKey;
   label: string;
@@ -58,6 +60,7 @@ interface ServiceDefinition {
   improvementOptions: string[];
 }
 
+// 1-3. SSMに格納したJSON全体を受け取るための型
 interface SurveyConfig {
   heardFromOptions: string[];
   serviceDefinitions: ServiceDefinition[];
@@ -103,13 +106,16 @@ const SurveyForm: React.FC = () => {
   // 5. サービス（利用目的）の選択
   const [usagePurpose, setUsagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
 
-  // 7. サービスごとの満足点/改善点
+  // 6. サービスごとの満足点/改善点
   const [satisfiedPoints, setSatisfiedPoints] = useState<Partial<Record<ServiceKey, string[]>>>({});
   const [improvementPoints, setImprovementPoints] = useState<Partial<Record<ServiceKey, string[]>>>(
     {}
   );
 
-  // 8. チェックボックス変更ハンドラ
+  /**
+   * 8. チェックボックス変更ハンドラ
+   */
+  // (A) シンプル配列
   const handleSimpleCheckboxChange = <T extends string>(
     event: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<T[]>>
@@ -120,6 +126,7 @@ const SurveyForm: React.FC = () => {
     );
   };
 
+  // (B) サービスごと
   const handleServicePointsCheckboxChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     serviceKey: ServiceKey,
@@ -135,7 +142,9 @@ const SurveyForm: React.FC = () => {
     });
   };
 
-  // 9. フォーム送信時のエラーチェック
+  /**
+   * 9. フォーム送信
+   */
   const [errors, setErrors] = useState({
     heardFrom: false,
     visitDate: false,
@@ -167,7 +176,7 @@ const SurveyForm: React.FC = () => {
     }
 
     // 必須チェック2: 利用日時
-    if (!visitDate.year || !visitDate.month || !visitDate.day) {
+    if (visitDate.year || !visitDate.month || !visitDate.day) {
       newErrors.visitDate = true;
     }
 
@@ -200,20 +209,10 @@ const SurveyForm: React.FC = () => {
       return;
     }
 
-    // usagePurpose の key → ラベル配列
+    // ここでusagePurposeのkeyに対応するラベルを配列に変換
     const usagePurposeLabels = usagePurpose.map((key) => {
       const service = surveyConfig?.serviceDefinitions.find((sd) => sd.key === key);
       return service ? service.label : key;
-    });
-
-    console.log('送信するstateの中身', {
-      visitDate,
-      heardFrom,
-      otherHeardFrom,
-      usagePurpose,
-      usagePurposeLabels,
-      satisfiedPoints,
-      improvementPoints,
     });
 
     navigate('/googleaccount', {
@@ -229,17 +228,27 @@ const SurveyForm: React.FC = () => {
     });
   };
 
-  // 10. 年月日のセレクト用配列
+  /**
+   * 10. 年月日のセレクト用配列
+   */
   const years = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => String(2020 + i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 
-  // Paper スタイル
-  const questionPaperStyle = {
-    p: 2,
-    mb: 3,
-  };
+  /**
+   * 11. 共通スタイルオブジェクト
+   */
+  const questionBoxStyle = {
+    backgroundColor: '#fff',
+    padding: 1,
+    borderRadius: 2,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    marginBottom: 3,
+  } as const;
 
+  /**
+   * 12. レンダリング
+   */
   if (!surveyConfig) {
     return (
       <Box textAlign="center" mt={10}>
@@ -256,9 +265,9 @@ const SurveyForm: React.FC = () => {
       onSubmit={handleSubmit}
       sx={{
         maxWidth: 600,
-        mx: 'auto',
+        margin: '0 auto',
         backgroundColor: '#e0f7fa',
-        p: 3,
+        padding: 3,
         borderRadius: 2,
       }}
     >
@@ -270,8 +279,7 @@ const SurveyForm: React.FC = () => {
       <Typography variant="body1" textAlign="left" mb={4}>
         <div>この度は当サロンをご利用いただきありがとうございます。</div>
         <div>
-          お客様からのご意見を今後のサービス向上に役立てたいと考えておりますので、
-          以下のアンケートにご協力いただけますと幸いです。
+          お客様からのご意見を今後のサービス向上に役立てたいと考えておりますので、以下のアンケートにご協力いただけますと幸いです。
         </div>
         <Typography variant="body2" color="textSecondary" mt={2}>
           ※ アンケートは約1分で完了します。
@@ -279,14 +287,9 @@ const SurveyForm: React.FC = () => {
       </Typography>
 
       {/* 当サロンをどこでお知りになりましたか */}
-      <Paper elevation={2} sx={questionPaperStyle}>
-        <FormControl
-          fullWidth
-          required
-          error={errors.heardFrom || errors.otherHeardFrom}
-          margin="normal"
-        >
-          <RequiredFormLabel label="当サロンをどこでお知りになりましたか？" />
+      <Box sx={questionBoxStyle}>
+        <FormControl fullWidth margin="normal" error={errors.heardFrom || errors.otherHeardFrom} required>
+          <RequiredFormLabel label="当サロンをどこでお知りになりましたか？"　/>
           <FormGroup>
             {surveyConfig.heardFromOptions.map((option) => (
               <FormControlLabel
@@ -299,11 +302,19 @@ const SurveyForm: React.FC = () => {
                     onChange={(e) => handleSimpleCheckboxChange<string>(e, setHeardFrom)}
                   />
                 }
-                label={option}
+                label={
+                  <Typography
+                    sx={{
+                      whiteSpace: 'pre-line',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {option}
+                  </Typography>
+                }
               />
             ))}
-
-            {/* その他チェック時のみテキスト入力表示 */}
+            {/* その他をチェックしたらテキスト入力欄表示 */}
             {heardFrom.includes('その他') && (
               <TextField
                 label="その他（具体的に）"
@@ -320,77 +331,70 @@ const SurveyForm: React.FC = () => {
             </FormHelperText>
           )}
         </FormControl>
-      </Paper>
+      </Box>
 
       {/* サロンをご利用された日時 */}
-      <Paper elevation={2} sx={questionPaperStyle}>
-        <FormControl fullWidth required error={errors.visitDate} margin="normal">
+      <Box sx={questionBoxStyle}>
+        <FormControl fullWidth margin="normal" error={errors.visitDate} required>
           <RequiredFormLabel label="当サロンをご利用された日時" />
-          <Grid container spacing={1} alignItems="center">
-            <Grid item xs={4}>
-              <Select
-                value={visitDate.year}
-                onChange={(e) => setVisitDate({ ...visitDate, year: e.target.value })}
-              >
-                <MenuItem value="">
-                  <em>選択</em>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Select
+              value={visitDate.year}
+              onChange={(e) => setVisitDate({ ...visitDate, year: e.target.value })}
+              sx={{ flex: 1, mr: 1, mt: 1 }}
+            >
+              <MenuItem value="">
+                <em>選択</em>
+              </MenuItem>
+              {years.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
                 </MenuItem>
-                {years.map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
-            <Grid item xs="auto">
-              <Typography>年</Typography>
-            </Grid>
-            <Grid item xs={3}>
-              <Select
-                value={visitDate.month}
-                onChange={(e) => setVisitDate({ ...visitDate, month: e.target.value })}
-              >
-                <MenuItem value="">
-                  <em>選択</em>
+              ))}
+            </Select>
+            <Typography>年</Typography>
+
+            <Select
+              value={visitDate.month}
+              onChange={(e) => setVisitDate({ ...visitDate, month: e.target.value })}
+              sx={{ flex: 1, mx: 1 }}
+            >
+              <MenuItem value="">
+                <em>選択</em>
+              </MenuItem>
+              {months.map((month) => (
+                <MenuItem key={month} value={month}>
+                  {month}
                 </MenuItem>
-                {months.map((month) => (
-                  <MenuItem key={month} value={month}>
-                    {month}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
-            <Grid item xs="auto">
-              <Typography>月</Typography>
-            </Grid>
-            <Grid item xs={3}>
-              <Select
-                value={visitDate.day}
-                onChange={(e) => setVisitDate({ ...visitDate, day: e.target.value })}
-              >
-                <MenuItem value="">
-                  <em>選択</em>
+              ))}
+            </Select>
+            <Typography>月</Typography>
+
+            <Select
+              value={visitDate.day}
+              onChange={(e) => setVisitDate({ ...visitDate, day: e.target.value })}
+              sx={{ flex: 1, ml: 1 }}
+            >
+              <MenuItem value="">
+                <em>選択</em>
+              </MenuItem>
+              {days.map((day) => (
+                <MenuItem key={day} value={day}>
+                  {day}
                 </MenuItem>
-                {days.map((day) => (
-                  <MenuItem key={day} value={day}>
-                    {day}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
-            <Grid item xs="auto">
-              <Typography>日</Typography>
-            </Grid>
-          </Grid>
+              ))}
+            </Select>
+            <Typography>日</Typography>
+          </Box>
           {errors.visitDate && (
             <FormHelperText>サロンをご利用された日時を選択してください。</FormHelperText>
           )}
         </FormControl>
-      </Paper>
+      </Box>
 
       {/* 利用目的(サービス) */}
-      <Paper elevation={2} sx={questionPaperStyle}>
-        <FormControl fullWidth required error={errors.usagePurpose} margin="normal">
+      <Box sx={questionBoxStyle}>
+        <FormControl fullWidth margin="normal" error={errors.usagePurpose} required>
           <RequiredFormLabel label="どのサービスをご利用されましたか？（複数選択可）" />
           <FormGroup>
             {surveyConfig.serviceDefinitions.map((service) => (
@@ -404,7 +408,16 @@ const SurveyForm: React.FC = () => {
                     onChange={(e) => handleSimpleCheckboxChange<ServiceKey>(e, setUsagePurpose)}
                   />
                 }
-                label={service.label}
+                label={
+                  <Typography
+                    sx={{
+                      whiteSpace: 'pre-line',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {service.label}
+                  </Typography>
+                }
               />
             ))}
           </FormGroup>
@@ -412,7 +425,7 @@ const SurveyForm: React.FC = () => {
             <FormHelperText>1つ以上選択してください。</FormHelperText>
           )}
         </FormControl>
-      </Paper>
+      </Box>
 
       {/* 選択されたサービスごとの満足点・改善点 */}
       {usagePurpose.map((serviceKey) => {
@@ -420,16 +433,10 @@ const SurveyForm: React.FC = () => {
         if (!service) return null;
 
         return (
-          <Paper key={service.key} elevation={2} sx={questionPaperStyle}>
+          <Box key={service.key} sx={questionBoxStyle}>
             {/* 満足した点 */}
-            <FormControl
-              component="fieldset"
-              fullWidth
-              required
-              error={errors.satisfiedPoints}
-              margin="normal"
-            >
-              <RequiredFormLabel
+            <FormControl component="fieldset" fullWidth margin="normal" error={errors.satisfiedPoints} required>
+              <RequiredFormLabel 
                 label={`${service.label}のサービスで満足した点を選択してください（複数選択可）`}
               />
               <FormGroup>
@@ -446,7 +453,11 @@ const SurveyForm: React.FC = () => {
                         }
                       />
                     }
-                    label={option}
+                    label={
+                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                        {option}
+                      </Typography>
+                    }
                   />
                 ))}
               </FormGroup>
@@ -456,15 +467,10 @@ const SurveyForm: React.FC = () => {
                 </FormHelperText>
               )}
             </FormControl>
+            
 
             {/* 改善してほしい点 */}
-            <FormControl
-              component="fieldset"
-              fullWidth
-              required
-              error={errors.improvementPoints}
-              margin="normal"
-            >
+            <FormControl component="fieldset" fullWidth margin="normal" error={errors.improvementPoints} required>
               <RequiredFormLabel
                 label={`${service.label}のサービスで改善してほしい点を選択してください（複数選択可）`}
               />
@@ -482,7 +488,11 @@ const SurveyForm: React.FC = () => {
                         }
                       />
                     }
-                    label={option}
+                    label={
+                      <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                        {option}
+                      </Typography>
+                    }
                   />
                 ))}
               </FormGroup>
@@ -492,12 +502,12 @@ const SurveyForm: React.FC = () => {
                 </FormHelperText>
               )}
             </FormControl>
-          </Paper>
+          </Box>
         );
       })}
 
-      {/* ボタン部分から「戻る」ボタンを削除 */}
-      <Box display="flex" justifyContent="flex-end" mt={4}>
+      {/* ボタン */}
+      <Box display="flex" justifyContent="space-between" mt={4}>
         <Button variant="contained" color="primary" type="submit">
           次へ
         </Button>

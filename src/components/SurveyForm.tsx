@@ -176,7 +176,7 @@ const SurveyForm: React.FC = () => {
     }
 
     // 必須チェック2: 利用日時
-    if (visitDate.year || !visitDate.month || !visitDate.day) {
+    if (!visitDate.year || !visitDate.month || !visitDate.day) {
       newErrors.visitDate = true;
     }
 
@@ -507,7 +507,7 @@ const SurveyForm: React.FC = () => {
       })}
 
       {/* ボタン */}
-      <Box display="flex" justifyContent="space-between" mt={4}>
+      <Box display="flex" justifyContent="flex-end" mt={4}>
         <Button variant="contained" color="primary" type="submit">
           次へ
         </Button>

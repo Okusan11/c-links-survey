@@ -273,7 +273,8 @@ const SurveyForm: React.FC = () => {
     >
       {/* タイトル */}
       <Typography variant="h4" component="h1" textAlign="center" mb={4}>
-        {`当サロン利用後の\nアンケート`}
+        当サロン利用後の<br />
+        アンケート
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>

@@ -273,7 +273,7 @@ const SurveyForm: React.FC = () => {
     >
       {/* タイトル */}
       <Typography variant="h4" component="h1" textAlign="center" mb={4}>
-        当サロン利用後のアンケート
+        {`当サロン利用後の\nアンケート`}
       </Typography>
 
       <Typography variant="body1" textAlign="left" mb={4}>
@@ -357,7 +357,7 @@ const SurveyForm: React.FC = () => {
             <Select
               value={visitDate.month}
               onChange={(e) => setVisitDate({ ...visitDate, month: e.target.value })}
-              sx={{ flex: 1, mx: 1 }}
+              sx={{ flex: 1, mx: 1, mt: 1 }}
             >
               <MenuItem value="">
                 <em>選択</em>
@@ -373,7 +373,7 @@ const SurveyForm: React.FC = () => {
             <Select
               value={visitDate.day}
               onChange={(e) => setVisitDate({ ...visitDate, day: e.target.value })}
-              sx={{ flex: 1, ml: 1 }}
+              sx={{ flex: 1, ml: 1, mt: 1 }}
             >
               <MenuItem value="">
                 <em>選択</em>

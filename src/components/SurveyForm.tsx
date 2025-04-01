@@ -267,15 +267,16 @@ const SurveyForm: React.FC = () => {
     <div
       onClick={onClick}
       className={cn(
-        "group relative flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all",
-        "border hover:border-primary/50 hover:shadow-sm hover:bg-primary/5",
+        "group relative flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all",
+        "border",
+        "@media(hover: hover){ hover:border-primary/50 hover:shadow-sm hover:bg-primary/5 }",
         selected ? "border-primary bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-sm" : "border-gray-200"
       )}
     >
       <div className={cn(
-        "flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5",
+        "flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center self-center",
         "transition-colors duration-200",
-        selected ? "border-primary" : "border-gray-300 group-hover:border-primary/50"
+        selected ? "border-primary" : "border-gray-300 @media(hover: hover){group-hover:border-primary/50}"
       )}>
         {selected && <div className="w-2.5 h-2.5 rounded-full bg-primary animate-scale-check" />}
       </div>
@@ -283,24 +284,24 @@ const SurveyForm: React.FC = () => {
         <div className="flex items-center gap-2">
           {icon && <div className={cn(
             "text-primary/70 transition-transform duration-200",
-            selected ? "scale-105" : "group-hover:scale-105"
+            selected ? "scale-105" : "@media(hover: hover){group-hover:scale-105}"
           )}>{icon}</div>}
           <span className={cn(
-            "text-[16px] leading-5 transition-colors duration-200",
-            selected ? "text-primary font-medium" : "text-gray-700 group-hover:text-primary/90"
+            "text-[16px] leading-tight transition-colors duration-200",
+            selected ? "text-primary font-medium" : "text-gray-700 @media(hover: hover){group-hover:text-primary/90}"
           )}>
             {children}
           </span>
         </div>
         {description && (
-          <p className="text-[14px] text-gray-500 group-hover:text-gray-600 pl-0.5">
+          <p className="text-[14px] text-gray-500 @media(hover: hover){group-hover:text-gray-600} pl-0.5">
             {description}
           </p>
         )}
       </div>
       <div className={cn(
         "absolute top-2 right-2 w-1.5 h-1.5 rounded-full transition-all duration-300",
-        selected ? "bg-primary scale-100" : "bg-gray-300 scale-0 group-hover:scale-100"
+        selected ? "bg-primary scale-100" : "bg-gray-300 scale-0 @media(hover: hover){group-hover:scale-100}"
       )} />
     </div>
   );
@@ -371,8 +372,8 @@ const SurveyForm: React.FC = () => {
         {/* 新規・リピーター選択 */}
         <QuestionBox>
           <div className="space-y-8">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
-              <div className="p-2 rounded-lg bg-primary/10">
+            <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
+              <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                 <Info className="h-5 w-5 text-primary" />
               </div>
               <div>
@@ -411,8 +412,8 @@ const SurveyForm: React.FC = () => {
         {isNewCustomer && (
       <QuestionBox>
             <div className="space-y-8">
-              <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
-                <div className="p-2 rounded-lg bg-primary/10">
+              <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
+                <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                   <Info className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -473,8 +474,8 @@ const SurveyForm: React.FC = () => {
       {/* サロンをご利用された日時 */}
       <QuestionBox>
           <div className="space-y-8">
-            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-              <div className="p-2 rounded-lg bg-primary/10">
+            <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
+              <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
@@ -519,8 +520,8 @@ const SurveyForm: React.FC = () => {
       {/* 利用目的(サービス) */}
       <QuestionBox>
           <div className="space-y-8">
-            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-              <div className="p-2 rounded-lg bg-primary/10">
+            <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
+              <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                 <Star className="h-6 w-6 text-primary" />
               </div>
               <div>
@@ -564,8 +565,8 @@ const SurveyForm: React.FC = () => {
         return (
           <QuestionBox key={service.key}>
               <div className="space-y-8">
-                <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                  <div className="p-2 rounded-lg bg-primary/10">
+                <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
+                  <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                     <Star className="h-6 w-6 text-primary" />
                   </div>
                   <div>

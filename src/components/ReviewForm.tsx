@@ -1,132 +1,113 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  TextField,
-  Typography
-} from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Typography } from '@mui/material';
 
+// 共通コンポーネントのインポート
+import PageLayout from './common/PageLayout';
+import QuestionBox from './common/QuestionBox';
+import FormButtons from './common/FormButtons';
+import RequiredFormLabel from './common/RequiredFormLabel';
+import { ProgressBar } from './common/ProgressBar';
+
+// UI コンポーネント
+import { Textarea } from '../ui/textarea';
 
 const ReviewForm: React.FC = () => {
-  const { state } = useLocation();
-  const { visitDate, heardFrom, usagePurpose, satisfiedPoints, improvementPoints } = state || {}; // GoogleAccountから渡されたデータ
   const navigate = useNavigate();
-  const [Feedback, setFeedback] = useState('');
+  const { state } = useLocation();
+  const [feedback, setFeedback] = useState<string>(state?.feedback || '');
+  const [error, setError] = useState<boolean>(false);
 
+  // 戻るボタン
   const handleBack = () => {
-    //　「戻る」ボタンを押した際に、入力内容を保持してSurveyFormに戻る
     navigate('/googleaccount', {
-      state: 
-      {
-        visitDate,
-        heardFrom,
-        usagePurpose,
-        satisfiedPoints,
-        improvementPoints,
-      }
-    })
-  }
-
-  const handleNext = () => {
-
-    console.log('送信するstateの中身', {
-      visitDate,
-      heardFrom,
-      usagePurpose,
-      satisfiedPoints,
-      improvementPoints,
-      Feedback,
-    });
-
-    // SurveyFormとReviewFormのデータをすべてConfirmationに渡す
-    navigate('/confirmation', {
       state: {
-        // SurveyFormのデータ
-        visitDate,
-        heardFrom,
-        usagePurpose,
-        satisfiedPoints,
-        improvementPoints,
-        // ReviewFormのデータ
-        Feedback,
-      }
+        ...state,
+        feedback,
+      },
     });
   };
 
+  // 送信ボタン
+  const handleNext = (event?: React.MouseEvent | React.FormEvent) => {
+    if (event) {
+      event.preventDefault();
+    }
+
+    if (!feedback.trim()) {
+      setError(true);
+      return;
+    }
+
+    // 確認画面へ遷移
+    navigate('/confirmation', {
+      state: {
+        ...state,
+        feedback,
+      },
+    });
+  };
+
+  const subtitle = 'ご利用いただいた際の感想をお聞かせください。今後のサービス向上に活用させていただきます。';
+
+  const progressSteps = [
+    {
+      title: "アンケート入力",
+      description: "ご利用に関する質問"
+    },
+    {
+      title: "Google確認",
+      description: "アカウントの確認"
+    },
+    {
+      title: "感想入力",
+      description: "最終ステップ"
+    }
+  ];
+
   return (
-    <Box
-      component="form"
-      sx={{
-        maxWidth: 600,
-        margin: '0 auto',
-        backgroundColor: '#e0f7fa',
-        padding: 3,
-        borderRadius: 2,
-      }}
-    >
-      <Typography variant="h4" component="h1" textAlign="center" mb={4} className="text">
-        {"当サロン利用後の\nご感想"}
-      </Typography>
-
-      <Typography variant="body1" textAlign="left" mb={4}>
-        <div>
-          この度の当サロンご利用に際して感じられたことを、このページにご記入ください。
-        </div>
-        <div>
-          お客様からの貴重なご意見を参考に、より良いサロンづくりに役立てさせていただきます。
-        </div>
-      </Typography>
-
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      handleNext();
+    }}>
+      <PageLayout
+        title="ご感想の入力をお願いします"
+        subtitle={subtitle}
       >
-        <FormControl fullWidth margin="normal" required>
-          <FormLabel>
-            当サロンご利用後のご感想
-            <Typography
-              component="span"
-              sx={{
-                color: 'white',
-                backgroundColor: 'red',
-                borderRadius: 1,
-                padding: '0 4px',
-                marginLeft: 1,
-                display: 'inline-block',
-                fontSize: '0.8rem',
-              }}
-            >
-              必須
-            </Typography>
-          </FormLabel>
-          <TextField
-            multiline
-            rows={8}
-            placeholder="当サロンご利用後の感想をご記入ください"
-            value={Feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            required
-          />
-        </FormControl>
-      </Box>
+        <ProgressBar 
+          currentStep={3} 
+          totalSteps={3} 
+          steps={progressSteps}
+        />
 
-      <Box display="flex" justifyContent="space-between" mt={4}>
-        <Button variant="outlined" color="secondary" onClick={handleBack}>
-          戻る
-        </Button>
-        <Button variant="contained" color="primary" onClick={handleNext}>
-          確認画面へ
-        </Button>
-      </Box>
-    </Box>
+        <QuestionBox>
+          <div className="space-y-4">
+            <RequiredFormLabel label="当サロンのご利用に関する感想をご自由にお書きください" />
+            
+            <Textarea
+              value={feedback}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                setFeedback(e.target.value);
+                setError(false);
+              }}
+              placeholder="サービスの感想や、改善点などをご自由にお書きください。"
+              className={error ? "border-destructive" : ""}
+              rows={6}
+            />
+            
+            {error && (
+              <p className="text-destructive text-sm">感想を入力してください。</p>
+            )}
+          </div>
+        </QuestionBox>
+
+        <FormButtons 
+          onBack={handleBack} 
+          onNext={handleNext}
+          nextButtonText="確認画面へ" 
+        />
+      </PageLayout>
+    </form>
   );
 };
 

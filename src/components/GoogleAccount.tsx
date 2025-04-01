@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Box,
-  Button,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -11,47 +9,33 @@ import {
   Typography,
 } from '@mui/material';
 
-// ------------------------------
-// 1. SurveyForm.tsx と同じ型定義を用意 (serviceKeyとconfig)
-// ------------------------------
-type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet';
+// 共通コンポーネントのインポート
+import PageLayout from './common/PageLayout';
+import QuestionBox from './common/QuestionBox';
+import FormButtons from './common/FormButtons';
+import { requiredLabelStyle } from '../styles/theme';
+import { ProgressBar } from './common/ProgressBar';
 
-interface ServiceDefinition {
-  key: ServiceKey;
-  label: string;
-  satisfiedOptions: string[];
-  improvementOptions: string[];
-}
-
-interface SurveyConfig {
-  heardFromOptions: string[];
-  serviceDefinitions: ServiceDefinition[];
-}
+// 型とデータのインポート
+import { getSurveyConfig } from '../config/surveyConfig';
+import { SurveyConfig, ServiceKey } from '../types';
 
 const GoogleAccount: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  // ① 環境変数からURL/エンドポイントを取得
+  // 環境変数からURL/エンドポイントを取得
   const googleReviewUrl =
     process.env.REACT_APP_GMAP_REVIEW_URL || 'https://www.google.com/maps';
   const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
 
-  // SurveyConfigを読み込み(SSMパラメータをビルド時に埋め込んだもの)
+  // SurveyConfigを読み込み
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
 
   useEffect(() => {
-    const rawConfig = process.env.REACT_APP_SURVEY_CONFIG;
-    if (!rawConfig) {
-      console.error('REACT_APP_SURVEY_CONFIG is not defined!');
-      return;
-    }
-    try {
-      const parsed = JSON.parse(rawConfig) as SurveyConfig;
-      setSurveyConfig(parsed);
-    } catch (err) {
-      console.error('Failed to parse REACT_APP_SURVEY_CONFIG:', err);
-    }
+    getSurveyConfig().then(config => {
+      setSurveyConfig(config);
+    });
   }, []);
 
   // serviceKey -> label を返すヘルパー
@@ -67,14 +51,17 @@ const GoogleAccount: React.FC = () => {
   // usagePurposeKeys をラベルに変換した配列
   const usagePurposeLabels = usagePurposeKeys.map((key) => getLabelFromKey(key));
 
-  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>('');
+  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
 
   // 必要であればデストラクチャリングしておく
   const {
     visitDate,
     heardFrom,
+    otherHeardFrom,
     satisfiedPoints,
     improvementPoints,
+    feedback,
+    isNewCustomer
   } = state || {};
 
   // 戻るボタン
@@ -84,43 +71,54 @@ const GoogleAccount: React.FC = () => {
       state: {
         visitDate,
         heardFrom,
-        usagePurposeKeys,
+        otherHeardFrom,
+        usagePurpose: usagePurposeKeys,
         usagePurposeLabels,
         satisfiedPoints,
         improvementPoints,
+        hasGoogleAccount,
+        feedback,
+        isNewCustomer
       },
     });
   };
   
   // 次へボタン
-  const handleNext = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    const data = {
-      visitDate,
-      heardFrom,
-      usagePurposeKeys,
-      usagePurposeLabels,
-      satisfiedPoints,
-      improvementPoints,
-    };
+  const handleNext = (event?: React.FormEvent) => {
+    // イベントがある場合はpreventDefaultを呼び出す
+    if (event) {
+      event.preventDefault();
+    }
 
     if (!hasGoogleAccount) {
       alert('Googleアカウントをお持ちですか？の質問に回答してください。');
       return;
     }
 
+    const data = {
+      visitDate,
+      heardFrom,
+      otherHeardFrom,
+      usagePurpose: usagePurposeKeys,
+      usagePurposeLabels,
+      satisfiedPoints,
+      improvementPoints,
+      hasGoogleAccount,
+      feedback,
+      isNewCustomer
+    };
+
     // 送信データの確認
     console.log('送信するstateの中身', data);
 
     if (hasGoogleAccount === 'yes') {
-      // ② API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
+      // API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
       if (!apiEndpoint) {
         alert('APIエンドポイントが設定されていません。');
         return;
       }
 
-      // --- 【ポイント】fetchは投げるがawaitしない ---
+      // --- fetchは投げるがawaitしない ---
       fetch(apiEndpoint, {
         method: 'POST',
         headers: {
@@ -137,82 +135,73 @@ const GoogleAccount: React.FC = () => {
     } else {
       // Googleアカウントがない場合は感想入力画面へ遷移
       navigate('/reviewform', {
-        state: {
-          ...state,
-          hasGoogleAccount,
-        },
+        state: data,
       });
     }
   };
 
+  if (!surveyConfig) {
+    return (
+      <Typography variant="h6" color="error" textAlign="center" mt={10}>
+        データを読み込んでいます...
+      </Typography>
+    );
+  }
+
+  const subtitle = '当サロンのサービスをご利用いただいた際の感想をぜひGoogle Mapの口コミとして投稿していただけますと幸いです！';
+
+  const progressSteps = [
+    {
+      title: "アンケート入力",
+      description: "ご利用に関する質問"
+    },
+    {
+      title: "Google確認",
+      description: "アカウントの確認"
+    },
+    {
+      title: "感想入力",
+      description: "最終ステップ"
+    }
+  ];
+
   return (
-    <Box
-      component="form"
-      onSubmit={handleNext}
-      sx={{
-        maxWidth: 600,
-        margin: '0 auto',
-        backgroundColor: '#e0f7fa',
-        padding: 3,
-        borderRadius: 2,
-      }}
-    >
-      <Typography variant="h4" component="h1" textAlign="center" mb={4} className="text">
-        {'Google Map口コミ\n投稿のご依頼'}
-      </Typography>
-
-      <Typography variant="body1" textAlign="left" mb={4}>
-        <div>
-          当サロンのサービスをご利用いただいた際の感想をぜひGoogle Mapの口コミとして投稿していただけますと幸いです！
-        </div>
-      </Typography>
-
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: 3,
-        }}
+    <form onSubmit={handleNext}>
+      <PageLayout
+        title="Google Map口コミ\n投稿のご依頼"
+        subtitle={subtitle}
       >
-        <FormControl component="fieldset" fullWidth margin="normal" required>
-          <FormLabel component="legend">
-            Googleアカウントをお持ちですか？
-            <Typography
-              component="span"
-              sx={{
-                color: 'white',
-                backgroundColor: 'red',
-                borderRadius: 1,
-                padding: '0 4px',
-                marginLeft: 1,
-                display: 'inline-block',
-                fontSize: '0.8rem',
-              }}
+        <ProgressBar 
+          currentStep={2} 
+          totalSteps={3} 
+          steps={progressSteps}
+        />
+        
+        <QuestionBox>
+          <FormControl component="fieldset" fullWidth margin="normal" required>
+            <FormLabel component="legend">
+              Googleアカウントをお持ちですか？
+              <Typography component="span" sx={requiredLabelStyle}>
+                必須
+              </Typography>
+            </FormLabel>
+            <RadioGroup
+              value={hasGoogleAccount}
+              onChange={(e) => setHasGoogleAccount(e.target.value)}
             >
-              必須
-            </Typography>
-          </FormLabel>
-          <RadioGroup
-            value={hasGoogleAccount}
-            onChange={(e) => setHasGoogleAccount(e.target.value)}
-          >
-            <FormControlLabel value="yes" control={<Radio />} label="はい" />
-            <FormControlLabel value="no" control={<Radio />} label="いいえ" />
-          </RadioGroup>
-        </FormControl>
-      </Box>
+              <FormControlLabel value="yes" control={<Radio />} label="はい" />
+              <FormControlLabel value="no" control={<Radio />} label="いいえ" />
+            </RadioGroup>
+          </FormControl>
+        </QuestionBox>
 
-      <Box display="flex" justifyContent="space-between" mt={4}>
-        <Button variant="outlined" color="secondary" onClick={handleBack}>
-          戻る
-        </Button>
-        <Button variant="contained" color="primary" onClick={handleNext}>
-          感想入力画面へ
-        </Button>
-      </Box>
-    </Box>
+        <FormButtons 
+          onBack={handleBack} 
+          onNext={handleNext} 
+          nextButtonText={hasGoogleAccount === 'yes' ? 'Google Mapへ' : '感想入力画面へ'} 
+        />
+      </PageLayout>
+    </form>
   );
 };
 

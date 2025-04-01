@@ -1,256 +1,268 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { cn } from '../lib/utils';
+
+// 共通コンポーネントのインポート
+import PageLayout from './common/PageLayout';
+import QuestionBox from './common/QuestionBox';
+import FormButtons from './common/FormButtons';
+import { ProgressBar } from './common/ProgressBar';
+
+// アイコン
 import {
-  Box,
-  Button,
-  Typography,
-  Card,
-  CardContent,
-  Divider,
-} from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import StarIcon from '@mui/icons-material/Star';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SendIcon from '@mui/icons-material/Send';
+  CalendarDays,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Info,
+  Send,
+  Check,
+  ChevronRight
+} from 'lucide-react';
 
-// ------------------------------
-// 1. SurveyForm.tsx と同じ型定義を用意 (serviceKeyとconfig)
-// ------------------------------
-type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet';
-
-interface ServiceDefinition {
-  key: ServiceKey;
-  label: string;
-  satisfiedOptions: string[];
-  improvementOptions: string[];
-}
-
-interface SurveyConfig {
-  heardFromOptions: string[];
-  serviceDefinitions: ServiceDefinition[];
-}
-
-// ------------------------------
-// 2. 質問 + 回答表示用のコンポーネント
-// ------------------------------
-const QuestionAnswer: React.FC<{ question: string; answer: string | string[] }> = ({
-  question,
-  answer,
-}) => {
-  return (
-    <Box sx={{ mb: 2, p: 2, backgroundColor: '#f0f0f0', borderRadius: 1 }}>
-      <Typography variant="subtitle1" fontWeight="bold">
-        {question}
-      </Typography>
-      <Typography variant="body1" sx={{ mt: 1 }}>
-        {Array.isArray(answer)
-          ? answer.map((item, index) => (
-              <span key={index}>
-                {item}
-                <br />
-              </span>
-            ))
-          : answer}
-      </Typography>
-    </Box>
-  );
-};
-
-// ------------------------------
-// 3. メインコンポーネント
-// ------------------------------
 const Confirmation: React.FC = () => {
-  const { state } = useLocation();
   const navigate = useNavigate();
-  const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
+  const { state } = useLocation();
 
-  // SurveyConfig を読み込み（SSMパラメータをビルド時に埋め込んだもの）
-  const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
-
-  // マウント時に REACT_APP_SURVEY_CONFIG をパース
-  useEffect(() => {
-    const rawConfig = process.env.REACT_APP_SURVEY_CONFIG;
-    if (!rawConfig) {
-      console.error('REACT_APP_SURVEY_CONFIG is not defined!');
-      return;
-    }
-    try {
-      const parsed = JSON.parse(rawConfig) as SurveyConfig;
-      setSurveyConfig(parsed);
-    } catch (err) {
-      console.error('Failed to parse REACT_APP_SURVEY_CONFIG:', err);
-    }
-  }, []);
-
-  /**
-   * serviceKey -> label を返すヘルパー
-   */
-  const getLabelFromKey = (key: ServiceKey): string => {
-    if (!surveyConfig) return ''; // 読み込み前などは空で返す
-    const found = surveyConfig.serviceDefinitions.find((item) => item.key === key);
-    return found ? found.label : '';
+  // serviceKey -> label を返すヘルパー
+  const getLabelFromKey = (key: string): string => {
+    if (!state?.usagePurposeLabels) return key;
+    const index = state.usagePurpose.indexOf(key);
+    return index !== -1 ? state.usagePurposeLabels[index] : key;
   };
 
-  // usagePurpose は serviceKey[] (SurveyForm.tsx でそう送ってきた想定)
-  const usagePurposeKeys: ServiceKey[] = state?.usagePurpose || [];
+  const handleBack = () => {
+    navigate('/reviewform', { state });
+  };
 
-  // usagePurposeKeys をラベルに変換した配列を作る (「ご利用目的」でまとめて表示する用)
-  const usagePurposeLabels = usagePurposeKeys.map((key) => getLabelFromKey(key));
+  const handleSubmit = async (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+    }
 
-  // ------------------------------
-  // フォーム送信
-  // ------------------------------
-  const handleSubmit = () => {
+    // APIエンドポイントを環境変数から取得
+    const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
     if (!apiEndpoint) {
-      alert('APIエンドポイントが取得されていません。しばらく待ってから再度お試しください。');
+      alert('APIエンドポイントが設定されていません。');
       return;
     }
 
-    // 送信データはキーのまま投げてもよいですし、ラベルに変換して投げてもよい
-    // 今回は例として「キーのまま」送る
-    const data = {
-      visitDate: state.visitDate,
-      heardFrom: state.heardFrom,
-      usagePurposeKeys: usagePurposeKeys,          // Labelで送信
-      usagePurposeLabels: usagePurposeLabels,          // Labelで送信
-      satisfiedPoints: state.satisfiedPoints,  // keyとオプションの紐付け
-      improvementPoints: state.improvementPoints,
-      satisfaction: state.satisfaction,
-      feedback: state.Feedback || '',
-    };
-
-    fetch(apiEndpoint, {
+    try {
+      await fetch(apiEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
-    })
-      .then((response) => {
-        if (response.ok) {
-          navigate('/thankyou');
-        } else {
-          alert('フォームの送信中にエラーが発生しました。');
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        alert('ネットワークエラーが発生しました。');
+        body: JSON.stringify(state),
       });
+      
+      // 送信成功時は完了画面へ
+      navigate('/complete', { state });
+    } catch (error) {
+      console.error('データ送信中にエラーが発生しました:', error);
+      alert('データの送信に失敗しました。もう一度お試しください。');
+    }
   };
 
-  // ------------------------------
-  // レンダリング
-  // ------------------------------
-  // surveyConfig の読み込み前に表示する内容
-  if (!surveyConfig) {
+  const progressSteps = [
+    {
+      title: "アンケート入力",
+      description: "ご利用に関する質問"
+    },
+    {
+      title: "Google確認",
+      description: "アカウントの確認"
+    },
+    {
+      title: "感想入力",
+      description: "最終ステップ"
+    }
+  ];
+
+  // 確認項目のレンダリング用コンポーネント
+  const ConfirmationItem: React.FC<{
+    icon: React.ReactNode;
+    title: string;
+    content: React.ReactNode;
+    className?: string;
+    accent?: 'primary' | 'green' | 'amber';
+  }> = ({ icon, title, content, className, accent = 'primary' }) => {
+    const accentColors = {
+      primary: 'bg-primary/10 text-primary border-primary/20',
+      green: 'bg-green-50 text-green-600 border-green-200',
+      amber: 'bg-amber-50 text-amber-600 border-amber-200'
+    };
+    
     return (
-      <Box
-        sx={{
-          maxWidth: 600,
-          margin: '0 auto',
-          padding: 3,
-          textAlign: 'center',
-        }}
-      >
-        <Typography>データを読み込んでいます...</Typography>
-      </Box>
+      <div className={cn("rounded-xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md", className)}>
+        <div className={cn("flex items-center gap-3 p-4 border-b", accentColors[accent])}>
+          <div className={cn("p-2 rounded-full bg-white/80 backdrop-blur-sm")}>
+            {icon}
+          </div>
+          <h3 className="font-semibold tracking-wide">{title}</h3>
+        </div>
+        <div className="p-5 bg-white">{content}</div>
+      </div>
     );
-  }
+  };
 
   return (
-    <Box
-      component="form"
-      sx={{
-        maxWidth: 600,
-        margin: '0 auto',
-        backgroundColor: '#e0f7fa',
-        padding: 3,
-        borderRadius: 2,
-      }}
-    >
-      <Typography variant="h4" component="h2" textAlign="center" gutterBottom>
-        <CheckCircleIcon sx={{ verticalAlign: 'middle', marginRight: 1 }} />
-        入力内容確認
-      </Typography>
-
-      {/* --- ご利用情報 --- */}
-      <Card sx={{ marginBottom: 2, backgroundColor: '#f9f9f9' }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            <HomeIcon sx={{ verticalAlign: 'middle', marginRight: 1 }} />
-            ご利用情報
-          </Typography>
-          <Divider sx={{ marginBottom: 2 }} />
-
-          <QuestionAnswer
-            question="当サロンご利用日"
-            answer={`${state.visitDate.year}年 ${state.visitDate.month}月 ${state.visitDate.day}日`}
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      handleSubmit();
+    }}>
+      <PageLayout
+        title="入力内容の確認"
+        subtitle="入力内容をご確認ください。問題がなければ「送信する」ボタンを押してください。"
+      >
+        <div className="sm:mb-8 mb-4 -mt-2">
+          <ProgressBar 
+            currentStep={3} 
+            totalSteps={3} 
+            steps={progressSteps}
+            className="scale-90 origin-top sm:scale-100"
           />
+        </div>
 
-          <QuestionAnswer
-            question="当サロンを知ったきっかけ"
-            answer={state.heardFrom || []}
-          />
+        <div className="max-w-2xl mx-auto sm:mt-0 -mt-2">
+          <div className="grid grid-cols-1 gap-6">
+            {/* 新規・リピーター */}
+            <ConfirmationItem
+              icon={<Info className="h-5 w-5" />}
+              title="ご利用状況"
+              content={
+                <div className="flex items-start gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="text-[14px] text-gray-700">
+                    {state.isNewCustomer ? "初めてのご利用" : "2回目以降のご利用"}
+                  </div>
+                </div>
+              }
+            />
 
-          {/* 当サロンご利用目的 → label配列へ変換して表示 */}
-          <QuestionAnswer
-            question="ご利用いただいたサービス"
-            answer={usagePurposeLabels}
-          />
-        </CardContent>
-      </Card>
+            {/* 認知経路（新規のお客様のみ表示） */}
+            {state.isNewCustomer && state.heardFrom.length > 0 && (
+              <ConfirmationItem
+                icon={<Info className="h-5 w-5" />}
+                title="当サロンを知ったきっかけ"
+                content={
+                  <div className="space-y-1.5">
+                    {state.heardFrom.map((item: string) => (
+                      <div key={item} className="flex items-start gap-2">
+                        <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <div className="text-[14px] text-gray-700">
+                          {item}
+                          {item === 'その他' && state.otherHeardFrom && (
+                            <span className="ml-1 text-gray-500 font-light italic">
+                              （{state.otherHeardFrom}）
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                }
+              />
+            )}
 
-      {/* --- サロン利用後のご感想 --- */}
-      <Card sx={{ marginBottom: 2, backgroundColor: '#f9f9f9' }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            <StarIcon sx={{ verticalAlign: 'middle', marginRight: 1 }} />
-            サロン利用後のご感想
-          </Typography>
-          <Divider sx={{ marginBottom: 2 }} />
+            {/* ご利用日時 */}
+            <ConfirmationItem
+              icon={<CalendarDays className="h-5 w-5" />}
+              title="ご利用日時"
+              content={
+                <div className="flex items-start gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="text-[14px] text-gray-700">
+                    {state.visitDate.year}年 {state.visitDate.month}月 {state.visitDate.day}日
+                  </div>
+                </div>
+              }
+            />
 
-          {/* サービスごとに満足点/改善点を表示するときは、serviceKeyからラベルを取得 */}
-          {usagePurposeKeys.map((key) => {
+            {/* ご利用サービス */}
+            <ConfirmationItem
+              icon={<MessageSquare className="h-5 w-5" />}
+              title="ご利用いただいたサービス"
+              content={
+                <div className="space-y-6">
+                  {state.usagePurpose.map((key: string) => {
             const label = getLabelFromKey(key);
             return (
-              <Box key={key} sx={{ marginBottom: 2 }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  {/* 例: 【児童発達支援事業所】 */}
-                  【{label}】
-                </Typography>
-                <QuestionAnswer
-                  question="ご満足いただいた点"
-                  answer={state.satisfiedPoints[key] || '選択なし'}
-                />
-                <QuestionAnswer
-                  question="改善してほしい点"
-                  answer={state.improvementPoints[key] || '選択なし'}
-                />
-              </Box>
+                      <div key={key} className="rounded-lg bg-gray-50/80 p-4">
+                        <div className="font-medium text-[15px] text-primary/90 mb-3 pb-2 border-b border-gray-200">
+                          {label}
+                        </div>
+                        
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          {/* 満足点 */}
+                          <div className="bg-white rounded-lg border border-green-100 shadow-sm p-3 space-y-3">
+                            <div className="flex items-center gap-2 text-green-600">
+                              <div className="p-1 rounded-full bg-green-50">
+                                <ThumbsUp className="h-3.5 w-3.5" />
+                              </div>
+                              <span className="text-[13px] font-medium">満足いただいた点</span>
+                            </div>
+                            <div className="space-y-2">
+                              {state.satisfiedPoints[key]?.map((point: string) => (
+                                <div key={point} className="flex items-start gap-2">
+                                  <Check className="h-3.5 w-3.5 text-green-500 mt-0.5" />
+                                  <div className="text-[13px] text-gray-600">{point}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* 改善点 */}
+                          <div className="bg-white rounded-lg border border-amber-100 shadow-sm p-3 space-y-3">
+                            <div className="flex items-center gap-2 text-amber-600">
+                              <div className="p-1 rounded-full bg-amber-50">
+                                <ThumbsDown className="h-3.5 w-3.5" />
+                              </div>
+                              <span className="text-[13px] font-medium">改善してほしい点</span>
+                            </div>
+                            <div className="space-y-2">
+                              {state.improvementPoints[key]?.map((point: string) => (
+                                <div key={point} className="flex items-start gap-2">
+                                  <Check className="h-3.5 w-3.5 text-amber-500 mt-0.5" />
+                                  <div className="text-[13px] text-gray-600">{point}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
             );
           })}
+                </div>
+              }
+            />
 
-          <Divider sx={{ marginY: 2 }} />
-          <QuestionAnswer question="ご感想" answer={state.Feedback || 'なし'} />
-        </CardContent>
-      </Card>
+            {/* ご感想 */}
+            {state.feedback && (
+              <ConfirmationItem
+                icon={<Send className="h-5 w-5" />}
+                title="ご感想"
+                content={
+                  <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-lg border border-gray-100 shadow-inner">
+                    <p className="text-[14px] leading-relaxed text-gray-700 whitespace-pre-wrap">
+                      {state.feedback}
+                    </p>
+                  </div>
+                }
+              />
+            )}
+          </div>
+        </div>
 
-      {/* ボタン */}
-      <Box display="flex" justifyContent="space-between" mt={4}>
-        <Button variant="outlined" color="secondary" onClick={() => navigate(-1)}>
-          戻る
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          startIcon={<SendIcon />}
-        >
-          送信する
-        </Button>
-      </Box>
-    </Box>
+        <div className="mt-10">
+      <FormButtons 
+        onBack={handleBack} 
+        onNext={handleSubmit} 
+        nextButtonText="送信する" 
+      />
+        </div>
+    </PageLayout>
+    </form>
   );
 };
 

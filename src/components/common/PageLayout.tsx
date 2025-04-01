@@ -10,8 +10,8 @@ interface PageLayoutProps {
 
 const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, className }) => {
   return (
-    <div className={cn("max-w-3xl mx-auto p-4 md:p-6 lg:p-8", className)}>
-      <div className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/90 px-4 py-6 sm:py-10 md:py-16 md:px-8 -mx-4 md:-mx-6 lg:-mx-8 overflow-hidden">
+    <div className={cn("max-w-3xl mx-auto pb-4 md:pb-6 lg:pb-8 px-4 md:px-6 lg:px-8", className)}>
+      <div className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/90 px-4 py-6 sm:py-10 md:py-12 md:px-8 -mx-4 md:-mx-6 lg:-mx-8 overflow-hidden">
         {/* デコレーティブな背景パターン */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.1),rgba(255,255,255,0)_50%)]" />
@@ -22,7 +22,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
 
         {/* タイトル */}
         <div className="flex flex-col items-center">
-          <h1 className="text-[24px] sm:text-[28px] md:text-[42px] font-bold text-center text-white tracking-tight leading-tight max-w-2xl">
+          <h1 className="text-[28px] sm:text-[36px] md:text-[48px] font-bold text-center text-white tracking-tight leading-tight max-w-2xl">
             {title.split('\n').map((line, index) => (
               <React.Fragment key={index}>
                 {line}
@@ -33,7 +33,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
 
           {/* サブタイトル */}
           {subtitle && (
-            <div className="mt-4 sm:mt-6 md:mt-8 text-sm sm:text-base md:text-lg text-center text-white/90 max-w-2xl">
+            <div className="mt-4 sm:mt-6 md:mt-8 text-base sm:text-lg md:text-xl text-center text-white/90 max-w-2xl">
               {subtitle.split('\n').map((line, index) => (
                 <p key={index} className="mb-2 sm:mb-2.5 leading-relaxed tracking-wide">{line}</p>
               ))}
@@ -49,7 +49,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
                   >
                     <path d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" />
                   </svg>
-                  <p className="text-[11px] sm:text-[13px] font-medium text-white/80">
+                  <p className="text-[12px] sm:text-[14px] font-medium text-white/80">
                     アンケートは約1分で完了します。
                   </p>
                 </div>

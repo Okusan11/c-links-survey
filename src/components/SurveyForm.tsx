@@ -124,7 +124,7 @@ const SurveyForm: React.FC = () => {
 
   const handleNext = (event?: React.MouseEvent) => {
     if (event) {
-      event.preventDefault();
+    event.preventDefault();
     }
 
     let newErrors = {
@@ -286,14 +286,14 @@ const SurveyForm: React.FC = () => {
             selected ? "scale-105" : "group-hover:scale-105"
           )}>{icon}</div>}
           <span className={cn(
-            "text-[14px] leading-5 transition-colors duration-200",
+            "text-[16px] leading-5 transition-colors duration-200",
             selected ? "text-primary font-medium" : "text-gray-700 group-hover:text-primary/90"
           )}>
             {children}
           </span>
         </div>
         {description && (
-          <p className="text-[13px] text-gray-500 group-hover:text-gray-600 pl-0.5">
+          <p className="text-[14px] text-gray-500 group-hover:text-gray-600 pl-0.5">
             {description}
           </p>
         )}
@@ -314,7 +314,7 @@ const SurveyForm: React.FC = () => {
     error?: boolean;
   }> = ({ label, value, onChange, options, error }) => (
     <div className="space-y-1.5">
-      <Label htmlFor={`${label}-select`} className="text-[13px] font-medium text-gray-700">
+      <Label htmlFor={`${label}-select`} className="text-[14px] font-medium text-gray-700">
         {label}
       </Label>
       <Select
@@ -324,7 +324,7 @@ const SurveyForm: React.FC = () => {
         <SelectTrigger 
           id={`${label}-select`} 
           className={cn(
-            "w-full h-10 transition-all duration-200 text-[14px]",
+            "w-full h-10 transition-all duration-200 text-[15px]",
             "border rounded-lg shadow-sm",
             "hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary/30",
             error ? "border-destructive" : "border-gray-200"
@@ -339,7 +339,7 @@ const SurveyForm: React.FC = () => {
                 key={option} 
                 value={option}
                 className={cn(
-                  "py-2 px-3 cursor-pointer transition-colors text-[14px]",
+                  "py-2 px-3 cursor-pointer transition-colors text-[15px]",
                   "hover:bg-primary/5 focus:bg-primary/5",
                   "data-[state=checked]:bg-primary/10 data-[state=checked]:text-primary data-[state=checked]:font-medium"
                 )}
@@ -358,10 +358,10 @@ const SurveyForm: React.FC = () => {
       e.preventDefault();
       handleNext();
     }}>
-      <PageLayout
+    <PageLayout
         title="当サロン利用後のアンケート"
-        subtitle={subtitle}
-      >
+      subtitle={subtitle}
+    >
         <ProgressBar 
           currentStep={1} 
           totalSteps={3} 
@@ -376,8 +376,8 @@ const SurveyForm: React.FC = () => {
                 <Info className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-900 tracking-wide">当サロンのご利用は初めてですか？</h3>
-                <p className="text-[13px] text-gray-500 mt-1 leading-relaxed">該当する方を選択してください</p>
+                <h3 className="text-lg font-semibold text-gray-900 tracking-wide">当サロンのご利用は初めてですか？</h3>
+                <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">該当する方を選択してください</p>
               </div>
             </div>
             
@@ -401,7 +401,7 @@ const SurveyForm: React.FC = () => {
             {errors.isNewCustomer && (
               <div className="flex items-center gap-2 text-destructive mt-2 animate-shake">
                 <AlertCircle className="h-4 w-4" />
-                <p className="text-[13px]">選択してください</p>
+                <p className="text-[14px]">選択してください</p>
               </div>
             )}
           </div>
@@ -409,22 +409,22 @@ const SurveyForm: React.FC = () => {
         
         {/* 当サロンをどこでお知りになりましたか（新規のお客様のみ表示） */}
         {isNewCustomer && (
-          <QuestionBox>
+      <QuestionBox>
             <div className="space-y-8">
               <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Info className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900 tracking-wide">当サロンをどこでお知りになりましたか？</h3>
-                  <p className="text-[13px] text-gray-500 mt-1 leading-relaxed">該当するものをすべて選択してください</p>
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-wide">当サロンをどこでお知りになりましたか？</h3>
+                  <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">該当するものをすべて選択してください</p>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {surveyConfig.heardFromOptions.map((option) => (
+            {surveyConfig.heardFromOptions.map((option) => (
                   <SelectOption
-                    key={option}
+                key={option}
                     selected={heardFrom.includes(option)}
                     onClick={() => {
                       const newHeardFrom = heardFrom.includes(option)
@@ -442,19 +442,19 @@ const SurveyForm: React.FC = () => {
               {errors.heardFrom && (
                 <div className="flex items-center gap-2 text-destructive mt-2 animate-shake">
                   <AlertCircle className="h-4 w-4" />
-                  <p className="text-[13px]">「どこで知ったか」を1つ以上選択してください</p>
+                  <p className="text-[14px]">「どこで知ったか」を1つ以上選択してください</p>
                 </div>
               )}
               
-              {/* その他をチェックしたらテキスト入力欄表示 */}
-              {heardFrom.includes('その他') && (
+            {/* その他をチェックしたらテキスト入力欄表示 */}
+            {heardFrom.includes('その他') && (
                 <div className="mt-3 animate-slide-down">
                   <Label htmlFor="other-heard-from" className="text-[13px] font-medium text-gray-700">
                     その他（具体的に）
                   </Label>
                   <Input
                     id="other-heard-from"
-                    value={otherHeardFrom}
+                value={otherHeardFrom}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setOtherHeardFrom(e.target.value)}
                     className={cn(
                       "mt-1.5 h-10 transition-all duration-200 text-[14px]",
@@ -470,8 +470,8 @@ const SurveyForm: React.FC = () => {
           </QuestionBox>
         )}
 
-        {/* サロンをご利用された日時 */}
-        <QuestionBox>
+      {/* サロンをご利用された日時 */}
+      <QuestionBox>
           <div className="space-y-8">
             <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
               <div className="p-2 rounded-lg bg-primary/10">
@@ -486,14 +486,14 @@ const SurveyForm: React.FC = () => {
             <div className="grid grid-cols-3 gap-6">
               <DateSelect
                 label="年"
-                value={visitDate.year}
+              value={visitDate.year}
                 onChange={(value) => setVisitDate((prev: VisitDate) => ({ ...prev, year: value }))}
                 options={years}
                 error={errors.visitDate}
               />
               <DateSelect
                 label="月"
-                value={visitDate.month}
+              value={visitDate.month}
                 onChange={(value) => setVisitDate((prev: VisitDate) => ({ ...prev, month: value }))}
                 options={months}
                 error={errors.visitDate}
@@ -507,17 +507,17 @@ const SurveyForm: React.FC = () => {
               />
             </div>
             
-            {errors.visitDate && (
+          {errors.visitDate && (
               <div className="flex items-center gap-2 text-destructive mt-2 animate-shake">
                 <AlertCircle className="h-4 w-4" />
                 <p className="text-sm">サロンをご利用された日時を選択してください</p>
               </div>
-            )}
+          )}
           </div>
-        </QuestionBox>
+      </QuestionBox>
 
-        {/* 利用目的(サービス) */}
-        <QuestionBox>
+      {/* 利用目的(サービス) */}
+      <QuestionBox>
           <div className="space-y-8">
             <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
               <div className="p-2 rounded-lg bg-primary/10">
@@ -530,9 +530,9 @@ const SurveyForm: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {surveyConfig.serviceDefinitions.map((service) => (
+            {surveyConfig.serviceDefinitions.map((service) => (
                 <SelectOption
-                  key={service.key}
+                key={service.key}
                   selected={usagePurpose.includes(service.key)}
                   onClick={() => {
                     const newUsagePurpose = usagePurpose.includes(service.key)
@@ -541,28 +541,28 @@ const SurveyForm: React.FC = () => {
                     setUsagePurpose(newUsagePurpose);
                   }}
                   icon={<Star className="h-5 w-5" />}
-                >
-                  {service.label}
+                  >
+                    {service.label}
                 </SelectOption>
-              ))}
+            ))}
             </div>
             
-            {errors.usagePurpose && (
+          {errors.usagePurpose && (
               <div className="flex items-center gap-2 text-destructive mt-2 animate-shake">
                 <AlertCircle className="h-4 w-4" />
                 <p className="text-sm">1つ以上のサービスを選択してください</p>
               </div>
-            )}
+          )}
           </div>
-        </QuestionBox>
+      </QuestionBox>
 
-        {/* 選択されたサービスごとの満足点・改善点 */}
-        {usagePurpose.map((serviceKey) => {
-          const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
-          if (!service) return null;
+      {/* 選択されたサービスごとの満足点・改善点 */}
+      {usagePurpose.map((serviceKey) => {
+        const service = surveyConfig.serviceDefinitions.find((s) => s.key === serviceKey);
+        if (!service) return null;
 
-          return (
-            <QuestionBox key={service.key}>
+        return (
+          <QuestionBox key={service.key}>
               <div className="space-y-8">
                 <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
                   <div className="p-2 rounded-lg bg-primary/10">
@@ -574,7 +574,7 @@ const SurveyForm: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 満足した点 */}
+            {/* 満足した点 */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2.5">
                     <div className="p-1.5 rounded-lg bg-green-50">
@@ -583,9 +583,9 @@ const SurveyForm: React.FC = () => {
                     <h4 className="text-[15px] font-medium text-green-700">満足した点</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {service.satisfiedOptions.map((option) => (
+                {service.satisfiedOptions.map((option) => (
                       <SelectOption
-                        key={option}
+                    key={option}
                         selected={(satisfiedPoints[serviceKey] || []).includes(option)}
                         onClick={() => handleServicePointChange(serviceKey, option, 'satisfied')}
                         icon={<ThumbsUp className="h-4 w-4" />}
@@ -595,8 +595,8 @@ const SurveyForm: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                
-                {/* 改善してほしい点 */}
+
+            {/* 改善してほしい点 */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2.5">
                     <div className="p-1.5 rounded-lg bg-amber-50">
@@ -605,9 +605,9 @@ const SurveyForm: React.FC = () => {
                     <h4 className="text-[15px] font-medium text-amber-700">改善してほしい点</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {service.improvementOptions.map((option) => (
+                {service.improvementOptions.map((option) => (
                       <SelectOption
-                        key={option}
+                    key={option}
                         selected={(improvementPoints[serviceKey] || []).includes(option)}
                         onClick={() => handleServicePointChange(serviceKey, option, 'improvement')}
                         icon={<ThumbsDown className="h-4 w-4" />}
@@ -618,9 +618,9 @@ const SurveyForm: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </QuestionBox>
-          );
-        })}
+          </QuestionBox>
+        );
+      })}
 
         <FormButtons 
           onNext={handleNext}
@@ -628,7 +628,7 @@ const SurveyForm: React.FC = () => {
           showBackButton={false}
           nextButtonText="次のステップへ"
         />
-      </PageLayout>
+    </PageLayout>
     </form>
   );
 };

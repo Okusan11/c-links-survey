@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface FormButtonsProps {
   onBack?: () => void;
@@ -10,6 +11,7 @@ interface FormButtonsProps {
   showBackButton?: boolean;
   rightAligned?: boolean;
   className?: string;
+  disabled?: boolean;
 }
 
 const FormButtons: React.FC<FormButtonsProps> = ({
@@ -20,6 +22,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
   showBackButton = true,
   rightAligned = false,
   className,
+  disabled = false,
 }) => {
   return (
     <div 
@@ -34,43 +37,23 @@ const FormButtons: React.FC<FormButtonsProps> = ({
         <Button 
           variant="outline" 
           onClick={onBack}
-          className="flex-1 sm:flex-none py-6 px-6 h-auto text-base"
+          className="flex-1 sm:flex-none py-6 px-6 h-auto text-base rounded-xl touch-target border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors shadow-soft"
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 mr-2" 
-            viewBox="0 0 20 20" 
-            fill="currentColor"
-          >
-            <path 
-              fillRule="evenodd" 
-              d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" 
-              clipRule="evenodd" 
-            />
-          </svg>
+          <ChevronLeft className="h-5 w-5 mr-2" />
           {backButtonText}
         </Button>
       )}
       <Button 
         onClick={() => onNext()}
         className={cn(
-          "flex-1 sm:flex-none py-6 px-6 h-auto text-base",
-          !showBackButton || !onBack ? "max-w-md" : ""
+          "flex-1 sm:flex-none py-6 px-6 h-auto text-base rounded-xl touch-target transition-all shadow-button",
+          !showBackButton || !onBack ? "max-w-md" : "",
+          disabled ? "opacity-70" : "hover:scale-[1.02]"
         )}
+        disabled={disabled}
       >
         {nextButtonText}
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          className="h-5 w-5 ml-2" 
-          viewBox="0 0 20 20" 
-          fill="currentColor"
-        >
-          <path 
-            fillRule="evenodd" 
-            d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" 
-            clipRule="evenodd" 
-          />
-        </svg>
+        <ChevronRight className="h-5 w-5 ml-2" />
       </Button>
     </div>
   );

@@ -5,6 +5,7 @@ import { cn } from '../lib/utils';
 // 共通コンポーネントのインポート
 import PageLayout from './common/PageLayout';
 import RequiredFormLabel from './common/RequiredFormLabel';
+import RequiredBadge from './common/RequiredBadge';
 import QuestionBox from './common/QuestionBox';
 import FormButtons from './common/FormButtons';
 import { ProgressBar } from './common/ProgressBar';
@@ -267,42 +268,60 @@ const SurveyForm: React.FC = () => {
     <div
       onClick={onClick}
       className={cn(
-        "group relative flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all",
-        "border",
-        "@media(hover: hover){ hover:border-primary/50 hover:shadow-sm hover:bg-primary/5 }",
-        selected ? "border-primary bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-sm" : "border-gray-200"
+        "group relative flex items-center gap-3 p-4 sm:p-5 rounded-xl cursor-pointer transition-all touch-target",
+        "border shadow-soft",
+        selected 
+          ? "border-primary/30 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent" 
+          : "border-gray-100 hover:border-gray-200"
       )}
     >
       <div className={cn(
-        "flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center self-center",
+        "flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center self-center",
         "transition-colors duration-200",
-        selected ? "border-primary" : "border-gray-300 @media(hover: hover){group-hover:border-primary/50}"
+        selected ? "border-primary" : "border-gray-300"
       )}>
-        {selected && <div className="w-2.5 h-2.5 rounded-full bg-primary animate-scale-check" />}
+        {selected && (
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary animate-scale-check" />
+        )}
       </div>
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
-          {icon && <div className={cn(
-            "text-primary/70 transition-transform duration-200",
-            selected ? "scale-105" : "@media(hover: hover){group-hover:scale-105}"
-          )}>{icon}</div>}
+          {icon && (
+            <div className={cn(
+              "flex-shrink-0 text-primary/80 transition-transform duration-200",
+              selected ? "scale-105" : ""
+            )}>
+              {icon}
+            </div>
+          )}
           <span className={cn(
-            "text-[16px] leading-tight transition-colors duration-200",
-            selected ? "text-primary font-medium" : "text-gray-700 @media(hover: hover){group-hover:text-primary/90}"
+            "text-[16px] sm:text-[17px] leading-tight transition-colors duration-200 font-medium",
+            selected ? "text-primary" : "text-gray-700"
           )}>
             {children}
           </span>
         </div>
         {description && (
-          <p className="text-[14px] text-gray-500 @media(hover: hover){group-hover:text-gray-600} pl-0.5">
+          <p className="text-[14px] text-gray-500 pl-0.5 mt-1">
             {description}
           </p>
         )}
       </div>
-      <div className={cn(
-        "absolute top-2 right-2 w-1.5 h-1.5 rounded-full transition-all duration-300",
-        selected ? "bg-primary scale-100" : "bg-gray-300 scale-0 @media(hover: hover){group-hover:scale-100}"
-      )} />
+      {selected && (
+        <div className="absolute top-0 right-0 w-5 h-5 bg-primary rounded-bl-xl rounded-tr-xl flex items-center justify-center">
+          <svg 
+            viewBox="0 0 24 24"
+            width="12" 
+            height="12" 
+            stroke="currentColor" 
+            strokeWidth="3" 
+            fill="none" 
+            className="text-white"
+          >
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+      )}
     </div>
   );
 
@@ -377,7 +396,10 @@ const SurveyForm: React.FC = () => {
                 <Info className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 tracking-wide">当サロンのご利用は初めてですか？</h3>
+                <h3 className="text-lg font-semibold text-gray-900 tracking-wide">
+                  当サロンのご利用は初めてですか？
+                  <RequiredBadge />
+                </h3>
                 <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">該当する方を選択してください</p>
               </div>
             </div>
@@ -417,7 +439,10 @@ const SurveyForm: React.FC = () => {
                   <Info className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 tracking-wide">当サロンをどこでお知りになりましたか？</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-wide">
+                    当サロンをどこでお知りになりましたか？
+                    <RequiredBadge />
+                  </h3>
                   <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">該当するものをすべて選択してください</p>
                 </div>
               </div>
@@ -479,7 +504,10 @@ const SurveyForm: React.FC = () => {
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg text-gray-900">当サロンをご利用された日時</h3>
+                <h3 className="font-semibold text-lg text-gray-900">
+                  当サロンをご利用された日時
+                  <RequiredBadge />
+                </h3>
                 <p className="text-sm text-gray-500 mt-1">ご来店された日付を選択してください</p>
               </div>
             </div>
@@ -525,7 +553,10 @@ const SurveyForm: React.FC = () => {
                 <Star className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg text-gray-900">どのサービスをご利用されましたか？</h3>
+                <h3 className="font-semibold text-lg text-gray-900">
+                  どのサービスをご利用されましたか？
+                  <RequiredBadge />
+                </h3>
                 <p className="text-sm text-gray-500 mt-1">該当するサービスをすべて選択してください</p>
               </div>
             </div>

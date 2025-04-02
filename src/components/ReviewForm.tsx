@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Typography } from '@mui/material';
+import { cn } from '../lib/utils';
+import { AlertCircle } from 'lucide-react';
 
 // 共通コンポーネントのインポート
 import PageLayout from './common/PageLayout';
 import QuestionBox from './common/QuestionBox';
 import FormButtons from './common/FormButtons';
-import RequiredFormLabel from './common/RequiredFormLabel';
+import RequiredBadge from './common/RequiredBadge';
 import { ProgressBar } from './common/ProgressBar';
 
 // UI コンポーネント
@@ -82,21 +84,39 @@ const ReviewForm: React.FC = () => {
 
         <QuestionBox>
           <div className="space-y-4">
-            <RequiredFormLabel label="当サロンのご利用に関する感想をご自由にお書きください" />
+            <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
+              <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
+                <AlertCircle className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 tracking-wide">
+                  ご意見・ご感想を自由にお書きください
+                  <RequiredBadge />
+                </h3>
+                <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">サービスの感想や改善点などをご自由にお書きください</p>
+              </div>
+            </div>
             
-            <Textarea
+            <textarea
+              id="feedback"
+              rows={6}
+              className={cn(
+                "mt-4 block w-full rounded-xl border shadow-sm focus:border-primary focus:ring-primary focus:ring-2 transition-all duration-200 resize-none p-4 text-base",
+                error ? "border-rose-500 ring-1 ring-rose-500" : "border-gray-300"
+              )}
+              placeholder="ご感想をお聞かせください..."
               value={feedback}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+              onChange={(e) => {
                 setFeedback(e.target.value);
                 setError(false);
               }}
-              placeholder="サービスの感想や、改善点などをご自由にお書きください。"
-              className={error ? "border-destructive" : ""}
-              rows={6}
             />
             
             {error && (
-              <p className="text-destructive text-sm">感想を入力してください。</p>
+              <div className="text-rose-500 text-sm mt-2 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                感想を入力してください
+              </div>
             )}
           </div>
         </QuestionBox>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
@@ -7,6 +7,7 @@ import PageLayout from './common/PageLayout';
 import QuestionBox from './common/QuestionBox';
 import FormButtons from './common/FormButtons';
 import { ProgressBar } from './common/ProgressBar';
+import LoadingOverlay from './common/LoadingOverlay';
 
 // アイコン
 import {
@@ -23,6 +24,7 @@ import {
 const Confirmation: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // serviceKey -> label を返すヘルパー
   const getLabelFromKey = (key: string): string => {
@@ -40,6 +42,9 @@ const Confirmation: React.FC = () => {
       event.preventDefault();
     }
 
+    // 既に送信中の場合は処理をスキップ
+    if (isSubmitting) return;
+
     // APIエンドポイントを環境変数から取得
     const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
     if (!apiEndpoint) {
@@ -47,12 +52,15 @@ const Confirmation: React.FC = () => {
       return;
     }
 
+    // 送信開始
+    setIsSubmitting(true);
+
     try {
       await fetch(apiEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(state),
       });
       
@@ -61,6 +69,7 @@ const Confirmation: React.FC = () => {
     } catch (error) {
       console.error('データ送信中にエラーが発生しました:', error);
       alert('データの送信に失敗しました。もう一度お試しください。');
+      setIsSubmitting(false);
     }
   };
 
@@ -115,6 +124,9 @@ const Confirmation: React.FC = () => {
         title="入力内容の確認"
         subtitle="入力内容をご確認ください。問題がなければ「送信する」ボタンを押してください。"
       >
+        {/* ローディングオーバーレイ */}
+        <LoadingOverlay visible={isSubmitting} message="データを送信中..." />
+        
         <div className="sm:mb-8 mb-4 -mt-2">
           <ProgressBar 
             currentStep={3} 
@@ -257,8 +269,9 @@ const Confirmation: React.FC = () => {
         <div className="mt-10">
       <FormButtons 
         onBack={handleBack} 
-        onNext={handleSubmit} 
+        onNext={handleSubmit}
         nextButtonText="送信する" 
+        disabled={isSubmitting}
       />
         </div>
     </PageLayout>

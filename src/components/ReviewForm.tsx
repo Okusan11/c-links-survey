@@ -89,9 +89,9 @@ const ReviewForm: React.FC = () => {
                 <AlertCircle className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 tracking-wide">
+                <h3 className="text-lg font-semibold text-gray-900 tracking-wide whitespace-normal text-wrap">
                   ご意見・ご感想を自由にお書きください
-                  <RequiredBadge />
+                  <RequiredBadge className="inline-block ml-1.5" />
                 </h3>
                 <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">サービスの感想や改善点などをご自由にお書きください</p>
               </div>

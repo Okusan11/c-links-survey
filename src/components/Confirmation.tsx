@@ -65,7 +65,7 @@ const Confirmation: React.FC = () => {
       });
       
       // 送信成功時は完了画面へ
-      navigate('/complete', { state });
+      navigate('/thankyou', { state });
     } catch (error) {
       console.error('データ送信中にエラーが発生しました:', error);
       alert('データの送信に失敗しました。もう一度お試しください。');

@@ -395,9 +395,9 @@ const SurveyForm: React.FC = () => {
                 <Info className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 tracking-wide">
+                <h3 className="text-lg font-semibold text-gray-900 tracking-wide whitespace-normal text-wrap">
                   当サロンのご利用は初めてですか？
-                  <RequiredBadge />
+                  <RequiredBadge className="inline-block ml-1.5" />
                 </h3>
                 <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">該当する方を選択してください</p>
               </div>
@@ -438,9 +438,9 @@ const SurveyForm: React.FC = () => {
                   <Info className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 tracking-wide">
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-wide whitespace-normal text-wrap">
                     当サロンをどこでお知りになりましたか？
-                    <RequiredBadge />
+                    <RequiredBadge className="inline-block ml-1.5" />
                   </h3>
                   <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">該当するものをすべて選択してください</p>
                 </div>
@@ -503,9 +503,9 @@ const SurveyForm: React.FC = () => {
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg text-gray-900">
+                <h3 className="font-semibold text-lg text-gray-900 whitespace-normal text-wrap">
                   当サロンをご利用された日時
-                  <RequiredBadge />
+                  <RequiredBadge className="inline-block ml-1.5" />
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">ご来店された日付を選択してください</p>
               </div>
@@ -552,9 +552,9 @@ const SurveyForm: React.FC = () => {
                 <Star className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg text-gray-900">
+                <h3 className="font-semibold text-lg text-gray-900 whitespace-normal text-wrap">
                   どのサービスをご利用されましたか？
-                  <RequiredBadge />
+                  <RequiredBadge className="inline-block ml-1.5" />
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">該当するサービスをすべて選択してください</p>
               </div>
@@ -600,7 +600,7 @@ const SurveyForm: React.FC = () => {
                     <Star className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg text-gray-900">{service.label}について</h3>
+                    <h3 className="font-semibold text-lg text-gray-900 whitespace-normal text-wrap">{service.label}について</h3>
                     <p className="text-sm text-gray-500 mt-1">サービスの評価をお願いします</p>
                   </div>
                 </div>

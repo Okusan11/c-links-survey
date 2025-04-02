@@ -48,27 +48,41 @@ const Confirmation: React.FC = () => {
     // APIエンドポイントを環境変数から取得
     const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
     if (!apiEndpoint) {
-      alert('APIエンドポイントが設定されていません。');
+      alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
       return;
     }
 
     // 送信開始
     setIsSubmitting(true);
 
+    // AWS SESバックエンド（Lambda）のためにデータ構造を整える
+    const submitData = {
+      ...state,
+      // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
+      usagePurposeKeys: state.usagePurpose,
+      usagePurposeLabels: state.usagePurposeLabels
+    };
+
     try {
-      await fetch(apiEndpoint, {
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(state),
+        body: JSON.stringify(submitData),
       });
+      
+      // レスポンスのステータスコードをチェック
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'サーバーエラーが発生しました');
+      }
       
       // 送信成功時は完了画面へ
       navigate('/thankyou', { state });
     } catch (error) {
       console.error('データ送信中にエラーが発生しました:', error);
-      alert('データの送信に失敗しました。もう一度お試しください。');
+      alert(`データの送信に失敗しました。もう一度お試しください。${error instanceof Error ? `\n${error.message}` : ''}`);
       setIsSubmitting(false);
     }
   };

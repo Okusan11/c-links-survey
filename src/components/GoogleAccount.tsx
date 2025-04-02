@@ -110,9 +110,19 @@ const GoogleAccount: React.FC = () => {
     if (hasGoogleAccount === 'yes') {
       // API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
       if (!apiEndpoint) {
-        alert('APIエンドポイントが設定されていません。');
+        alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
         return;
       }
+
+      // AWS SESバックエンド（Lambda）のためにデータ構造を整える
+      const submitData = {
+        ...data,
+        // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
+        usagePurposeKeys: data.usagePurpose,
+        usagePurposeLabels: data.usagePurposeLabels,
+        // GoogleMapの口コミとしての投稿であることを示す
+        isGoogleReview: true
+      };
 
       // --- fetchは投げるがawaitしない ---
       fetch(apiEndpoint, {
@@ -120,7 +130,7 @@ const GoogleAccount: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(submitData),
       }).catch((error) => {
         // 失敗した場合も、一旦はコンソールエラーのみ表示
         console.error('データ送信中にエラーが発生しました:', error);

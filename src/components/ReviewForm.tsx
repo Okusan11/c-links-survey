@@ -101,7 +101,7 @@ const ReviewForm: React.FC = () => {
               id="feedback"
               rows={6}
               className={cn(
-                "mt-4 block w-full rounded-xl border shadow-sm focus:border-primary focus:ring-primary focus:ring-2 transition-all duration-200 resize-none p-4 text-base",
+                "mt-4 block w-full rounded-xl border shadow-sm focus:border-primary focus:ring-primary focus:ring-2 resize-none p-4 text-base",
                 error ? "border-rose-500 ring-1 ring-rose-500" : "border-gray-300"
               )}
               placeholder="ご感想をお聞かせください..."

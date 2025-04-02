@@ -172,7 +172,7 @@ const GoogleAccount: React.FC = () => {
     <div
       onClick={onClick}
       className={cn(
-        "group relative flex items-center gap-3 p-4 sm:p-5 rounded-xl cursor-pointer transition-all touch-target",
+        "group relative flex items-center gap-3 p-4 sm:p-5 rounded-xl cursor-pointer touch-target",
         "border shadow-soft",
         selected 
           ? "border-primary/30 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent" 
@@ -181,25 +181,24 @@ const GoogleAccount: React.FC = () => {
     >
       <div className={cn(
         "flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center self-center",
-        "transition-colors duration-200",
         selected ? "border-primary" : "border-gray-300"
       )}>
         {selected && (
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary animate-scale-check" />
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary" />
         )}
       </div>
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
           {icon && (
             <div className={cn(
-              "flex-shrink-0 text-primary/80 transition-transform duration-200",
+              "flex-shrink-0 text-primary/80",
               selected ? "scale-105" : ""
             )}>
               {icon}
             </div>
           )}
           <span className={cn(
-            "text-[16px] sm:text-[17px] leading-tight transition-colors duration-200 font-medium",
+            "text-[16px] sm:text-[17px] leading-tight font-medium",
             selected ? "text-primary" : "text-gray-700"
           )}>
             {children}
@@ -280,7 +279,7 @@ const GoogleAccount: React.FC = () => {
             </div>
             
             {error && (
-              <div className="flex items-center gap-2 text-destructive mt-2 animate-shake">
+              <div className="flex items-center gap-2 text-destructive mt-2">
                 <AlertCircle className="h-4 w-4" />
                 <p className="text-[14px]">選択してください</p>
               </div>

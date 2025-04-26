@@ -56,27 +56,46 @@ const GoogleAccount: React.FC = () => {
     otherHeardFrom,
     satisfiedPoints,
     improvementPoints,
+    goodImpressions,
+    badImpressions,
+    willReturn,
+    satisfaction,
     feedback,
-    isNewCustomer
+    isNewCustomer,
+    impressions
   } = state || {};
 
   // 戻るボタン
   const handleBack = () => {
-    // SurveyFormに戻り、入力内容を保持しておく
-    navigate('/surveyform', {
-      state: {
-        visitDate,
-        heardFrom,
-        otherHeardFrom,
-        usagePurpose: usagePurposeKeys,
-        usagePurposeLabels,
-        satisfiedPoints,
-        improvementPoints,
-        hasGoogleAccount,
-        feedback,
-        isNewCustomer
-      },
-    });
+    // 新規・リピーターで適切な画面に戻る
+    if (isNewCustomer) {
+      // 新規のお客様は新規アンケート画面に戻る
+      navigate('/new-customer', {
+        state: {
+          heardFrom,
+          otherHeardFrom,
+          impressions,
+          goodImpressions,
+          badImpressions,
+          willReturn,
+          hasGoogleAccount,
+          feedback,
+        },
+      });
+    } else {
+      // リピーターのお客様はリピーターアンケート画面に戻る
+      navigate('/repeater-customer', {
+        state: {
+          satisfaction,
+          usagePurpose: usagePurposeKeys,
+          usagePurposeLabels,
+          satisfiedPoints: satisfiedPoints || {},
+          improvementPoints: improvementPoints || {},
+          hasGoogleAccount,
+          feedback,
+        },
+      });
+    }
   };
   
   // 次へボタン
@@ -92,20 +111,26 @@ const GoogleAccount: React.FC = () => {
     }
 
     const data = {
-      visitDate,
       heardFrom,
       otherHeardFrom,
-      usagePurpose: usagePurposeKeys,
-      usagePurposeLabels,
-      satisfiedPoints,
-      improvementPoints,
-      hasGoogleAccount,
+      goodImpressions,
+      badImpressions,
+      willReturn,
+      satisfaction,
       feedback,
-      isNewCustomer
+      isNewCustomer,
+      hasGoogleAccount,
+      impressions,
+      ...(isNewCustomer ? {} : {
+        usagePurpose: usagePurposeKeys,
+        usagePurposeLabels,
+        satisfiedPoints: satisfiedPoints || {},
+        improvementPoints: improvementPoints || {},
+      }),
     };
 
     // 送信データの確認
-    console.log('送信するstateの中身', data);
+    //console.log('送信するstateの中身', data);
 
     if (hasGoogleAccount === 'yes') {
       // API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
@@ -118,8 +143,10 @@ const GoogleAccount: React.FC = () => {
       const submitData = {
         ...data,
         // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
-        usagePurposeKeys: data.usagePurpose,
-        usagePurposeLabels: data.usagePurposeLabels,
+        ...(isNewCustomer ? {} : {
+          usagePurposeKeys: data.usagePurpose,
+          usagePurposeLabels: data.usagePurposeLabels,
+        }),
         // GoogleMapの口コミとしての投稿であることを示す
         isGoogleReview: true
       };

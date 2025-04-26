@@ -22,6 +22,7 @@ const ReviewForm: React.FC = () => {
 
   // 戻るボタン
   const handleBack = () => {
+    // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
     navigate('/googleaccount', {
       state: {
         ...state,

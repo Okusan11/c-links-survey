@@ -10,6 +10,37 @@ export const localSurveyConfig: SurveyConfig = {
     "広告(チラシ・看板など)",
     "その他"
   ],
+  "newCustomerOptions": {
+    "heardFromOptions": [
+      "Google検索",
+      "当サロンのホームページ",
+      "SNS(インスタグラム、Xなど)",
+      "ホットペッパービューティーなどの検索サイト",
+      "ご友人・知人からのご紹介",
+      "広告(チラシ・看板など)",
+      "その他"
+    ],
+    "impressionOptions": [
+      "スタッフ対応", 
+      "品揃え", 
+      "価格", 
+      "店内の雰囲気", 
+      "アクセスの良さ",
+      "サービス品質"
+    ],
+    "willReturnOptions": [
+      "ぜひ来たい",
+      "どちらとも言えない",
+      "たぶん来ない"
+    ]
+  },
+  "repeaterOptions": {
+    "satisfactionOptions": [
+      "良くなった",
+      "同じ",
+      "悪くなった"
+    ]
+  },
   "serviceDefinitions": [
     {
       "key": "cut",

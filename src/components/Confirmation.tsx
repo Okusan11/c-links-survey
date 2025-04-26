@@ -25,6 +25,9 @@ const Confirmation: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 環境変数からAPIエンドポイントを取得
+  const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
 
   // serviceKey -> label を返すヘルパー
   const getLabelFromKey = (key: string): string => {
@@ -34,36 +37,42 @@ const Confirmation: React.FC = () => {
   };
 
   const handleBack = () => {
+    // ReviewForm画面へ戻る際に現在のステートを引き継ぐ
     navigate('/reviewform', { state });
   };
 
-  const handleSubmit = async (event?: React.MouseEvent) => {
+  const handleSubmit = async (event?: React.FormEvent) => {
     if (event) {
       event.preventDefault();
     }
-
+    
     // 既に送信中の場合は処理をスキップ
     if (isSubmitting) return;
-
-    // APIエンドポイントを環境変数から取得
-    const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
-    if (!apiEndpoint) {
-      alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
-      return;
-    }
-
+    
     // 送信開始
     setIsSubmitting(true);
 
+    // 送信APIがある場合は、送信処理
+    if (!apiEndpoint) {
+      alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
+      setIsSubmitting(false);
+      return;
+    }
+
     // AWS SESバックエンド（Lambda）のためにデータ構造を整える
     const submitData = {
-      ...state,
       // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
-      usagePurposeKeys: state.usagePurpose,
-      usagePurposeLabels: state.usagePurposeLabels
+      ...state,
+      ...(state.isNewCustomer ? {} : {
+        usagePurposeKeys: state.usagePurpose,
+        usagePurposeLabels: state.usagePurposeLabels,
+      }),
+      // 通常の投稿である
+      isGoogleReview: false
     };
 
     try {
+      // POST送信
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
@@ -72,17 +81,16 @@ const Confirmation: React.FC = () => {
         body: JSON.stringify(submitData),
       });
       
-      // レスポンスのステータスコードをチェック
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'サーバーエラーが発生しました');
+        throw new Error('APIからエラーレスポンスが返されました');
       }
       
-      // 送信成功時は完了画面へ
-      navigate('/thankyou', { state });
+      const data = await response.json();
+      navigate('/thankyou');
     } catch (error) {
       console.error('データ送信中にエラーが発生しました:', error);
-      alert(`データの送信に失敗しました。もう一度お試しください。${error instanceof Error ? `\n${error.message}` : ''}`);
+      alert(`送信中にエラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -130,10 +138,7 @@ const Confirmation: React.FC = () => {
   };
 
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      handleSubmit();
-    }}>
+    <form onSubmit={handleSubmit}>
       <PageLayout
         title="入力内容の確認"
         subtitle="入力内容をご確認ください。問題がなければ「送信する」ボタンを押してください。"
@@ -167,7 +172,7 @@ const Confirmation: React.FC = () => {
             />
 
             {/* 認知経路（新規のお客様のみ表示） */}
-            {state.isNewCustomer && state.heardFrom.length > 0 && (
+            {state.isNewCustomer && state.heardFrom && state.heardFrom.length > 0 && (
               <ConfirmationItem
                 icon={<Info className="h-5 w-5" />}
                 title="当サロンを知ったきっかけ"
@@ -191,88 +196,172 @@ const Confirmation: React.FC = () => {
               />
             )}
 
-            {/* ご利用日時 */}
-            <ConfirmationItem
-              icon={<CalendarDays className="h-5 w-5" />}
-              title="ご利用日時"
-              content={
-                <div className="flex items-start gap-2">
-                  <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  <div className="text-[14px] text-gray-700">
-                    {state.visitDate.year}年 {state.visitDate.month}月 {state.visitDate.day}日
-                  </div>
-                </div>
-              }
-            />
-
-            {/* ご利用サービス */}
-            <ConfirmationItem
-              icon={<MessageSquare className="h-5 w-5" />}
-              title="ご利用いただいたサービス"
-              content={
-                <div className="space-y-6">
-                  {state.usagePurpose.map((key: string) => {
-            const label = getLabelFromKey(key);
-            return (
-                      <div key={key} className="rounded-lg bg-gray-50/80 p-4">
-                        <div className="font-medium text-[15px] text-primary/90 mb-3 pb-2 border-b border-gray-200">
-                          {label}
+            {/* 最も印象に残った点（新規のお客様のみ表示） */}
+            {state.isNewCustomer && (
+              <ConfirmationItem
+                icon={<Info className="h-5 w-5" />}
+                title="印象に残った点"
+                content={
+                  <div className="space-y-3">
+                    {/* 良い印象 */}
+                    {state.goodImpressions && state.goodImpressions.length > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <ThumbsUp className="h-4 w-4 text-green-500" />
+                          <span className="text-[14px] font-medium text-gray-700">良かった点</span>
                         </div>
-                        
-                        <div className="grid sm:grid-cols-2 gap-4">
-                          {/* 満足点 */}
-                          <div className="bg-white rounded-lg border border-green-100 shadow-sm p-3 space-y-3">
-                            <div className="flex items-center gap-2 text-green-600">
-                              <div className="p-1 rounded-full bg-green-50">
-                                <ThumbsUp className="h-3.5 w-3.5" />
-                              </div>
-                              <span className="text-[13px] font-medium">満足いただいた点</span>
-                            </div>
-                            <div className="space-y-2">
-                              {state.satisfiedPoints[key]?.map((point: string) => (
-                                <div key={point} className="flex items-start gap-2">
-                                  <Check className="h-3.5 w-3.5 text-green-500 mt-0.5" />
-                                  <div className="text-[13px] text-gray-600">{point}</div>
-                                </div>
-                              ))}
-                            </div>
+                        {state.goodImpressions.map((item: string) => (
+                          <div key={item} className="flex items-start gap-2 pl-6">
+                            <ChevronRight className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <div className="text-[14px] text-gray-700">{item}</div>
                           </div>
+                        ))}
+                      </div>
+                    )}
 
-                          {/* 改善点 */}
-                          <div className="bg-white rounded-lg border border-amber-100 shadow-sm p-3 space-y-3">
-                            <div className="flex items-center gap-2 text-amber-600">
-                              <div className="p-1 rounded-full bg-amber-50">
-                                <ThumbsDown className="h-3.5 w-3.5" />
-                              </div>
-                              <span className="text-[13px] font-medium">改善してほしい点</span>
-                            </div>
-                            <div className="space-y-2">
-                              {state.improvementPoints[key]?.map((point: string) => (
-                                <div key={point} className="flex items-start gap-2">
-                                  <Check className="h-3.5 w-3.5 text-amber-500 mt-0.5" />
-                                  <div className="text-[13px] text-gray-600">{point}</div>
-                                </div>
-                              ))}
-                            </div>
+                    {/* 悪い印象 */}
+                    {state.badImpressions && state.badImpressions.length > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <ThumbsDown className="h-4 w-4 text-rose-500" />
+                          <span className="text-[14px] font-medium text-gray-700">改善してほしい点</span>
+                        </div>
+                        {state.badImpressions.map((item: string) => (
+                          <div key={item} className="flex items-start gap-2 pl-6">
+                            <ChevronRight className="h-4 w-4 text-rose-500 mt-0.5 flex-shrink-0" />
+                            <div className="text-[14px] text-gray-700">{item}</div>
                           </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                }
+              />
+            )}
+
+            {/* また来たいと思うか（新規のお客様のみ表示） */}
+            {state.isNewCustomer && state.willReturn && (
+              <ConfirmationItem
+                icon={<Info className="h-5 w-5" />}
+                title="また来店したいと思いますか？"
+                content={
+                  <div className="flex items-start gap-2">
+                    <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="text-[14px] text-gray-700">{state.willReturn}</div>
+                  </div>
+                }
+              />
+            )}
+
+            {/* 満足度（リピーターのお客様のみ表示） */}
+            {!state.isNewCustomer && state.satisfaction && (
+              <ConfirmationItem
+                icon={<Info className="h-5 w-5" />}
+                title="前回と比べた満足度"
+                content={
+                  <div className="flex items-start gap-2">
+                    <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="text-[14px] text-gray-700">{state.satisfaction}</div>
+                  </div>
+                }
+              />
+            )}
+
+            {/* サービス/利用目的（リピーターのお客様のみ表示） */}
+            {!state.isNewCustomer && state.usagePurpose && state.usagePurpose.length > 0 && (
+              <ConfirmationItem
+                icon={<Info className="h-5 w-5" />}
+                title="ご利用いただいたサービス"
+                content={
+                  <div className="space-y-1.5">
+                    {state.usagePurpose.map((serviceKey: string) => (
+                      <div key={serviceKey} className="flex items-start gap-2">
+                        <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <div className="text-[14px] text-gray-700">
+                          {getLabelFromKey(serviceKey)}
                         </div>
                       </div>
-            );
-          })}
-                </div>
-              }
-            />
+                    ))}
+                  </div>
+                }
+              />
+            )}
 
-            {/* ご感想 */}
+            {/* サービスごとの満足点/改善点（リピーターのお客様のみ表示） */}
+            {!state.isNewCustomer && state.satisfiedPoints && state.improvementPoints && (
+              <ConfirmationItem
+                icon={<Info className="h-5 w-5" />}
+                title="サービスの評価"
+                content={
+                  <div className="space-y-4">
+                    {Object.entries(state.satisfiedPoints).map(([serviceKey, points]) => (
+                      <div key={`satisfied-${serviceKey}`} className="space-y-2">
+                        <div className="font-medium text-[15px] text-gray-800">
+                          {getLabelFromKey(serviceKey)}
+                        </div>
+                        
+                        {/* 満足点 */}
+                        {Array.isArray(points) && points.length > 0 && (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <ThumbsUp className="h-4 w-4 text-green-500" />
+                              <span className="text-[14px] font-medium text-gray-700">満足した点</span>
+                            </div>
+                            {(points as string[]).map((item: string, index: number) => (
+                              <div key={`${serviceKey}-sat-${index}`} className="flex items-start gap-2 pl-6">
+                                <ChevronRight className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <div className="text-[14px] text-gray-700">{item}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* 改善点 */}
+                        {state.improvementPoints[serviceKey] && state.improvementPoints[serviceKey].length > 0 && (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <ThumbsDown className="h-4 w-4 text-rose-500" />
+                              <span className="text-[14px] font-medium text-gray-700">改善してほしい点</span>
+                            </div>
+                            {(state.improvementPoints[serviceKey] as string[]).map((item: string, index: number) => (
+                              <div key={`${serviceKey}-imp-${index}`} className="flex items-start gap-2 pl-6">
+                                <ChevronRight className="h-4 w-4 text-rose-500 mt-0.5 flex-shrink-0" />
+                                <div className="text-[14px] text-gray-700">{item}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                }
+              />
+            )}
+
+            {/* Googleアカウントを持っているか */}
+            {state.hasGoogleAccount && (
+              <ConfirmationItem
+                icon={<Info className="h-5 w-5" />}
+                title="Googleアカウント"
+                content={
+                  <div className="flex items-start gap-2">
+                    <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="text-[14px] text-gray-700">
+                      {state.hasGoogleAccount === 'yes' ? 'アカウントを持っている' : 'アカウントを持っていない'}
+                    </div>
+                  </div>
+                }
+              />
+            )}
+
+            {/* 感想・フィードバック */}
             {state.feedback && (
               <ConfirmationItem
-                icon={<Send className="h-5 w-5" />}
+                icon={<MessageSquare className="h-5 w-5" />}
                 title="ご感想"
                 content={
-                  <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-lg border border-gray-100 shadow-inner">
-                    <p className="text-[14px] leading-relaxed text-gray-700 whitespace-pre-wrap">
-                      {state.feedback}
-                    </p>
+                  <div className="whitespace-pre-wrap text-[14px] text-gray-700 leading-relaxed">
+                    {state.feedback}
                   </div>
                 }
               />

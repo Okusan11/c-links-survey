@@ -23,7 +23,6 @@ export interface RepeaterOptions {
 
 // SSMに格納したJSON全体を受け取るための型
 export interface SurveyConfig {
-  heardFromOptions: string[];
   serviceDefinitions: ServiceDefinition[];
   newCustomerOptions: NewCustomerOptions;
   repeaterOptions: RepeaterOptions;

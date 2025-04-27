@@ -2,14 +2,6 @@ import { SurveyConfig } from '../types';
 
 // ローカル開発用のモックデータ
 export const localSurveyConfig: SurveyConfig = {
-  "heardFromOptions": [
-    "当サロンのホームページ",
-    "SNS(インスタグラム、Xなど)",
-    "ホットペッパービューティーなどの検索サイト",
-    "ご友人・知人からのご紹介",
-    "広告(チラシ・看板など)",
-    "その他"
-  ],
   "newCustomerOptions": {
     "heardFromOptions": [
       "Google検索",
@@ -22,11 +14,11 @@ export const localSurveyConfig: SurveyConfig = {
     ],
     "impressionOptions": [
       "スタッフ対応", 
-      "品揃え", 
+      "サービス品質",
+      "サービスメニューの豊富さ", 
       "価格", 
       "店内の雰囲気", 
       "アクセスの良さ",
-      "サービス品質"
     ],
     "willReturnOptions": [
       "ぜひ来たい",

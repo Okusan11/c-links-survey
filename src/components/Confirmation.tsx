@@ -196,44 +196,29 @@ const Confirmation: React.FC = () => {
               />
             )}
 
-            {/* 最も印象に残った点（新規のお客様のみ表示） */}
-            {state.isNewCustomer && (
+            {/* 印象評価（新規のお客様のみ表示） */}
+            {state.isNewCustomer && state.impressionRatings && state.impressionRatings.length > 0 && (
               <ConfirmationItem
                 icon={<Info className="h-5 w-5" />}
-                title="印象に残った点"
+                title="印象評価"
                 content={
                   <div className="space-y-3">
-                    {/* 良い印象 */}
-                    {state.goodImpressions && state.goodImpressions.length > 0 && (
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <ThumbsUp className="h-4 w-4 text-green-500" />
-                          <span className="text-[14px] font-medium text-gray-700">良かった点</span>
+                    {state.impressionRatings.map((rating: {category: string, rating: string}) => (
+                      <div key={rating.category} className="flex items-start gap-2">
+                        <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <div className="text-[14px] text-gray-700">
+                          <span className="font-medium">{rating.category}:</span>
+                          <span className={cn(
+                            "ml-2 px-2 py-0.5 rounded text-xs",
+                            rating.rating === "良い" && "bg-green-100 text-green-700",
+                            rating.rating === "普通" && "bg-gray-100 text-gray-700", 
+                            rating.rating === "改善が必要" && "bg-amber-100 text-amber-700"
+                          )}>
+                            {rating.rating}
+                          </span>
                         </div>
-                        {state.goodImpressions.map((item: string) => (
-                          <div key={item} className="flex items-start gap-2 pl-6">
-                            <ChevronRight className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                            <div className="text-[14px] text-gray-700">{item}</div>
-                          </div>
-                        ))}
                       </div>
-                    )}
-
-                    {/* 悪い印象 */}
-                    {state.badImpressions && state.badImpressions.length > 0 && (
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <ThumbsDown className="h-4 w-4 text-rose-500" />
-                          <span className="text-[14px] font-medium text-gray-700">改善してほしい点</span>
-                        </div>
-                        {state.badImpressions.map((item: string) => (
-                          <div key={item} className="flex items-start gap-2 pl-6">
-                            <ChevronRight className="h-4 w-4 text-rose-500 mt-0.5 flex-shrink-0" />
-                            <div className="text-[14px] text-gray-700">{item}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    ))}
                   </div>
                 }
               />

@@ -9,10 +9,16 @@ export interface ServiceDefinition {
   improvementOptions: string[];
 }
 
+// 印象評価のカテゴリと評価オプション
+export interface ImpressionEvaluation {
+  category: string;
+  ratingOptions: string[];
+}
+
 // 新規のお客様向けアンケートの選択肢
 export interface NewCustomerOptions {
   heardFromOptions: string[]; // どこで知ったか
-  impressionOptions: string[]; // 最も印象に残った点
+  impressionEvaluations: ImpressionEvaluation[]; // 印象評価（カテゴリごと）
   willReturnOptions: string[]; // また来たいと思うか
 }
 

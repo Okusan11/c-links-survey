@@ -56,13 +56,11 @@ const GoogleAccount: React.FC = () => {
     otherHeardFrom,
     satisfiedPoints,
     improvementPoints,
-    goodImpressions,
-    badImpressions,
+    impressionRatings,
     willReturn,
     satisfaction,
     feedback,
-    isNewCustomer,
-    impressions
+    isNewCustomer
   } = state || {};
 
   // 戻るボタン
@@ -74,9 +72,7 @@ const GoogleAccount: React.FC = () => {
         state: {
           heardFrom,
           otherHeardFrom,
-          impressions,
-          goodImpressions,
-          badImpressions,
+          impressionRatings,
           willReturn,
           hasGoogleAccount,
           feedback,
@@ -113,14 +109,12 @@ const GoogleAccount: React.FC = () => {
     const data = {
       heardFrom,
       otherHeardFrom,
-      goodImpressions,
-      badImpressions,
+      impressionRatings,
       willReturn,
       satisfaction,
       feedback,
       isNewCustomer,
       hasGoogleAccount,
-      impressions,
       ...(isNewCustomer ? {} : {
         usagePurpose: usagePurposeKeys,
         usagePurposeLabels,
@@ -299,7 +293,6 @@ const GoogleAccount: React.FC = () => {
                   setHasGoogleAccount('yes');
                   setError(false);
                 }}
-                icon={<Info className="h-5 w-5" />}
               >
                 はい、持っています
               </SelectOption>
@@ -309,7 +302,6 @@ const GoogleAccount: React.FC = () => {
                   setHasGoogleAccount('no');
                   setError(false);
                 }}
-                icon={<Info className="h-5 w-5" />}
               >
                 いいえ、持っていません
               </SelectOption>

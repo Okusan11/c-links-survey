@@ -18,13 +18,16 @@ import {
   Info,
   Star,
   AlertCircle,
-  ThumbsUp,
-  ThumbsDown,
+  Smile,
+  Meh,
+  Frown,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 // 型とローカル設定のインポート
 import { getSurveyConfig } from '../config/surveyConfig';
-import { SurveyConfig, ServiceKey } from '../types';
+import { SurveyConfig, ServiceKey, ImpressionEvaluation } from '../types';
 
 // 選択肢のレンダリング用コンポーネント
 const SelectOption: React.FC<{
@@ -93,10 +96,10 @@ const SelectOption: React.FC<{
   </div>
 );
 
-// 印象に関する状態を更新
-interface ImpressionItem {
-  option: string;
-  isPositive: boolean;
+// 印象評価のインターフェース
+interface ImpressionRating {
+  category: string;
+  rating: string; // "良い" | "普通" | "悪い"
 }
 
 interface FormErrors {
@@ -123,8 +126,8 @@ const NewCustomerSurvey: React.FC = () => {
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
   const [otherHeardFrom, setOtherHeardFrom] = useState<string>(state?.otherHeardFrom || '');
 
-  // 「最も印象に残った点は？」- 複数選択可能な形式に変更
-  const [impressions, setImpressions] = useState<ImpressionItem[]>(state?.impressions || []);
+  // 「印象評価用のstate（カテゴリごとの評価を保存）」
+  const [impressionRatings, setImpressionRatings] = useState<ImpressionRating[]>(state?.impressionRatings || []);
   
   // 「また来たいと思いますか？」
   const [willReturn, setWillReturn] = useState<string>(state?.willReturn || '');
@@ -137,25 +140,26 @@ const NewCustomerSurvey: React.FC = () => {
     otherHeardFrom: false,
   });
 
-  // 印象に関する選択を追加/削除するハンドラ
-  const toggleImpression = (option: string, isPositive: boolean) => {
-    // 既に同じ項目と評価が選択されているか確認
-    const existingIndex = impressions.findIndex(
-      item => item.option === option && item.isPositive === isPositive
-    );
-
-    if (existingIndex >= 0) {
-      // 既に選択されている場合は削除
-      setImpressions(prev => prev.filter((_, index) => index !== existingIndex));
-    } else {
-      // 選択されていない場合は追加
-      setImpressions(prev => [...prev, { option, isPositive }]);
-    }
+  // 印象評価の更新関数
+  const updateImpressionRating = (category: string, rating: string) => {
+    setImpressionRatings(prev => {
+      const existing = prev.find(item => item.category === category);
+      if (existing) {
+        // 既存の評価を更新
+        return prev.map(item => 
+          item.category === category ? { ...item, rating } : item
+        );
+      } else {
+        // 新しい評価を追加
+        return [...prev, { category, rating }];
+      }
+    });
   };
 
-  // 指定した項目と評価が選択されているかチェック
-  const isImpressionSelected = (option: string, isPositive: boolean) => {
-    return impressions.some(item => item.option === option && item.isPositive === isPositive);
+  // 印象評価の取得関数
+  const getImpressionRating = (category: string): string | null => {
+    const rating = impressionRatings.find(item => item.category === category);
+    return rating ? rating.rating : null;
   };
 
   /**
@@ -182,8 +186,8 @@ const NewCustomerSurvey: React.FC = () => {
       newErrors.otherHeardFrom = true;
     }
 
-    // 必須チェック2: 印象に残った点
-    if (impressions.length === 0) {
+    // 必須チェック2: 印象評価
+    if (impressionRatings.length === 0) {
       newErrors.impressions = true;
     }
 
@@ -204,25 +208,14 @@ const NewCustomerSurvey: React.FC = () => {
       return;
     }
 
-    // 良い点と改善点を分離
-    const goodImpressions = impressions
-      .filter(item => item.isPositive)
-      .map(item => item.option);
-    
-    const badImpressions = impressions
-      .filter(item => !item.isPositive)
-      .map(item => item.option);
-
     // Google確認画面に遷移
     navigate('/googleaccount', {
       state: {
         heardFrom,
         otherHeardFrom,
-        goodImpressions,
-        badImpressions,
+        impressionRatings,
         willReturn,
         isNewCustomer: true,
-        impressions,
       },
     });
   };
@@ -235,7 +228,7 @@ const NewCustomerSurvey: React.FC = () => {
         // 入力した情報をステートとして保持
         heardFrom,
         otherHeardFrom,
-        impressions,
+        impressionRatings,
         willReturn,
         isNewCustomer: true
       }
@@ -309,7 +302,6 @@ const NewCustomerSurvey: React.FC = () => {
                       : [...heardFrom, option];
                     setHeardFrom(newHeardFrom);
                   }}
-                  icon={<Info className="h-5 w-5" />}
                 >
                   {option}
                 </SelectOption>
@@ -346,9 +338,9 @@ const NewCustomerSurvey: React.FC = () => {
           </div>
         </QuestionBox>
 
-        {/* 印象に残った点 */}
+        {/* 印象評価 */}
         <QuestionBox>
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                 <Info className="h-5 w-5 text-primary" />
@@ -359,48 +351,61 @@ const NewCustomerSurvey: React.FC = () => {
                   <RequiredBadge className="inline-block ml-1.5" />
                 </h3>
                 <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">
-                  印象に残った点について、「良い」「改善」ボタンを選択してください（複数選択可）
+                  各項目について、該当する評価を選択してください
                 </p>
               </div>
             </div>
-            
+
+            {/* 統一されたコンパクトカード形式 */}
             <div className="space-y-3">
-              {surveyConfig.newCustomerOptions.impressionOptions.map((option) => (
-                <div key={option} className="flex items-center rounded-lg border border-gray-100 hover:shadow-sm">
-                  <div className="flex-1 py-2.5 px-3 flex items-center gap-2">
-                    <Star className="h-4 w-4 text-primary/80 flex-shrink-0" />
-                    <span className="font-medium text-gray-800">{option}</span>
+              {surveyConfig.newCustomerOptions.impressionEvaluations.map((evaluation) => {
+                const currentRating = getImpressionRating(evaluation.category);
+                
+                return (
+                  <div 
+                    key={evaluation.category} 
+                    className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+                  >
+                    {/* カテゴリヘッダー */}
+                    <div className="px-3 py-2 bg-gray-50 border-b border-gray-100">
+                      <h4 className="font-medium text-gray-900 text-base">{evaluation.category}</h4>
+                    </div>
+                    
+                    {/* 評価ボタン（横並び） */}
+                    <div className="p-1.5">
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {evaluation.ratingOptions.map((rating) => {
+                          const isSelected = currentRating === rating;
+                          
+                          return (
+                            <button
+                              key={rating}
+                              type="button"
+                              onClick={() => updateImpressionRating(evaluation.category, rating)}
+                              className={cn(
+                                "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-3 px-1 sm:px-2 transition-all rounded-lg",
+                                "text-sm sm:text-lg font-medium border border-transparent min-h-[40px] sm:min-h-[44px]",
+                                isSelected && rating === "良い" && "bg-green-500 text-white",
+                                isSelected && rating === "普通" && "bg-gray-500 text-white", 
+                                isSelected && rating === "改善が必要" && "bg-amber-500 text-white",
+                                !isSelected && rating === "良い" && "text-green-700 hover:bg-green-50",
+                                !isSelected && rating === "普通" && "text-gray-700 hover:bg-gray-50",
+                                !isSelected && rating === "改善が必要" && "text-amber-700 hover:bg-amber-50"
+                              )}
+                            >
+                              {/* 表情アイコン（常に横並び） */}
+                              {rating === "良い" && <Smile className={cn("h-4 w-4 sm:h-5 sm:w-5", isSelected ? "text-white" : "text-green-600")} />}
+                              {rating === "普通" && <Meh className={cn("h-4 w-4 sm:h-5 sm:w-5", isSelected ? "text-white" : "text-gray-600")} />}
+                              {rating === "改善が必要" && <Frown className={cn("h-4 w-4 sm:h-5 sm:w-5", isSelected ? "text-white" : "text-amber-600")} />}
+                              <span>{rating}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex divide-x border-l">
-                    <button
-                      type="button"
-                      onClick={() => toggleImpression(option, true)}
-                      className={cn(
-                        "flex items-center justify-center gap-1.5 py-2.5 px-3 transition-all",
-                        isImpressionSelected(option, true)
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "hover:bg-primary/5 text-gray-700"
-                      )}
-                    >
-                      <ThumbsUp className="h-4 w-4" />
-                      <span className="whitespace-nowrap">良い</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => toggleImpression(option, false)}
-                      className={cn(
-                        "flex items-center justify-center gap-1.5 py-2.5 px-3 transition-all",
-                        isImpressionSelected(option, false)
-                          ? "bg-amber-50 text-amber-600 font-medium"
-                          : "hover:bg-amber-50/50 text-gray-700"
-                      )}
-                    >
-                      <ThumbsDown className="h-4 w-4" />
-                      <span className="whitespace-nowrap">改善</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             
             {errors.impressions && (
@@ -434,7 +439,6 @@ const NewCustomerSurvey: React.FC = () => {
                   key={option}
                   selected={willReturn === option}
                   onClick={() => setWillReturn(option)}
-                  icon={<Info className="h-5 w-5" />}
                 >
                   {option}
                 </SelectOption>

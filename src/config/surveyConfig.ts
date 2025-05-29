@@ -15,23 +15,23 @@ export const localSurveyConfig: SurveyConfig = {
     "impressionEvaluations": [
       {
         "category": "店舗の雰囲気",
-        "ratingOptions": ["良い", "普通", "改善が必要"]
+        "ratingOptions": ["良い", "普通", "要改善"]
       },
       {
         "category": "技術・仕上がり",
-        "ratingOptions": ["良い", "普通", "改善が必要"]
+        "ratingOptions": ["良い", "普通", "要改善"]
       },
       {
         "category": "接客サービス",
-        "ratingOptions": ["良い", "普通", "改善が必要"]
+        "ratingOptions": ["良い", "普通", "要改善"]
       },
       {
         "category": "メニュー料金",
-        "ratingOptions": ["良い", "普通", "改善が必要"]
+        "ratingOptions": ["良い", "普通", "要改善"]
       },
       {
         "category": "総合満足度",
-        "ratingOptions": ["良い", "普通", "改善が必要"]
+        "ratingOptions": ["良い", "普通", "要改善"]
       }
     ],
     "willReturnOptions": [

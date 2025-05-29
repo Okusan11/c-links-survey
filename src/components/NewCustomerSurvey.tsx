@@ -387,16 +387,16 @@ const NewCustomerSurvey: React.FC = () => {
                                 "text-sm sm:text-lg font-medium border border-transparent min-h-[40px] sm:min-h-[44px]",
                                 isSelected && rating === "良い" && "bg-green-500 text-white",
                                 isSelected && rating === "普通" && "bg-gray-500 text-white", 
-                                isSelected && rating === "改善が必要" && "bg-amber-500 text-white",
+                                isSelected && rating === "要改善" && "bg-amber-500 text-white",
                                 !isSelected && rating === "良い" && "text-green-700 hover:bg-green-50",
                                 !isSelected && rating === "普通" && "text-gray-700 hover:bg-gray-50",
-                                !isSelected && rating === "改善が必要" && "text-amber-700 hover:bg-amber-50"
+                                !isSelected && rating === "要改善" && "text-amber-700 hover:bg-amber-50"
                               )}
                             >
                               {/* 表情アイコン（常に横並び） */}
                               {rating === "良い" && <Smile className={cn("h-4 w-4 sm:h-5 sm:w-5", isSelected ? "text-white" : "text-green-600")} />}
                               {rating === "普通" && <Meh className={cn("h-4 w-4 sm:h-5 sm:w-5", isSelected ? "text-white" : "text-gray-600")} />}
-                              {rating === "改善が必要" && <Frown className={cn("h-4 w-4 sm:h-5 sm:w-5", isSelected ? "text-white" : "text-amber-600")} />}
+                              {rating === "要改善" && <Frown className={cn("h-4 w-4 sm:h-5 sm:w-5", isSelected ? "text-white" : "text-amber-600")} />}
                               <span>{rating}</span>
                             </button>
                           );

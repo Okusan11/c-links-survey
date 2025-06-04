@@ -351,7 +351,7 @@ const NewCustomerSurvey: React.FC = () => {
                   <RequiredBadge className="inline-block ml-1.5" />
                 </h3>
                 <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">
-                  各項目について、該当する評価を選択してください
+                  1つ以上の項目について、該当する評価を選択してください
                 </p>
               </div>
             </div>

@@ -212,7 +212,7 @@ const Confirmation: React.FC = () => {
                             "ml-2 px-2 py-0.5 rounded text-xs",
                             rating.rating === "良い" && "bg-green-100 text-green-700",
                             rating.rating === "普通" && "bg-gray-100 text-gray-700", 
-                            rating.rating === "改善が必要" && "bg-amber-100 text-amber-700"
+                            rating.rating === "要改善" && "bg-amber-100 text-amber-700"
                           )}>
                             {rating.rating}
                           </span>

@@ -1,5 +1,5 @@
-// サービスキーの型
-export type ServiceKey = 'cut' | 'color' | 'perm' | 'straightPerm' | 'treatment' | 'headSpa' | 'hairSet';
+// サービスキーの型 - 動的に推論されるように変更
+export type ServiceKey = string;  // より柔軟に
 
 // サービスごとの定義
 export interface ServiceDefinition {
@@ -34,6 +34,36 @@ export interface SurveyConfig {
   repeaterOptions: RepeaterOptions;
 }
 
+// 型安全性を保ちながら動的にServiceKeyを扱うためのユーティリティ型
+export type InferServiceKeys<T extends SurveyConfig> = T['serviceDefinitions'][number]['key'];
+
+// ServiceDefinitionから特定のサービスキーの型を推論
+export type ServiceDefinitionByKey<
+  T extends SurveyConfig, 
+  K extends InferServiceKeys<T>
+> = Extract<T['serviceDefinitions'][number], { key: K }>;
+
+// 実行時の型ガード関数
+export function isValidServiceKey(
+  key: string, 
+  serviceDefinitions: ServiceDefinition[]
+): key is ServiceKey {
+  return serviceDefinitions.some(service => service.key === key);
+}
+
+// サービスキーの配列を取得するヘルパー関数
+export function getServiceKeys(serviceDefinitions: ServiceDefinition[]): ServiceKey[] {
+  return serviceDefinitions.map(service => service.key);
+}
+
+// 特定のサービス定義を安全に取得するヘルパー関数
+export function getServiceDefinition(
+  key: ServiceKey, 
+  serviceDefinitions: ServiceDefinition[]
+): ServiceDefinition | undefined {
+  return serviceDefinitions.find(service => service.key === key);
+}
+
 // 訪問日の型
 export interface VisitDate {
   year: string;
@@ -41,7 +71,7 @@ export interface VisitDate {
   day: string;
 }
 
-// フォームのエラー型
+// フォームのエラー型 - 動的サービスキーに対応
 export interface FormErrors {
   heardFrom: boolean;
   visitDate: boolean;
@@ -50,4 +80,6 @@ export interface FormErrors {
   improvementPoints: boolean;
   otherHeardFrom: boolean;
   isNewCustomer: boolean;
+  // 動的サービスエラーのための汎用フィールド
+  [key: string]: boolean;
 } 

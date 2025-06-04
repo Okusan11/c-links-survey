@@ -12,8 +12,8 @@ interface PageLayoutProps {
 const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, className }) => {
   return (
     <div className={cn("max-w-4xl mx-auto pb-6 md:pb-8 lg:pb-12 px-4 md:px-6 lg:px-8", className)}>
-      {/* ヒーローセクション - モバイルでコンパクト */}
-      <div className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/85 px-4 py-8 sm:px-6 sm:py-12 md:py-20 md:px-10 -mx-4 md:-mx-6 lg:-mx-8 overflow-hidden rounded-b-2xl sm:rounded-b-3xl">
+      {/* ヒーローセクション - モバイルでコンパクト、横スクロール防止 */}
+      <div className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/85 px-4 py-8 sm:px-6 sm:py-12 md:py-20 md:px-10 -mx-4 sm:-mx-6 lg:-mx-8 overflow-hidden rounded-b-2xl sm:rounded-b-3xl">
         {/* 背景装飾要素 */}
         <div className="absolute inset-0">
           {/* メイングラデーション */}
@@ -67,7 +67,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
           {/* サブタイトル - モバイルでコンパクト */}
           {subtitle && (
             <div className="mt-4 sm:mt-8 md:mt-12 space-y-3 sm:space-y-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <div className="text-sm sm:text-lg md:text-2xl text-white/95 max-w-3xl leading-relaxed">
+              <div className="text-sm sm:text-lg md:text-2xl text-white/95 max-w-3xl leading-relaxed px-2 sm:px-0">
                 {subtitle.split('\n').map((line, index) => (
                   <p key={index} className="mb-2 sm:mb-3 font-medium tracking-wide">
                     {line}
@@ -91,7 +91,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
       </div>
 
       {/* コンテンツエリア */}
-      <div className="relative">
+      <div className="relative overflow-hidden">
         {/* 背景グラデーション */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5 -z-10" />
         

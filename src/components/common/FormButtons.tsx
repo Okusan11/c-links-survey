@@ -36,7 +36,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
         <button
           onClick={onBack}
           className={cn(
-            "group relative flex-1 sm:flex-none px-8 py-4 text-base font-medium rounded-2xl touch-target",
+            "group relative flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-medium rounded-2xl touch-target",
             "bg-gradient-to-r from-gray-50 to-gray-100/80 text-gray-700",
             "border border-gray-200/80 shadow-soft",
             "hover:from-gray-100 hover:to-gray-150/80 hover:shadow-medium hover:border-gray-300/80 hover:-translate-y-0.5",
@@ -45,9 +45,9 @@ const FormButtons: React.FC<FormButtonsProps> = ({
             "active:scale-[0.98] active:translate-y-0"
           )}
         >
-          <div className="flex items-center justify-center gap-2">
-            <ChevronLeft className="h-5 w-5 transition-transform duration-300 group-hover:-translate-x-0.5" />
-            <span>{backButtonText}</span>
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:-translate-x-0.5" />
+            <span className="whitespace-nowrap">{backButtonText}</span>
           </div>
           
           {/* ホバー時のシマー効果 */}
@@ -59,7 +59,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
         onClick={() => onNext()}
         disabled={disabled}
         className={cn(
-          "group relative flex-1 sm:flex-none px-8 py-4 text-base font-semibold rounded-2xl touch-target",
+          "group relative flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-2xl touch-target",
           "bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground",
           "shadow-soft border border-primary/20",
           !disabled && "hover:from-primary/95 hover:via-primary/90 hover:to-primary/85 hover:shadow-card-hover hover:-translate-y-1",
@@ -70,9 +70,9 @@ const FormButtons: React.FC<FormButtonsProps> = ({
           disabled ? "opacity-60 cursor-not-allowed" : ""
         )}
       >
-        <div className="flex items-center justify-center gap-2">
-          <span>{nextButtonText}</span>
-          <ChevronRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5" />
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+          <span className="whitespace-nowrap">{nextButtonText}</span>
+          <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-0.5" />
         </div>
         
         {/* プログレス効果 */}

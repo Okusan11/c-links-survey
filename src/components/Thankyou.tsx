@@ -83,7 +83,8 @@ const ThankYou: React.FC = () => {
         >
           ご協力ありがとうございました。
           <Box component="span" sx={{ display: 'block', mt: 2 }}>
-            ご回答いただいた内容は
+            ご回答いただいた内容は、
+            <br />
             <Box
               component="span"
               sx={{
@@ -95,9 +96,7 @@ const ThankYou: React.FC = () => {
             >
               当サロンの改善
             </Box>
-            のために
-            <br />
-            活用させていただきます。
+            のために活用させていただきます。
           </Box>
         </Typography>
       </Box>

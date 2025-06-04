@@ -40,50 +40,58 @@ const SelectOption: React.FC<{
   <div
     onClick={onClick}
     className={cn(
-      "group relative flex items-center gap-3 p-4 sm:p-5 rounded-xl cursor-pointer touch-target",
-      "border shadow-soft",
+      "group relative flex items-center gap-4 p-5 sm:p-6 rounded-2xl cursor-pointer touch-target stagger-item",
+      "border transition-all duration-300 ease-out hover-lift mobile-touch-feedback",
       selected 
-        ? "border-primary/30 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent" 
-        : "border-gray-100 hover:border-gray-200"
+        ? "border-primary/30 bg-gradient-to-br from-primary/8 via-primary/4 to-accent/5 shadow-card-hover selected-glow" 
+        : "border-gray-100/80 hover:border-primary/20 hover:bg-gradient-to-br hover:from-primary/2 hover:to-accent/2 shadow-soft hover:shadow-medium"
     )}
   >
+    {/* 選択インジケーター */}
     <div className={cn(
-      "flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center self-center",
-      selected ? "border-primary" : "border-gray-300"
+      "flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300",
+      selected ? "border-primary bg-gradient-to-br from-primary to-primary/80 shadow-medium" : "border-gray-300 group-hover:border-primary/40"
     )}>
       {selected && (
-        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary" />
+        <div className="w-3 h-3 rounded-full bg-white animate-scale-in" />
       )}
     </div>
+    
+    {/* コンテンツ */}
     <div className="flex-1 space-y-1">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {icon && (
           <div className={cn(
-            "flex-shrink-0 text-primary/80",
-            selected ? "scale-105" : ""
+            "flex-shrink-0 transition-all duration-300",
+            selected ? "text-primary scale-110" : "text-primary/60 group-hover:text-primary/80"
           )}>
             {icon}
           </div>
         )}
         <span className={cn(
-          "text-[16px] sm:text-[17px] leading-tight font-medium",
-          selected ? "text-primary" : "text-gray-700"
+          "text-base sm:text-lg leading-tight font-medium transition-colors duration-300",
+          selected ? "text-primary" : "text-gray-700 group-hover:text-gray-900"
         )}>
           {children}
         </span>
       </div>
       {description && (
-        <p className="text-[14px] text-gray-500 pl-0.5 mt-1">
+        <p className={cn(
+          "text-sm transition-colors duration-300 pl-0.5",
+          selected ? "text-primary/70" : "text-gray-500 group-hover:text-gray-600"
+        )}>
           {description}
         </p>
       )}
     </div>
+    
+    {/* 選択時のチェックマーク */}
     {selected && (
-      <div className="absolute top-0 right-0 w-5 h-5 bg-primary rounded-bl-xl rounded-tr-xl flex items-center justify-center">
+      <div className="absolute top-2 right-2 w-6 h-6 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-medium animate-scale-in">
         <svg 
           viewBox="0 0 24 24"
-          width="12" 
-          height="12" 
+          width="14" 
+          height="14" 
           stroke="currentColor" 
           strokeWidth="3" 
           fill="none" 
@@ -93,6 +101,15 @@ const SelectOption: React.FC<{
         </svg>
       </div>
     )}
+    
+    {/* ホバー時のシマー効果 */}
+    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out pointer-events-none" />
+    
+    {/* 装飾ドット */}
+    <div className={cn(
+      "absolute bottom-2 left-2 w-1.5 h-1.5 rounded-full transition-all duration-300",
+      selected ? "bg-accent opacity-80" : "bg-gray-300 opacity-40 group-hover:bg-primary/40 group-hover:opacity-60"
+    )} />
   </div>
 );
 

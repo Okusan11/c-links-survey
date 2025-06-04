@@ -11,7 +11,10 @@ interface PageLayoutProps {
 
 const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, className }) => {
   return (
-    <div className={cn("max-w-4xl mx-auto pb-6 md:pb-8 lg:pb-12 px-4 md:px-6 lg:px-8", className)}>
+    <div className={cn("max-w-4xl mx-auto pb-6 md:pb-8 lg:pb-12 px-4 md:px-6 lg:px-8 relative", className)}>
+      {/* 全体背景グラデーション - 画面最下部まで */}
+      <div className="fixed inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5 -z-20" />
+      
       {/* ヒーローセクション - モバイルでコンパクト、横スクロール防止 */}
       <div className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/85 px-4 py-8 sm:px-6 sm:py-12 md:py-20 md:px-10 -mx-4 sm:-mx-6 lg:-mx-8 overflow-hidden rounded-b-2xl sm:rounded-b-3xl">
         {/* 背景装飾要素 */}
@@ -91,12 +94,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
       </div>
 
       {/* コンテンツエリア */}
-      <div className="relative overflow-hidden">
-        {/* 背景グラデーション */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5 -z-10" />
-        
+      <div className="relative overflow-hidden min-h-screen">
         {/* 子コンポーネント */}
-        <div className="space-y-6 sm:space-y-8 md:space-y-10 mt-6 sm:mt-8 md:mt-12">
+        <div className="space-y-6 sm:space-y-8 md:space-y-10 mt-6 sm:mt-8 md:mt-12 relative z-10">
           {children}
         </div>
 

@@ -36,7 +36,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
         <button
           onClick={onBack}
           className={cn(
-            "group relative flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-medium rounded-2xl touch-target",
+            "group relative flex-1 sm:flex-none px-8 sm:px-10 py-4 sm:py-5 text-sm sm:text-base font-medium rounded-2xl touch-target",
             "bg-gradient-to-r from-gray-50 to-gray-100/80 text-gray-700",
             "border border-gray-200/80 shadow-soft",
             "hover:from-gray-100 hover:to-gray-150/80 hover:shadow-medium hover:border-gray-300/80 hover:-translate-y-0.5",
@@ -59,7 +59,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
         onClick={() => onNext()}
         disabled={disabled}
         className={cn(
-          "group relative flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-2xl touch-target",
+          "group relative flex-1 sm:flex-none px-8 sm:px-10 py-4 sm:py-5 text-sm sm:text-base font-semibold rounded-2xl touch-target",
           "bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground",
           "shadow-soft border border-primary/20",
           !disabled && "hover:from-primary/95 hover:via-primary/90 hover:to-primary/85 hover:shadow-card-hover hover:-translate-y-1",

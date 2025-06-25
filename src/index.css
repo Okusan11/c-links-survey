@@ -4,6 +4,23 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
 
+/* ステータスバーエリアまで表示を拡張 */
+html, body {
+  /* ステータスバーエリアまでビューポートを使用 */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ルート要素をステータスバーエリアまで拡張 */
+#root {
+  min-height: 100vh;
+  /* ステータスバーの後ろまで背景を拡張 */
+  margin-top: calc(-1 * env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -142,6 +159,23 @@
 
   .shadow-card-hover {
     box-shadow: var(--shadow-card-hover);
+  }
+
+  /* ステータスバーエリア対応クラス */
+  .full-screen-height {
+    min-height: 100vh;
+    min-height: calc(100vh + env(safe-area-inset-top));
+  }
+
+  .hero-section-extended {
+    /* ヒーローセクションをステータスバーエリアまで拡張 */
+    margin-top: calc(-1 * env(safe-area-inset-top));
+    padding-top: calc(env(safe-area-inset-top) + 2rem);
+  }
+
+  .content-safe-area {
+    /* コンテンツがステータスバーと重ならないように調整 */
+    padding-top: env(safe-area-inset-top);
   }
 
   /* 美しいグラデーションテキスト */

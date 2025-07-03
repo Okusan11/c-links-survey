@@ -49,6 +49,22 @@ export const localSurveyConfig: SurveyConfig = {
   },
   "serviceDefinitions": [
     {
+      "key": "cut",
+      "label": "カット",
+      "satisfiedOptions": [
+        "理想のスタイルに仕上がり、細かな要望もくみ取ってくれた",
+        "スタイリングやホームケアのアドバイスをもらえた",
+        "スタイリストの細やかな気配りが感じられた",
+        "特になし"
+      ],
+      "improvementOptions": [
+        "待ち時間を短くしてほしい",
+        "予約を取りやすくしてほしい",
+        "スタイリングなどのアドバイスを詳しくしてほしい",
+        "特になし"
+      ]
+    },
+    {
       "key": "color",
       "label": "カラー",
       "satisfiedOptions": [
@@ -65,8 +81,24 @@ export const localSurveyConfig: SurveyConfig = {
       ]
     },
     {
+      "key": "perm",
+      "label": "パーマ",
+      "satisfiedOptions": [
+        "イメージ通りに仕上がった",
+        "髪質やダメージに合わせて提案してもらい安心できた",
+        "スタイリングの仕方を丁寧にアドバイスしてくれた",
+        "特になし"
+      ],
+      "improvementOptions": [
+        "パーマを長持ちさせる方法をもっと詳しく教えてほしい",
+        "パーマ後のトリートメントケアの選択肢を増やしてほしい",
+        "ダメージをもっと抑えられるように工夫してほしい",
+        "特になし"
+      ]
+    },
+    {
       "key": "straightPerm",
-      "label": "縮毛矯正",
+      "label": "ストレート",
       "satisfiedOptions": [
         "髪が扱いやすくなり朝のスタイリングが楽になった",
         "ダメージを最小限に抑えてくれてツヤのある仕上がりになった",

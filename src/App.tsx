@@ -9,8 +9,11 @@ import Thankyou from './components/Thankyou';
 
 
 const App: React.FC = () => {
+  // 環境変数からベースパスを取得（店舗ID付きのパス）
+  const basename = process.env.REACT_APP_BASENAME || '';
+  
   return (
-    <Router>
+    <Router basename={basename}>
       <Routes>
         <Route path="/" element={<Navigate to="/new-customer" replace />} />
         <Route path="/new-customer" element={<NewCustomerSurvey />} />

@@ -41,11 +41,7 @@ const Confirmation: React.FC = () => {
     navigate('/reviewform', { state });
   };
 
-  const handleSubmit = async (event?: React.FormEvent) => {
-    if (event) {
-      event.preventDefault();
-    }
-    
+  const handleSubmit = async () => {
     // 既に送信中の場合は処理をスキップ
     if (isSubmitting) return;
     
@@ -138,7 +134,7 @@ const Confirmation: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <PageLayout
         title="入力内容の確認"
         subtitle="入力内容をご確認ください。問題がなければ「送信する」ボタンを押してください。"
@@ -363,7 +359,7 @@ const Confirmation: React.FC = () => {
       />
         </div>
     </PageLayout>
-    </form>
+    </div>
   );
 };
 

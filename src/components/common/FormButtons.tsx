@@ -34,6 +34,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
     >
       {showBackButton && onBack && (
         <button
+          type="button"
           onClick={onBack}
           className={cn(
             "group relative flex-1 sm:flex-none px-8 sm:px-10 py-5 sm:py-6 text-sm sm:text-base font-medium rounded-2xl touch-target",
@@ -56,6 +57,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
       )}
       
       <button
+        type="button"
         onClick={() => onNext()}
         disabled={disabled}
         className={cn(

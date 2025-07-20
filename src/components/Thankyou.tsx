@@ -360,16 +360,7 @@ const ThankYou: React.FC = () => {
                             ))}
                           </div>
 
-                          {/* 下部メッセージ - より魅力的に */}
-                          <div className="text-center pt-4">
-                            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-100 via-orange-100 to-red-100 px-6 py-3 rounded-full border border-yellow-200 shadow-md">
-                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                              <span className="text-orange-700 font-bold text-sm">
-                                今すぐフォローで特別特典をGET！
-                              </span>
-                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                            </div>
-                          </div>
+
                         </div>
 
                         {/* 右下装飾 */}

@@ -6,7 +6,7 @@ import GoogleAccount from './components/GoogleAccount';
 import ReviewForm from './components/ReviewForm';
 import Confirmation from './components/Confirmation';
 import Thankyou from './components/Thankyou';
-
+import DegitalGacha from './components/DegitalGacha';
 
 const App: React.FC = () => {
   // 環境変数からベースパスを取得（店舗ID付きのパス）
@@ -22,6 +22,7 @@ const App: React.FC = () => {
         <Route path="/reviewform" element={<ReviewForm />} />
         <Route path="/confirmation" element={<Confirmation />} />
         <Route path="/thankyou" element={<Thankyou />} />
+        <Route path="/gacha" element={<DegitalGacha />} />
       </Routes>
     </Router>
   );

@@ -28,6 +28,7 @@ const GoogleAccount: React.FC = () => {
   // SurveyConfigを読み込み
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
+  const [showGoogleConfirmation, setShowGoogleConfirmation] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
@@ -101,7 +102,7 @@ const GoogleAccount: React.FC = () => {
       event.preventDefault();
     }
 
-    if (!hasGoogleAccount) {
+    if (!hasGoogleAccount || hasGoogleAccount === 'yes') {
       setError(true);
       return;
     }
@@ -126,7 +127,7 @@ const GoogleAccount: React.FC = () => {
     // 送信データの確認
     //console.log('送信するstateの中身', data);
 
-    if (hasGoogleAccount === 'yes') {
+    if (hasGoogleAccount === 'yes-confirmed') {
       // API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
       if (!apiEndpoint) {
         alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
@@ -288,9 +289,12 @@ const GoogleAccount: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SelectOption
-                selected={hasGoogleAccount === 'yes'}
+                selected={hasGoogleAccount === 'yes' || hasGoogleAccount === 'yes-confirmed'}
                 onClick={() => {
-                  setHasGoogleAccount('yes');
+                  if (hasGoogleAccount !== 'yes' && hasGoogleAccount !== 'yes-confirmed') {
+                    setHasGoogleAccount('yes-confirmed');
+                    setShowGoogleConfirmation(true);
+                  }
                   setError(false);
                 }}
               >
@@ -300,17 +304,39 @@ const GoogleAccount: React.FC = () => {
                 selected={hasGoogleAccount === 'no'}
                 onClick={() => {
                   setHasGoogleAccount('no');
+                  setShowGoogleConfirmation(false);
                   setError(false);
                 }}
               >
                 いいえ、持っていません
               </SelectOption>
             </div>
+
+            {/* Google確認メッセージ - 優しいトーン */}
+            {showGoogleConfirmation && (
+              <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 animate-in slide-in-from-top-2 duration-300">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg mt-1">
+                    <Info className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    <div>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        お客様のGoogleアカウント名での投稿となります。<br/>
+                        お名前を公開したくない場合は「いいえ、持っていません」を選択し、感想はアンケート内にご記入いただけますと幸いです。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {error && (
               <div className="flex items-center gap-2 text-destructive mt-2">
                 <AlertCircle className="h-4 w-4" />
-                <p className="text-[14px]">選択してください</p>
+                <p className="text-[14px]">
+                  {hasGoogleAccount === 'yes' ? 'ご確認をお願いいたします' : '選択してください'}
+                </p>
               </div>
             )}
           </div>
@@ -319,7 +345,7 @@ const GoogleAccount: React.FC = () => {
         <FormButtons 
           onBack={handleBack} 
           onNext={handleNext} 
-          nextButtonText={hasGoogleAccount === 'yes' ? 'Google Mapへ' : '感想入力画面へ'} 
+          nextButtonText={hasGoogleAccount === 'yes-confirmed' ? 'Google Mapへ' : '感想入力画面へ'} 
         />
       </PageLayout>
     </form>

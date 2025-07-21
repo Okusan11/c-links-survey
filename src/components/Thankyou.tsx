@@ -30,7 +30,7 @@ const getSnsStyles = (type: string) => {
   switch (type.toLowerCase()) {
     case 'line':
       return {
-        icon: <MessageCircle className="w-5 h-5" />,
+        icon: <MessageCircle className="w-full h-full" />,
         bgGradient: 'from-green-500 to-green-600',
         hoverGradient: 'hover:from-green-600 hover:to-green-700',
         borderColor: 'border-green-400',
@@ -38,7 +38,7 @@ const getSnsStyles = (type: string) => {
       };
     case 'instagram':
       return {
-        icon: <Instagram className="w-5 h-5" />,
+        icon: <Instagram className="w-full h-full" />,
         bgGradient: 'from-pink-500 via-purple-500 to-indigo-500',
         hoverGradient: 'hover:from-pink-600 hover:via-purple-600 hover:to-indigo-600',
         borderColor: 'border-pink-400',
@@ -46,7 +46,7 @@ const getSnsStyles = (type: string) => {
       };
     case 'twitter':
       return {
-        icon: <Twitter className="w-5 h-5" />,
+        icon: <Twitter className="w-full h-full" />,
         bgGradient: 'from-blue-400 to-blue-500',
         hoverGradient: 'hover:from-blue-500 hover:to-blue-600',
         borderColor: 'border-blue-300',
@@ -54,7 +54,7 @@ const getSnsStyles = (type: string) => {
       };
     case 'youtube':
       return {
-        icon: <Youtube className="w-5 h-5" />,
+        icon: <Youtube className="w-full h-full" />,
         bgGradient: 'from-red-500 to-red-600',
         hoverGradient: 'hover:from-red-600 hover:to-red-700',
         borderColor: 'border-red-400',
@@ -62,7 +62,7 @@ const getSnsStyles = (type: string) => {
       };
     case 'facebook':
       return {
-        icon: <Users className="w-5 h-5" />,
+        icon: <Users className="w-full h-full" />,
         bgGradient: 'from-blue-600 to-blue-700',
         hoverGradient: 'hover:from-blue-700 hover:to-blue-800',
         borderColor: 'border-blue-500',
@@ -70,7 +70,7 @@ const getSnsStyles = (type: string) => {
       };
     case 'tiktok':
       return {
-        icon: <Camera className="w-5 h-5" />,
+        icon: <Camera className="w-full h-full" />,
         bgGradient: 'from-gray-800 to-black',
         hoverGradient: 'hover:from-gray-900 hover:to-black',
         borderColor: 'border-gray-600',
@@ -78,7 +78,7 @@ const getSnsStyles = (type: string) => {
       };
     default:
       return {
-        icon: <ExternalLink className="w-5 h-5" />,
+        icon: <ExternalLink className="w-full h-full" />,
         bgGradient: 'from-gray-600 to-gray-700',
         hoverGradient: 'hover:from-gray-700 hover:to-gray-800',
         borderColor: 'border-gray-500',
@@ -151,18 +151,18 @@ const ThankYou: React.FC = () => {
       <button
         onClick={() => handleSnsClick(config)}
         className={cn(
-          "group w-full bg-gradient-to-r text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border",
+          "group w-full bg-gradient-to-r text-white px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border",
           `${styles.bgGradient} ${styles.hoverGradient} ${styles.borderColor}`
         )}
       >
-        <div className="flex items-center justify-center gap-3">
-          <span className="text-xl">{styles.emoji}</span>
-          {styles.icon}
-          <span className="font-semibold text-lg">{config.displayName}</span>
-          <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        <div className="flex items-center justify-center gap-2 sm:gap-3">
+          <span className="text-base sm:text-lg lg:text-xl">{styles.emoji}</span>
+          <div className="w-4 h-4 sm:w-5 sm:h-5">{styles.icon}</div>
+          <span className="font-semibold text-sm sm:text-base lg:text-lg">{config.displayName}</span>
+          <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
         </div>
         {config.description && (
-          <p className="text-white/90 text-sm mt-1">
+          <p className="text-white/90 text-xs sm:text-sm mt-1 px-2 leading-tight">
             {config.description}
           </p>
         )}
@@ -202,8 +202,8 @@ const ThankYou: React.FC = () => {
         </div>
       )}
 
-      <div className="relative z-20 flex items-center justify-center min-h-screen p-4 sm:p-6">
-        <div className="w-full max-w-2xl">
+      <div className="relative z-20 flex items-center justify-center min-h-screen p-3 sm:p-4 lg:p-6">
+        <div className="w-full max-w-sm sm:max-w-lg lg:max-w-2xl">
           {/* メインカード */}
           <div className="relative group">
             {/* カード背景のグラデーション */}
@@ -215,7 +215,7 @@ const ThankYou: React.FC = () => {
               {/* トップアクセント */}
               <div className="h-2 bg-gradient-to-r from-primary via-accent to-primary animate-pulse" />
               
-              <div className="p-6 sm:p-8 text-center space-y-4 sm:space-y-6">
+              <div className="p-4 sm:p-6 lg:p-8 text-center space-y-3 sm:space-y-4 lg:space-y-6">
                 {/* 成功アイコン */}
                 <div 
                   className={cn(
@@ -241,15 +241,15 @@ const ThankYou: React.FC = () => {
                     visibleElements >= 2 ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
                   )}
                 >
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-800 via-primary to-gray-800 bg-clip-text text-transparent leading-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-gray-800 via-primary to-gray-800 bg-clip-text text-transparent leading-tight">
                     送信完了！
                   </h1>
-                  <div className="flex items-center justify-center gap-2">
-                    <Heart className="w-5 h-5 text-red-400 animate-pulse" />
-                    <p className="text-lg sm:text-xl text-gray-600 font-medium">
+                  <div className="flex items-center justify-center gap-1 sm:gap-2">
+                    <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 animate-pulse" />
+                    <p className="text-base sm:text-lg lg:text-xl text-gray-600 font-medium">
                       ご協力ありがとうございました
                     </p>
-                    <Heart className="w-5 h-5 text-red-400 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 animate-pulse" style={{ animationDelay: '0.5s' }} />
                   </div>
                 </div>
 
@@ -260,11 +260,11 @@ const ThankYou: React.FC = () => {
                     visibleElements >= 3 ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
                   )}
                 >
-                  <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-2xl p-4 sm:p-6 border border-primary/10">
-                    <MessageCircle className="w-8 h-8 text-primary mx-auto mb-2 sm:mb-3" />
-                    <p className="text-gray-700 text-lg leading-relaxed">
+                  <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-2xl p-3 sm:p-4 lg:p-6 border border-primary/10">
+                    <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary mx-auto mb-2 sm:mb-3" />
+                    <p className="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed">
                       頂いたご意見は、当サロンの
-                      <span className="inline-block mx-2 px-3 py-1 bg-gradient-to-r from-primary to-accent text-white rounded-full text-sm font-semibold shadow-md">
+                      <span className="inline-block mx-1 sm:mx-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-primary to-accent text-white rounded-full text-xs sm:text-sm font-semibold shadow-md">
                         サービス向上
                       </span>
                       のために大切に活用させていただきます。
@@ -282,7 +282,7 @@ const ThankYou: React.FC = () => {
                   {snsConfigs.length > 0 && (
                     <div className="relative">
                       {/* 魅力的な背景カード */}
-                      <div className="relative bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-3xl p-8 border-2 border-gradient-to-r from-pink-200 via-purple-200 to-indigo-200 shadow-xl overflow-hidden">
+                      <div className="relative bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-3xl p-4 sm:p-6 lg:p-8 border-2 border-gradient-to-r from-pink-200 via-purple-200 to-indigo-200 shadow-xl overflow-hidden">
                         {/* キラキラ背景エフェクト */}
                         <div className="absolute inset-0 overflow-hidden">
                           {[...Array(12)].map((_, i) => (
@@ -307,36 +307,36 @@ const ThankYou: React.FC = () => {
                         {/* 上部装飾ライン */}
                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 animate-pulse"></div>
 
-                        <div className="relative space-y-6">
+                        <div className="relative space-y-4 sm:space-y-6">
                           {/* SNSセクションタイトル - より魅力的に */}
-                          <div className="text-center space-y-3">
+                          <div className="text-center space-y-2 sm:space-y-3">
                             <div className="relative inline-block">
                               {/* タイトル周りのオーラ */}
                               <div className="absolute inset-0 bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-200 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
                               
-                              <div className="relative flex items-center justify-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/50 shadow-lg">
-                                <div className="relative">
-                                  <Heart className="w-8 h-8 text-red-500 animate-bounce" />
-                                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+                              <div className="relative flex items-center justify-center gap-2 sm:gap-3 bg-white/80 backdrop-blur-sm px-3 sm:px-6 py-3 sm:py-4 rounded-2xl border border-white/50 shadow-lg">
+                                <div className="relative flex-shrink-0">
+                                  <Heart className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-red-500 animate-bounce" />
+                                  <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-yellow-400 rounded-full animate-ping"></div>
                                 </div>
                                 
-                                <h3 className="text-2xl font-black bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                                  フォローしてサービスをよりお得にご利用ください！
+                                <h3 className="text-sm sm:text-lg lg:text-xl font-black bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent text-center leading-tight">
+                                  フォローして<br className="sm:hidden" />サービスを<br className="sm:hidden" />お得にご利用ください！
                                 </h3>
                                 
-                                <div className="relative">
-                                  <Sparkles className="w-8 h-8 text-yellow-500 animate-spin" style={{ animationDuration: '3s' }} />
-                                  <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-pink-400 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                                <div className="relative flex-shrink-0">
+                                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-yellow-500 animate-spin" style={{ animationDuration: '3s' }} />
+                                  <div className="absolute -bottom-1 -left-1 w-2 h-2 sm:w-3 sm:h-3 bg-pink-400 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
                                 </div>
                               </div>
                             </div>
                             
-                            <div className="relative">
-                              <p className="text-lg font-semibold bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent">
-                                🎁 限定特典やお得な情報をいち早くお届けします 🎁
+                            <div className="relative px-2">
+                              <p className="text-xs sm:text-sm lg:text-base font-semibold bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent leading-tight">
+                                🎁 限定特典やお得な情報を<br className="sm:hidden" />いち早くお届けします 🎁
                               </p>
                               {/* サブタイトル装飾 */}
-                              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"></div>
+                              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"></div>
                             </div>
                           </div>
 
@@ -385,8 +385,8 @@ const ThankYou: React.FC = () => {
           </div>
 
           {/* 下部の小さなメッセージ */}
-          <div className="text-center mt-8">
-            <p className="text-gray-500 text-sm">
+          <div className="text-center mt-4 sm:mt-6 lg:mt-8">
+            <p className="text-gray-500 text-xs sm:text-sm px-4">
               またのご来店を心よりお待ちしております
             </p>
           </div>

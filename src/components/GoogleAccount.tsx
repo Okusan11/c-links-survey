@@ -261,7 +261,10 @@ const GoogleAccount: React.FC = () => {
   );
 
   return (
-    <form onSubmit={handleNext}>
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      handleNext();
+    }}>
       <PageLayout
         title="Google Map口コミ投稿のご依頼"
         subtitle={subtitle}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Typography } from '@mui/material';
 import { cn } from '../lib/utils';
@@ -19,22 +19,54 @@ const ReviewForm: React.FC = () => {
   const { state } = useLocation();
   const [feedback, setFeedback] = useState<string>(state?.feedback || '');
   const [error, setError] = useState<boolean>(false);
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
+  const [actionType, setActionType] = useState<'back' | 'next' | null>(null);
 
-  // 戻るボタン
-  const handleBack = () => {
-    // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
-    navigate('/googleaccount', {
-      state: {
-        ...state,
-        feedback,
-      },
-    });
-  };
+  // 戻るボタン - スマホフレンドリーに改善
+  const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
+    // 既にナビゲーション中の場合は処理しない
+    if (isNavigating) {
+      return;
+    }
 
-  // 送信ボタン
-  const handleNext = (event?: React.MouseEvent | React.FormEvent) => {
+    // イベントの伝播とデフォルト動作を防ぐ
     if (event) {
       event.preventDefault();
+      event.stopPropagation();
+    }
+
+    // 戻るボタンが押されたことを明示
+    setActionType('back');
+    setIsNavigating(true);
+
+    try {
+      // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
+      navigate('/googleaccount', {
+        state: {
+          ...state,
+          feedback,
+        },
+        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+      });
+    } catch (error) {
+      console.error('ナビゲーションエラー:', error);
+      // エラーが発生した場合はフラグをリセット
+      setIsNavigating(false);
+      setActionType(null);
+    }
+  }, [isNavigating, navigate, state, feedback]);
+
+  // 次へボタン - スマホフレンドリーに改善
+  const handleNext = useCallback((event?: React.MouseEvent | React.FormEvent | React.TouchEvent) => {
+    // 既にナビゲーション中、または戻るボタンが押された場合は処理しない
+    if (isNavigating || actionType === 'back') {
+      return;
+    }
+
+    // イベントの伝播とデフォルト動作を防ぐ
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
     }
 
     if (!feedback.trim()) {
@@ -42,14 +74,25 @@ const ReviewForm: React.FC = () => {
       return;
     }
 
-    // 確認画面へ遷移
-    navigate('/confirmation', {
-      state: {
-        ...state,
-        feedback,
-      },
-    });
-  };
+    // 次へボタンが押されたことを明示
+    setActionType('next');
+    setIsNavigating(true);
+
+    try {
+      // 確認画面へ遷移
+      navigate('/confirmation', {
+        state: {
+          ...state,
+          feedback,
+        },
+        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+      });
+    } catch (error) {
+      console.error('ナビゲーションエラー:', error);
+      setIsNavigating(false);
+      setActionType(null);
+    }
+  }, [isNavigating, actionType, feedback, navigate, state]);
 
   const subtitle = 'ご利用いただいた際の感想をお聞かせください。今後のサービス向上に活用させていただきます。';
 
@@ -71,7 +114,11 @@ const ReviewForm: React.FC = () => {
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      handleNext();
+      // 戻るボタンが押された場合はsubmitを無視
+      if (actionType === 'back') {
+        return;
+      }
+      handleNext(e);
     }}>
       <PageLayout
         title="ご感想の入力をお願いします"
@@ -125,7 +172,13 @@ const ReviewForm: React.FC = () => {
         <FormButtons 
           onBack={handleBack} 
           onNext={handleNext}
-          nextButtonText="確認画面へ" 
+          backButtonText={
+            isNavigating && actionType === 'back' ? '処理中...' : '戻る'
+          }
+          nextButtonText={
+            isNavigating && actionType === 'next' ? '処理中...' : '確認画面へ'
+          }
+          disabled={isNavigating}
         />
       </PageLayout>
     </form>

@@ -203,7 +203,7 @@ const GoogleAccount: React.FC = () => {
   // 選択肢のレンダリング用コンポーネント
   const SelectOption: React.FC<{
     selected: boolean;
-    onClick: () => void;
+    onClick: (e?: React.MouseEvent) => void;
     children: React.ReactNode;
     icon?: React.ReactNode;
     description?: string;
@@ -270,7 +270,12 @@ const GoogleAccount: React.FC = () => {
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      handleNext();
+      // フォームがsubmitされた場合のみhandleNextを実行
+      // 戻るボタンや選択肢クリック時のsubmitを防ぐ
+      const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLElement;
+      if (submitter && submitter.textContent?.includes('次へ') || submitter && submitter.textContent?.includes('Google Map')) {
+        handleNext();
+      }
     }}>
       <PageLayout
         title="Google Map口コミ投稿のご依頼"
@@ -300,7 +305,8 @@ const GoogleAccount: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SelectOption
                 selected={hasGoogleAccount === 'yes' || hasGoogleAccount === 'yes-confirmed'}
-                onClick={() => {
+                onClick={(e) => {
+                  e?.preventDefault(); // フォーム送信を防ぐ
                   if (hasGoogleAccount !== 'yes' && hasGoogleAccount !== 'yes-confirmed') {
                     setHasGoogleAccount('yes-confirmed');
                     setShowGoogleConfirmation(true);
@@ -312,7 +318,8 @@ const GoogleAccount: React.FC = () => {
               </SelectOption>
               <SelectOption
                 selected={hasGoogleAccount === 'no'}
-                onClick={() => {
+                onClick={(e) => {
+                  e?.preventDefault(); // フォーム送信を防ぐ
                   setHasGoogleAccount('no');
                   setShowGoogleConfirmation(false);
                   setError(false);

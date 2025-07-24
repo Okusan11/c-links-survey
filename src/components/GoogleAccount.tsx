@@ -52,7 +52,6 @@ const GoogleAccount: React.FC = () => {
 
   // 必要であればデストラクチャリングしておく
   const {
-    visitDate,
     heardFrom,
     otherHeardFrom,
     satisfiedPoints,
@@ -81,7 +80,6 @@ const GoogleAccount: React.FC = () => {
           otherHeardFrom,
           impressionRatings,
           willReturn,
-          // hasGoogleAccountの選択状態を保持
           hasGoogleAccount,
           feedback,
         },
@@ -95,7 +93,6 @@ const GoogleAccount: React.FC = () => {
           usagePurposeLabels,
           satisfiedPoints: satisfiedPoints || {},
           improvementPoints: improvementPoints || {},
-          // hasGoogleAccountの選択状態を保持
           hasGoogleAccount,
           feedback,
         },

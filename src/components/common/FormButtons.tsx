@@ -3,7 +3,7 @@ import { cn } from '../../lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface FormButtonsProps {
-  onBack?: () => void;
+  onBack?: (event?: React.MouseEvent) => void;
   onNext: (...args: any[]) => void;
   nextButtonText?: string;
   backButtonText?: string;
@@ -35,7 +35,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
       {showBackButton && onBack && (
         <button
           type="button"
-          onClick={onBack}
+          onClick={(e) => onBack?.(e)}
           className={cn(
             "group relative flex-1 sm:flex-none px-8 sm:px-10 py-5 sm:py-6 text-sm sm:text-base font-medium rounded-2xl touch-target",
             "bg-gradient-to-r from-gray-50 to-gray-100/80 text-gray-700",
@@ -58,7 +58,7 @@ const FormButtons: React.FC<FormButtonsProps> = ({
       
       <button
         type="button"
-        onClick={() => onNext()}
+        onClick={(e) => onNext(e)}
         disabled={disabled}
         className={cn(
           "group relative flex-1 sm:flex-none px-8 sm:px-10 py-5 sm:py-6 text-sm sm:text-base font-semibold rounded-2xl touch-target",

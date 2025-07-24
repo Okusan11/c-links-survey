@@ -117,6 +117,10 @@ const RepeaterCustomerSurvey: React.FC = () => {
   const [satisfiedPoints, setSatisfiedPoints] = useState<Partial<Record<ServiceKey, string[]>>>(state?.satisfiedPoints || {});
   const [improvementPoints, setImprovementPoints] = useState<Partial<Record<ServiceKey, string[]>>>(state?.improvementPoints || {});
 
+  // GoogleAccountから戻ってきた場合のstate
+  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
+  const [feedback, setFeedback] = useState<string>(state?.feedback || '');
+
   // エラー状態
   const [errors, setErrors] = useState<FormErrors>({
     satisfaction: false,
@@ -205,25 +209,14 @@ const RepeaterCustomerSurvey: React.FC = () => {
         usagePurposeLabels,
         satisfiedPoints,
         improvementPoints,
+        hasGoogleAccount,
+        feedback,
         isNewCustomer: false,
       },
     });
   };
 
-  // 戻るボタン
-  const handleBack = () => {
-    // ホーム画面に戻る
-    navigate('/', { 
-      state: {
-        // 入力した情報をステートとして保持
-        satisfaction,
-        usagePurpose,
-        satisfiedPoints,
-        improvementPoints,
-        isNewCustomer: false
-      }
-    });
-  };
+
 
   if (!surveyConfig) {
     return (
@@ -406,7 +399,6 @@ const RepeaterCustomerSurvey: React.FC = () => {
 
         <FormButtons 
           onNext={handleNext}
-          onBack={handleBack}
           rightAligned={true} 
           showBackButton={false}
           nextButtonText="次のステップへ"

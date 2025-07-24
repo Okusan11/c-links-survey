@@ -149,6 +149,10 @@ const NewCustomerSurvey: React.FC = () => {
   // 「また来たいと思いますか？」
   const [willReturn, setWillReturn] = useState<string>(state?.willReturn || '');
 
+  // GoogleAccountから戻ってきた場合のstate
+  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
+  const [feedback, setFeedback] = useState<string>(state?.feedback || '');
+
   // エラー状態
   const [errors, setErrors] = useState<FormErrors>({
     heardFrom: false,
@@ -232,25 +236,14 @@ const NewCustomerSurvey: React.FC = () => {
         otherHeardFrom,
         impressionRatings,
         willReturn,
+        hasGoogleAccount,
+        feedback,
         isNewCustomer: true,
       },
     });
   };
 
-  // 戻るボタン
-  const handleBack = () => {
-    // ホーム画面に戻る
-    navigate('/', { 
-      state: {
-        // 入力した情報をステートとして保持
-        heardFrom,
-        otherHeardFrom,
-        impressionRatings,
-        willReturn,
-        isNewCustomer: true
-      }
-    });
-  };
+
 
   if (!surveyConfig) {
     return (
@@ -473,7 +466,6 @@ const NewCustomerSurvey: React.FC = () => {
 
         <FormButtons 
           onNext={handleNext}
-          onBack={handleBack}
           rightAligned={true} 
           showBackButton={false}
           nextButtonText="次のステップへ"

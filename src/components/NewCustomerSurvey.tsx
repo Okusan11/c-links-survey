@@ -149,6 +149,9 @@ const NewCustomerSurvey: React.FC = () => {
   // 「また来たいと思いますか？」
   const [willReturn, setWillReturn] = useState<string>(state?.willReturn || '');
 
+  // GoogleAccountの選択状態を保持
+  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
+
   // エラー状態
   const [errors, setErrors] = useState<FormErrors>({
     heardFrom: false,
@@ -232,6 +235,7 @@ const NewCustomerSurvey: React.FC = () => {
         otherHeardFrom,
         impressionRatings,
         willReturn,
+        hasGoogleAccount,
         isNewCustomer: true,
       },
     });
@@ -247,6 +251,7 @@ const NewCustomerSurvey: React.FC = () => {
         otherHeardFrom,
         impressionRatings,
         willReturn,
+        hasGoogleAccount,
         isNewCustomer: true
       }
     });

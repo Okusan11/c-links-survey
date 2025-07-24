@@ -52,7 +52,6 @@ const GoogleAccount: React.FC = () => {
 
   // 必要であればデストラクチャリングしておく
   const {
-    visitDate,
     heardFrom,
     otherHeardFrom,
     satisfiedPoints,
@@ -65,7 +64,13 @@ const GoogleAccount: React.FC = () => {
   } = state || {};
 
   // 戻るボタン
-  const handleBack = () => {
+  const handleBack = (event?: React.FormEvent | React.MouseEvent) => {
+    // イベントがある場合は伝播を防ぐ
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
     // 新規・リピーターで適切な画面に戻る
     if (isNewCustomer) {
       // 新規のお客様は新規アンケート画面に戻る
@@ -203,7 +208,7 @@ const GoogleAccount: React.FC = () => {
   // 選択肢のレンダリング用コンポーネント
   const SelectOption: React.FC<{
     selected: boolean;
-    onClick: (e?: React.MouseEvent) => void;
+    onClick: () => void;
     children: React.ReactNode;
     icon?: React.ReactNode;
     description?: string;
@@ -268,15 +273,7 @@ const GoogleAccount: React.FC = () => {
   );
 
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      // フォームがsubmitされた場合のみhandleNextを実行
-      // 戻るボタンや選択肢クリック時のsubmitを防ぐ
-      const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLElement;
-      if (submitter && submitter.textContent?.includes('次へ') || submitter && submitter.textContent?.includes('Google Map')) {
-        handleNext();
-      }
-    }}>
+    <div>
       <PageLayout
         title="Google Map口コミ投稿のご依頼"
         subtitle={subtitle}
@@ -305,8 +302,7 @@ const GoogleAccount: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SelectOption
                 selected={hasGoogleAccount === 'yes' || hasGoogleAccount === 'yes-confirmed'}
-                onClick={(e) => {
-                  e?.preventDefault(); // フォーム送信を防ぐ
+                onClick={() => {
                   if (hasGoogleAccount !== 'yes' && hasGoogleAccount !== 'yes-confirmed') {
                     setHasGoogleAccount('yes-confirmed');
                     setShowGoogleConfirmation(true);
@@ -318,8 +314,7 @@ const GoogleAccount: React.FC = () => {
               </SelectOption>
               <SelectOption
                 selected={hasGoogleAccount === 'no'}
-                onClick={(e) => {
-                  e?.preventDefault(); // フォーム送信を防ぐ
+                onClick={() => {
                   setHasGoogleAccount('no');
                   setShowGoogleConfirmation(false);
                   setError(false);
@@ -365,7 +360,7 @@ const GoogleAccount: React.FC = () => {
           nextButtonText={hasGoogleAccount === 'yes-confirmed' ? 'Google Mapへ' : '感想入力画面へ'} 
         />
       </PageLayout>
-    </form>
+    </div>
   );
 };
 

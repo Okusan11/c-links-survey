@@ -117,6 +117,9 @@ const RepeaterCustomerSurvey: React.FC = () => {
   const [satisfiedPoints, setSatisfiedPoints] = useState<Partial<Record<ServiceKey, string[]>>>(state?.satisfiedPoints || {});
   const [improvementPoints, setImprovementPoints] = useState<Partial<Record<ServiceKey, string[]>>>(state?.improvementPoints || {});
 
+  // GoogleAccountの選択状態を保持
+  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
+
   // エラー状態
   const [errors, setErrors] = useState<FormErrors>({
     satisfaction: false,
@@ -205,6 +208,7 @@ const RepeaterCustomerSurvey: React.FC = () => {
         usagePurposeLabels,
         satisfiedPoints,
         improvementPoints,
+        hasGoogleAccount,
         isNewCustomer: false,
       },
     });
@@ -220,6 +224,7 @@ const RepeaterCustomerSurvey: React.FC = () => {
         usagePurpose,
         satisfiedPoints,
         improvementPoints,
+        hasGoogleAccount,
         isNewCustomer: false
       }
     });

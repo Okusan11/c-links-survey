@@ -102,7 +102,7 @@ const GoogleAccount: React.FC = () => {
       event.preventDefault();
     }
 
-    if (!hasGoogleAccount || hasGoogleAccount === 'yes') {
+    if (!hasGoogleAccount) {
       setError(true);
       return;
     }
@@ -127,7 +127,10 @@ const GoogleAccount: React.FC = () => {
     // 送信データの確認
     //console.log('送信するstateの中身', data);
 
-    if (hasGoogleAccount === 'yes-confirmed') {
+    if (hasGoogleAccount === 'yes') {
+      // 「はい」が選択された場合、確認状態に変更してからGoogle Mapに遷移
+      setHasGoogleAccount('yes-confirmed');
+      
       // API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
       if (!apiEndpoint) {
         alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
@@ -137,6 +140,7 @@ const GoogleAccount: React.FC = () => {
       // AWS SESバックエンド（Lambda）のためにデータ構造を整える
       const submitData = {
         ...data,
+        hasGoogleAccount: 'yes-confirmed', // 送信データでは確認済み状態を設定
         // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
         ...(isNewCustomer ? {} : {
           usagePurposeKeys: data.usagePurpose,
@@ -160,11 +164,13 @@ const GoogleAccount: React.FC = () => {
 
       // 非同期のAPI送信を待たずに、すぐにGoogleMapへ
       window.location.href = googleReviewUrl;
-    } else {
+    } else if (hasGoogleAccount === 'no') {
       // Googleアカウントがない場合は感想入力画面へ遷移
       navigate('/reviewform', {
         state: data,
       });
+    } else {
+      setError(true);
     }
   };
 
@@ -202,7 +208,20 @@ const GoogleAccount: React.FC = () => {
     description?: string;
   }> = ({ selected, onClick, children, icon, description }) => (
     <div
-      onClick={onClick}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          onClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className={cn(
         "group relative flex items-center gap-3 p-4 sm:p-5 rounded-xl cursor-pointer touch-target",
         "border shadow-soft",
@@ -294,10 +313,8 @@ const GoogleAccount: React.FC = () => {
               <SelectOption
                 selected={hasGoogleAccount === 'yes' || hasGoogleAccount === 'yes-confirmed'}
                 onClick={() => {
-                  if (hasGoogleAccount !== 'yes' && hasGoogleAccount !== 'yes-confirmed') {
-                    setHasGoogleAccount('yes-confirmed');
-                    setShowGoogleConfirmation(true);
-                  }
+                  setHasGoogleAccount('yes');
+                  setShowGoogleConfirmation(true);
                   setError(false);
                 }}
               >

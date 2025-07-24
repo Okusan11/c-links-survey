@@ -31,6 +31,7 @@ const GoogleAccount: React.FC = () => {
   const [showGoogleConfirmation, setShowGoogleConfirmation] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
+  const [actionType, setActionType] = useState<'back' | 'next' | null>(null);
 
   useEffect(() => {
     getSurveyConfig().then(config => {
@@ -77,7 +78,8 @@ const GoogleAccount: React.FC = () => {
       event.stopPropagation();
     }
 
-    // ナビゲーション開始フラグを設定
+    // 戻るボタンが押されたことを明示
+    setActionType('back');
     setIsNavigating(true);
 
     try {
@@ -114,9 +116,11 @@ const GoogleAccount: React.FC = () => {
       console.error('ナビゲーションエラー:', error);
       // エラーが発生した場合はフラグをリセット
       setIsNavigating(false);
+      setActionType(null);
     }
   }, [
     isNavigating,
+    actionType,
     isNewCustomer,
     navigate,
     heardFrom,
@@ -134,8 +138,8 @@ const GoogleAccount: React.FC = () => {
   
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.FormEvent | React.MouseEvent | React.TouchEvent) => {
-    // 既にナビゲーション中の場合は処理しない
-    if (isNavigating) {
+    // 既にナビゲーション中、または戻るボタンが押された場合は処理しない
+    if (isNavigating || actionType === 'back') {
       return;
     }
 
@@ -157,7 +161,8 @@ const GoogleAccount: React.FC = () => {
       return;
     }
 
-    // ナビゲーション開始フラグを設定
+    // 次へボタンが押されたことを明示
+    setActionType('next');
     setIsNavigating(true);
 
     const data = {
@@ -186,6 +191,7 @@ const GoogleAccount: React.FC = () => {
         if (!apiEndpoint) {
           alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
           setIsNavigating(false);
+          setActionType(null);
           return;
         }
 
@@ -225,9 +231,11 @@ const GoogleAccount: React.FC = () => {
     } catch (error) {
       console.error('ナビゲーションエラー:', error);
       setIsNavigating(false);
+      setActionType(null);
     }
   }, [
     isNavigating,
+    actionType,
     hasGoogleAccount,
     apiEndpoint,
     isNewCustomer,
@@ -340,7 +348,11 @@ const GoogleAccount: React.FC = () => {
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      handleNext();
+      // 戻るボタンが押された場合はsubmitを無視
+      if (actionType === 'back') {
+        return;
+      }
+      handleNext(e);
     }}>
       <PageLayout
         title="Google Map口コミ投稿のご依頼"
@@ -425,8 +437,11 @@ const GoogleAccount: React.FC = () => {
         <FormButtons 
           onBack={handleBack} 
           onNext={handleNext} 
+          backButtonText={
+            isNavigating && actionType === 'back' ? '処理中...' : '戻る'
+          }
           nextButtonText={
-            isNavigating 
+            isNavigating && actionType === 'next'
               ? '処理中...' 
               : hasGoogleAccount === 'yes-confirmed' 
                 ? 'Google Mapへ' 

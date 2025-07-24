@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
@@ -30,6 +30,7 @@ const GoogleAccount: React.FC = () => {
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
   const [showGoogleConfirmation, setShowGoogleConfirmation] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
 
   useEffect(() => {
     getSurveyConfig().then(config => {
@@ -63,48 +64,85 @@ const GoogleAccount: React.FC = () => {
     isNewCustomer
   } = state || {};
 
-  // 戻るボタン
-  const handleBack = (event?: React.MouseEvent) => {
+  // 戻るボタン - スマホフレンドリーに改善
+  const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
+    // 既にナビゲーション中の場合は処理しない
+    if (isNavigating) {
+      return;
+    }
+
     // イベントの伝播とデフォルト動作を防ぐ
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
-    
-    // 新規・リピーターで適切な画面に戻る
-    if (isNewCustomer) {
-      // 新規のお客様は新規アンケート画面に戻る
-      navigate('/new-customer', {
-        state: {
-          heardFrom,
-          otherHeardFrom,
-          impressionRatings,
-          willReturn,
-          hasGoogleAccount,
-          feedback,
-        },
-      });
-    } else {
-      // リピーターのお客様はリピーターアンケート画面に戻る
-      navigate('/repeater-customer', {
-        state: {
-          satisfaction,
-          usagePurpose: usagePurposeKeys,
-          usagePurposeLabels,
-          satisfiedPoints: satisfiedPoints || {},
-          improvementPoints: improvementPoints || {},
-          hasGoogleAccount,
-          feedback,
-        },
-      });
+
+    // ナビゲーション開始フラグを設定
+    setIsNavigating(true);
+
+    try {
+      // 新規・リピーターで適切な画面に戻る
+      if (isNewCustomer) {
+        // 新規のお客様は新規アンケート画面に戻る
+        navigate('/new-customer', {
+          state: {
+            heardFrom,
+            otherHeardFrom,
+            impressionRatings,
+            willReturn,
+            hasGoogleAccount,
+            feedback,
+          },
+          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+        });
+      } else {
+        // リピーターのお客様はリピーターアンケート画面に戻る
+        navigate('/repeater-customer', {
+          state: {
+            satisfaction,
+            usagePurpose: usagePurposeKeys,
+            usagePurposeLabels,
+            satisfiedPoints: satisfiedPoints || {},
+            improvementPoints: improvementPoints || {},
+            hasGoogleAccount,
+            feedback,
+          },
+          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+        });
+      }
+    } catch (error) {
+      console.error('ナビゲーションエラー:', error);
+      // エラーが発生した場合はフラグをリセット
+      setIsNavigating(false);
     }
-  };
+  }, [
+    isNavigating,
+    isNewCustomer,
+    navigate,
+    heardFrom,
+    otherHeardFrom,
+    impressionRatings,
+    willReturn,
+    hasGoogleAccount,
+    feedback,
+    satisfaction,
+    usagePurposeKeys,
+    usagePurposeLabels,
+    satisfiedPoints,
+    improvementPoints,
+  ]);
   
-  // 次へボタン
-  const handleNext = (event?: React.FormEvent | React.MouseEvent) => {
+  // 次へボタン - スマホフレンドリーに改善
+  const handleNext = useCallback((event?: React.FormEvent | React.MouseEvent | React.TouchEvent) => {
+    // 既にナビゲーション中の場合は処理しない
+    if (isNavigating) {
+      return;
+    }
+
     // イベントがある場合はpreventDefaultを呼び出す
     if (event) {
       event.preventDefault();
+      event.stopPropagation();
     }
 
     // バリデーション: Googleアカウントの選択状況をチェック
@@ -118,6 +156,9 @@ const GoogleAccount: React.FC = () => {
       setError(true);
       return;
     }
+
+    // ナビゲーション開始フラグを設定
+    setIsNavigating(true);
 
     const data = {
       heardFrom,
@@ -139,46 +180,70 @@ const GoogleAccount: React.FC = () => {
     // 送信データの確認
     //console.log('送信するstateの中身', data);
 
-    if (hasGoogleAccount === 'yes-confirmed') {
-      // API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
-      if (!apiEndpoint) {
-        alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
-        return;
+    try {
+      if (hasGoogleAccount === 'yes-confirmed') {
+        // API Gateway へデータを送信するが、レスポンスを待たずに画面遷移
+        if (!apiEndpoint) {
+          alert('APIエンドポイントが設定されていません。AWS SSMパラメータ「/c-links-survey/api-endpoint-url」を確認してください。');
+          setIsNavigating(false);
+          return;
+        }
+
+        // AWS SESバックエンド（Lambda）のためにデータ構造を整える
+        const submitData = {
+          ...data,
+          // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
+          ...(isNewCustomer ? {} : {
+            usagePurposeKeys: data.usagePurpose,
+            usagePurposeLabels: data.usagePurposeLabels,
+          }),
+          // GoogleMapの口コミとしての投稿であることを示す
+          isGoogleReview: true
+        };
+
+        // --- fetchは投げるがawaitしない ---
+        fetch(apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submitData),
+        }).catch((error) => {
+          // 失敗した場合も、一旦はコンソールエラーのみ表示
+          console.error('データ送信中にエラーが発生しました:', error);
+        });
+
+        // 非同期のAPI送信を待たずに、すぐにGoogleMapへ
+        window.location.href = googleReviewUrl;
+      } else {
+        // Googleアカウントがない場合は感想入力画面へ遷移
+        navigate('/reviewform', {
+          state: data,
+          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+        });
       }
-
-      // AWS SESバックエンド（Lambda）のためにデータ構造を整える
-      const submitData = {
-        ...data,
-        // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
-        ...(isNewCustomer ? {} : {
-          usagePurposeKeys: data.usagePurpose,
-          usagePurposeLabels: data.usagePurposeLabels,
-        }),
-        // GoogleMapの口コミとしての投稿であることを示す
-        isGoogleReview: true
-      };
-
-      // --- fetchは投げるがawaitしない ---
-      fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
-      }).catch((error) => {
-        // 失敗した場合も、一旦はコンソールエラーのみ表示
-        console.error('データ送信中にエラーが発生しました:', error);
-      });
-
-      // 非同期のAPI送信を待たずに、すぐにGoogleMapへ
-      window.location.href = googleReviewUrl;
-    } else {
-      // Googleアカウントがない場合は感想入力画面へ遷移
-      navigate('/reviewform', {
-        state: data,
-      });
+    } catch (error) {
+      console.error('ナビゲーションエラー:', error);
+      setIsNavigating(false);
     }
-  };
+  }, [
+    isNavigating,
+    hasGoogleAccount,
+    apiEndpoint,
+    isNewCustomer,
+    navigate,
+    googleReviewUrl,
+    heardFrom,
+    otherHeardFrom,
+    impressionRatings,
+    willReturn,
+    satisfaction,
+    feedback,
+    usagePurposeKeys,
+    usagePurposeLabels,
+    satisfiedPoints,
+    improvementPoints,
+  ]);
 
   if (!surveyConfig) {
     return (
@@ -360,7 +425,14 @@ const GoogleAccount: React.FC = () => {
         <FormButtons 
           onBack={handleBack} 
           onNext={handleNext} 
-          nextButtonText={hasGoogleAccount === 'yes-confirmed' ? 'Google Mapへ' : '感想入力画面へ'} 
+          nextButtonText={
+            isNavigating 
+              ? '処理中...' 
+              : hasGoogleAccount === 'yes-confirmed' 
+                ? 'Google Mapへ' 
+                : '感想入力画面へ'
+          }
+          disabled={isNavigating}
         />
       </PageLayout>
     </form>

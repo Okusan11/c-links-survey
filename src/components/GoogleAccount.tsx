@@ -52,6 +52,7 @@ const GoogleAccount: React.FC = () => {
 
   // 必要であればデストラクチャリングしておく
   const {
+    visitDate,
     heardFrom,
     otherHeardFrom,
     satisfiedPoints,
@@ -64,13 +65,13 @@ const GoogleAccount: React.FC = () => {
   } = state || {};
 
   // 戻るボタン
-  const handleBack = (event?: React.FormEvent | React.MouseEvent) => {
-    // イベントがある場合は伝播を防ぐ
+  const handleBack = (event?: React.MouseEvent) => {
+    // イベントの伝播とデフォルト動作を防ぐ
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
-
+    
     // 新規・リピーターで適切な画面に戻る
     if (isNewCustomer) {
       // 新規のお客様は新規アンケート画面に戻る
@@ -80,6 +81,7 @@ const GoogleAccount: React.FC = () => {
           otherHeardFrom,
           impressionRatings,
           willReturn,
+          // hasGoogleAccountの選択状態を保持
           hasGoogleAccount,
           feedback,
         },
@@ -93,6 +95,7 @@ const GoogleAccount: React.FC = () => {
           usagePurposeLabels,
           satisfiedPoints: satisfiedPoints || {},
           improvementPoints: improvementPoints || {},
+          // hasGoogleAccountの選択状態を保持
           hasGoogleAccount,
           feedback,
         },
@@ -273,7 +276,10 @@ const GoogleAccount: React.FC = () => {
   );
 
   return (
-    <div>
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      handleNext();
+    }}>
       <PageLayout
         title="Google Map口コミ投稿のご依頼"
         subtitle={subtitle}
@@ -360,7 +366,7 @@ const GoogleAccount: React.FC = () => {
           nextButtonText={hasGoogleAccount === 'yes-confirmed' ? 'Google Mapへ' : '感想入力画面へ'} 
         />
       </PageLayout>
-    </div>
+    </form>
   );
 };
 

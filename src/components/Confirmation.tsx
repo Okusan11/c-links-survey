@@ -66,7 +66,11 @@ const Confirmation: React.FC = () => {
     try {
       // ReviewForm画面へ戻る際に現在のステートを引き継ぐ
       navigate('/reviewform', { 
-        state,
+        state: {
+          ...state,
+          // 現在のフィードバック内容も含めて渡す
+          feedback: state?.feedback || '',
+        },
         replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
       });
     } catch (error) {
@@ -208,7 +212,7 @@ const Confirmation: React.FC = () => {
 
           <div className="max-w-2xl mx-auto sm:mt-0 -mt-2">
             <div className="grid grid-cols-1 gap-6">
-              {/* 新規・リピーター */}
+              {/* ご利用状況 */}
               <ConfirmationItem
                 icon={<Info className="h-5 w-5" />}
                 title="ご利用状況"
@@ -216,7 +220,9 @@ const Confirmation: React.FC = () => {
                   <div className="flex items-start gap-2">
                     <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                     <div className="text-[14px] text-gray-700">
-                      {state.isNewCustomer ? "初めてのご利用" : "2回目以降のご利用"}
+                      {state.isNewCustomer && "🆕 初めてのご利用"}
+                      {state.isSecondVisit && "🔄 2回目のご利用"}
+                      {state.isRepeater && "👑 3回以上のご利用"}
                     </div>
                   </div>
                 }
@@ -289,11 +295,38 @@ const Confirmation: React.FC = () => {
                 />
               )}
 
-              {/* 満足度（リピーターのお客様のみ表示） */}
+              {/* 再来店理由（2回目のお客様のみ表示） */}
+              {state.isSecondVisit && state.returnReasons && state.returnReasons.length > 0 && (
+                <ConfirmationItem
+                  icon={<Info className="h-5 w-5" />}
+                  title="再来店いただいた理由"
+                  content={
+                    <div className="space-y-1.5">
+                      {state.returnReasons.map((reason: string) => (
+                        <div key={reason} className="flex items-start gap-2">
+                          <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                          <div className="text-[14px] text-gray-700">
+                            {reason}
+                            {reason === 'その他' && state.otherReturnReasons && (
+                              <span className="ml-1 text-gray-500 font-light italic">
+                                （{state.otherReturnReasons}）
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  }
+                />
+              )}
+
+              {/* 満足度（2回目・3回以上のお客様のみ表示） */}
               {!state.isNewCustomer && state.satisfaction && (
                 <ConfirmationItem
                   icon={<Info className="h-5 w-5" />}
-                  title="前回と比べた満足度"
+                  title={
+                    state.isSecondVisit ? "初回来店と比べた満足度" : "前回来店と比べた満足度"
+                  }
                   content={
                     <div className="flex items-start gap-2">
                       <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
@@ -303,7 +336,7 @@ const Confirmation: React.FC = () => {
                 />
               )}
 
-              {/* サービス/利用目的（リピーターのお客様のみ表示） */}
+              {/* サービス/利用目的（2回目・3回以上のお客様のみ表示） */}
               {!state.isNewCustomer && state.usagePurpose && state.usagePurpose.length > 0 && (
                 <ConfirmationItem
                   icon={<Info className="h-5 w-5" />}
@@ -323,7 +356,7 @@ const Confirmation: React.FC = () => {
                 />
               )}
 
-              {/* サービスごとの満足点/改善点（リピーターのお客様のみ表示） */}
+              {/* サービスごとの満足点/改善点（2回目・3回以上のお客様のみ表示） */}
               {!state.isNewCustomer && state.satisfiedPoints && state.improvementPoints && (
                 <ConfirmationItem
                   icon={<Info className="h-5 w-5" />}

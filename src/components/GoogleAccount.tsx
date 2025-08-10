@@ -83,35 +83,15 @@ const GoogleAccount: React.FC = () => {
     setIsNavigating(true);
 
     try {
-      // 新規・リピーターで適切な画面に戻る
-      if (isNewCustomer) {
-        // 新規のお客様は新規アンケート画面に戻る
-        navigate('/new-customer', {
-          state: {
-            heardFrom,
-            otherHeardFrom,
-            impressionRatings,
-            willReturn,
-            hasGoogleAccount,
-            feedback,
-          },
-          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-        });
-      } else {
-        // リピーターのお客様はリピーターアンケート画面に戻る
-        navigate('/repeater-customer', {
-          state: {
-            satisfaction,
-            usagePurpose: usagePurposeKeys,
-            usagePurposeLabels,
-            satisfiedPoints: satisfiedPoints || {},
-            improvementPoints: improvementPoints || {},
-            hasGoogleAccount,
-            feedback,
-          },
-          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-        });
-      }
+      // 統合アンケート画面に戻る（全ての顧客タイプで共通）
+      navigate('/survey', {
+        state: {
+          ...state, // 全ての状態を保持
+          hasGoogleAccount,
+          feedback,
+        },
+        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+      });
     } catch (error) {
       console.error('ナビゲーションエラー:', error);
       // エラーが発生した場合はフラグをリセット

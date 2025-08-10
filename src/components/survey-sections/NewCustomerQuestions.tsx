@@ -15,9 +15,6 @@ import { Label } from '../ui/label';
 import {
   Info,
   Star,
-  Smile,
-  Meh,
-  Frown,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -74,19 +71,7 @@ const NewCustomerQuestions: React.FC<NewCustomerQuestionsProps> = ({
   updateImpressionRating,
   getImpressionRating,
 }) => {
-  // 印象評価アイコンの取得
-  const getImpressionIcon = (rating: string) => {
-    switch (rating) {
-      case '良い':
-        return <Smile className="h-5 w-5" />;
-      case '普通':
-        return <Meh className="h-5 w-5" />;
-      case '要改善':
-        return <Frown className="h-5 w-5" />;
-      default:
-        return <Info className="h-5 w-5" />;
-    }
-  };
+
 
   return (
     <>
@@ -175,25 +160,76 @@ const NewCustomerQuestions: React.FC<NewCustomerQuestionsProps> = ({
             </div>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-3">
             {surveyConfig.newCustomerOptions.impressionEvaluations.map((evaluation: ImpressionEvaluation) => (
-              <div key={evaluation.category} className="bg-gray-50/50 rounded-xl p-5 space-y-4">
-                <h4 className="text-base font-medium text-gray-800 flex items-center gap-2">
-                  <Star className="h-4 w-4 text-primary/70" />
-                  {evaluation.category}
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {evaluation.ratingOptions.map((rating) => (
-                    <SelectOption
-                      key={`${evaluation.category}-${rating}`}
-                      selected={getImpressionRating(evaluation.category) === rating}
-                      onClick={() => updateImpressionRating(evaluation.category, rating)}
-                      icon={getImpressionIcon(rating)}
-                      variant="enhanced"
-                    >
-                      {rating}
-                    </SelectOption>
-                  ))}
+              <div key={evaluation.category} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                <div className="px-3 py-2 bg-gray-50 border-b border-gray-100">
+                  <h4 className="font-medium text-gray-900 text-base">{evaluation.category}</h4>
+                </div>
+                
+                <div className="p-1.5">
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {evaluation.ratingOptions.map((rating) => {
+                      const isSelected = getImpressionRating(evaluation.category) === rating;
+                      const getRatingConfig = (rating: string) => {
+                        switch (rating) {
+                          case '良い':
+                            return {
+                              icon: '😊',
+                              selectedBg: 'bg-green-500',
+                              unselectedText: 'text-green-700',
+                              unselectedHover: 'hover:bg-green-50',
+                              iconColor: isSelected ? 'text-white' : 'text-green-600'
+                            };
+                          case '普通':
+                            return {
+                              icon: '😐',
+                              selectedBg: 'bg-gray-500',
+                              unselectedText: 'text-gray-700',
+                              unselectedHover: 'hover:bg-gray-50',
+                              iconColor: isSelected ? 'text-white' : 'text-gray-600'
+                            };
+                          case '要改善':
+                            return {
+                              icon: '😞',
+                              selectedBg: 'bg-amber-500',
+                              unselectedText: 'text-amber-700',
+                              unselectedHover: 'hover:bg-amber-50',
+                              iconColor: isSelected ? 'text-white' : 'text-amber-600'
+                            };
+                          default:
+                            return {
+                              icon: '❓',
+                              selectedBg: 'bg-gray-500',
+                              unselectedText: 'text-gray-700',
+                              unselectedHover: 'hover:bg-gray-50',
+                              iconColor: isSelected ? 'text-white' : 'text-gray-600'
+                            };
+                        }
+                      };
+
+                      const config = getRatingConfig(rating);
+                      
+                      return (
+                        <button
+                          key={`${evaluation.category}-${rating}`}
+                          type="button"
+                          onClick={() => updateImpressionRating(evaluation.category, rating)}
+                          className={cn(
+                            "flex items-center justify-center gap-1.5 transition-all rounded-lg font-medium border border-transparent",
+                            "py-2 sm:py-3 px-1 sm:px-2 text-sm sm:text-lg min-h-[40px] sm:min-h-[44px]",
+                            isSelected && config.selectedBg,
+                            isSelected && "text-white",
+                            !isSelected && config.unselectedText,
+                            !isSelected && config.unselectedHover
+                          )}
+                        >
+                          <span className="text-base">{config.icon}</span>
+                          <span>{rating}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             ))}

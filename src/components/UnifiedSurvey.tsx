@@ -79,6 +79,38 @@ const UnifiedSurvey: React.FC = () => {
     });
   }, []);
 
+  // ナビゲーション時のstate変更を監視して状態を更新
+  useEffect(() => {
+    if (state) {
+      // 顧客属性
+      if (state.customerType) setCustomerType(state.customerType);
+      
+      // 新規顧客データ
+      if (state.heardFrom) setHeardFrom(state.heardFrom);
+      if (state.otherHeardFrom) setOtherHeardFrom(state.otherHeardFrom);
+      if (state.impressionRatings) setImpressionRatings(state.impressionRatings);
+      if (state.willReturn) setWillReturn(state.willReturn);
+      if (state.otherWillReturn) setOtherWillReturn(state.otherWillReturn);
+      
+      // 2回目顧客データ
+      if (state.returnReasons) setReturnReasons(state.returnReasons);
+      if (state.otherReturnReasons) setOtherReturnReasons(state.otherReturnReasons);
+      
+      // 2回目・リピーター共通データ
+      if (state.satisfaction) setSatisfaction(state.satisfaction);
+      if (state.otherSatisfaction) setOtherSatisfaction(state.otherSatisfaction);
+      if (state.usagePurpose) setUsagePurpose(state.usagePurpose);
+      if (state.satisfiedPoints) setSatisfiedPoints(state.satisfiedPoints);
+      if (state.improvementPoints) setImprovementPoints(state.improvementPoints);
+      if (state.otherSatisfiedPoints) setOtherSatisfiedPoints(state.otherSatisfiedPoints);
+      if (state.otherImprovementPoints) setOtherImprovementPoints(state.otherImprovementPoints);
+      
+      // 共通データ
+      if (state.hasGoogleAccount) setHasGoogleAccount(state.hasGoogleAccount);
+      if (state.feedback) setFeedback(state.feedback);
+    }
+  }, [state]);
+
   // 顧客属性選択
   const [customerType, setCustomerType] = useState<CustomerType>(state?.customerType || '');
 

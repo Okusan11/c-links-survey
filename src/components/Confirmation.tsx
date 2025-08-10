@@ -42,6 +42,7 @@ const Confirmation: React.FC = () => {
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
     // 既にナビゲーション中または送信中の場合は処理しない
     if (isNavigating || isSubmitting) {
+      console.log('Navigation or submission already in progress, ignoring back button');
       return;
     }
 
@@ -51,23 +52,28 @@ const Confirmation: React.FC = () => {
       event.stopPropagation();
     }
 
+    console.log('Back button clicked, navigating to review form');
+
     // 戻るボタンが押されたことを明示
     setActionType('back');
     setIsNavigating(true);
 
-    try {
-      // ReviewForm画面へ戻る際に現在のステートを引き継ぐ
-      navigate('/reviewform', { 
-        state,
-        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-      });
-    } catch (error) {
-      console.error('ナビゲーションエラー:', error);
-      // エラーが発生した場合はフラグをリセット
-      setIsNavigating(false);
-      setActionType(null);
-    }
-  }, [isNavigating, isSubmitting, navigate, state]);
+    // 少し遅延させてナビゲーションを実行
+    setTimeout(() => {
+      try {
+        // ReviewForm画面へ戻る際に現在のステートを引き継ぐ
+        navigate('/reviewform', { 
+          state,
+          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+        });
+      } catch (error) {
+        console.error('ナビゲーションエラー:', error);
+        // エラーが発生した場合はフラグをリセット
+        setIsNavigating(false);
+        setActionType(null);
+      }
+    }, 100);
+  }, [navigate, state, isNavigating, isSubmitting]);
 
   // 送信ボタン - スマホフレンドリーに改善
   const handleSubmit = useCallback(async (event?: React.MouseEvent | React.FormEvent | React.TouchEvent) => {

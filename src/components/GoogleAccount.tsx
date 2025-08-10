@@ -69,6 +69,7 @@ const GoogleAccount: React.FC = () => {
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
     // 既にナビゲーション中の場合は処理しない
     if (isNavigating) {
+      console.log('Navigation already in progress, ignoring back button');
       return;
     }
 
@@ -78,43 +79,32 @@ const GoogleAccount: React.FC = () => {
       event.stopPropagation();
     }
 
+    console.log('Back button clicked, navigating to survey');
+
     // 戻るボタンが押されたことを明示
     setActionType('back');
     setIsNavigating(true);
 
-    try {
-      // 統合アンケート画面に戻る（全ての顧客タイプで共通）
-      navigate('/survey', {
-        state: {
-          ...state, // 全ての状態を保持
-          hasGoogleAccount,
-          feedback,
-        },
-        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-      });
-    } catch (error) {
-      console.error('ナビゲーションエラー:', error);
-      // エラーが発生した場合はフラグをリセット
-      setIsNavigating(false);
-      setActionType(null);
-    }
-  }, [
-    isNavigating,
-    actionType,
-    isNewCustomer,
-    navigate,
-    heardFrom,
-    otherHeardFrom,
-    impressionRatings,
-    willReturn,
-    hasGoogleAccount,
-    feedback,
-    satisfaction,
-    usagePurposeKeys,
-    usagePurposeLabels,
-    satisfiedPoints,
-    improvementPoints,
-  ]);
+    // 少し遅延させてナビゲーションを実行
+    setTimeout(() => {
+      try {
+        // 統合アンケート画面に戻る（全ての顧客タイプで共通）
+        navigate('/survey', {
+          state: {
+            ...state, // 全ての状態を保持
+            hasGoogleAccount,
+            feedback,
+          },
+          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+        });
+      } catch (error) {
+        console.error('ナビゲーションエラー:', error);
+        // エラーが発生した場合はフラグをリセット
+        setIsNavigating(false);
+        setActionType(null);
+      }
+    }, 100);
+  }, [navigate, state, hasGoogleAccount, feedback, isNavigating]);
   
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.FormEvent | React.MouseEvent | React.TouchEvent) => {

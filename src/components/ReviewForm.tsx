@@ -26,6 +26,7 @@ const ReviewForm: React.FC = () => {
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
     // 既にナビゲーション中の場合は処理しない
     if (isNavigating) {
+      console.log('Navigation already in progress, ignoring back button');
       return;
     }
 
@@ -35,26 +36,31 @@ const ReviewForm: React.FC = () => {
       event.stopPropagation();
     }
 
+    console.log('Back button clicked, navigating to google account');
+
     // 戻るボタンが押されたことを明示
     setActionType('back');
     setIsNavigating(true);
 
-    try {
-      // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
-      navigate('/googleaccount', {
-        state: {
-          ...state,
-          feedback,
-        },
-        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-      });
-    } catch (error) {
-      console.error('ナビゲーションエラー:', error);
-      // エラーが発生した場合はフラグをリセット
-      setIsNavigating(false);
-      setActionType(null);
-    }
-  }, [isNavigating, navigate, state, feedback]);
+    // 少し遅延させてナビゲーションを実行
+    setTimeout(() => {
+      try {
+        // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
+        navigate('/googleaccount', {
+          state: {
+            ...state,
+            feedback,
+          },
+          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+        });
+      } catch (error) {
+        console.error('ナビゲーションエラー:', error);
+        // エラーが発生した場合はフラグをリセット
+        setIsNavigating(false);
+        setActionType(null);
+      }
+    }, 100);
+  }, [navigate, state, feedback, isNavigating]);
 
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.MouseEvent | React.FormEvent | React.TouchEvent) => {

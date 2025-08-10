@@ -33,7 +33,6 @@ type CustomerType = 'new' | 'second-visit' | 'repeater' | '';
 interface CustomerTypeOption {
   value: CustomerType;
   label: string;
-  description: string;
   icon: React.ReactNode;
 }
 
@@ -132,19 +131,16 @@ const UnifiedSurvey: React.FC = () => {
     {
       value: 'new',
       label: '初回ご利用のお客様',
-      description: '当サロンを初めてご利用いただくお客様',
       icon: <UserPlus className="h-6 w-6" />
     },
     {
       value: 'second-visit',
       label: '2回目ご利用のお客様',
-      description: '当サロンを2回目ご利用いただくお客様',
       icon: <Repeat className="h-6 w-6" />
     },
     {
       value: 'repeater',
       label: '3回以上ご利用のお客様',
-      description: '当サロンを3回以上ご利用いただいているお客様',
       icon: <Crown className="h-6 w-6" />
     }
   ];
@@ -504,7 +500,7 @@ const UnifiedSurvey: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-lg text-gray-900 whitespace-normal text-wrap">
-                  ご来店回数をお選びください
+                  ご来店いただいた回数をお選びください
                   <RequiredBadge className="inline-block ml-1.5" />
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">お客様の来店回数に応じた質問をご用意しております</p>
@@ -521,7 +517,6 @@ const UnifiedSurvey: React.FC = () => {
                     setErrors(prev => ({ ...prev, customerType: false }));
                   }}
                   icon={option.icon}
-                  description={option.description}
                   variant="enhanced"
                 >
                   {option.label}
@@ -629,12 +624,14 @@ const UnifiedSurvey: React.FC = () => {
           />
         )}
 
-        <FormButtons 
-          onNext={handleNext}
-          rightAligned={true} 
-          showBackButton={false}
-          nextButtonText={customerType ? "次のステップへ" : "アンケート開始"}
-        />
+        {customerType && (
+          <FormButtons 
+            onNext={handleNext}
+            rightAligned={true} 
+            showBackButton={false}
+            nextButtonText="次のステップへ"
+          />
+        )}
       </PageLayout>
     </form>
   );

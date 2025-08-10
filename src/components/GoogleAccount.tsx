@@ -54,6 +54,7 @@ const GoogleAccount: React.FC = () => {
 
   // 必要であればデストラクチャリングしておく
   const {
+    customerType,
     heardFrom,
     otherHeardFrom,
     satisfiedPoints,
@@ -62,7 +63,15 @@ const GoogleAccount: React.FC = () => {
     willReturn,
     satisfaction,
     feedback,
-    isNewCustomer
+    isNewCustomer,
+    isSecondVisit,
+    isRepeater,
+    returnReasons,
+    otherReturnReasons,
+    otherSatisfaction,
+    otherWillReturn,
+    otherSatisfiedPoints,
+    otherImprovementPoints
   } = state || {};
 
   // 戻るボタン - スマホフレンドリーに改善
@@ -138,19 +147,28 @@ const GoogleAccount: React.FC = () => {
     setIsNavigating(true);
 
     const data = {
+      customerType,
       heardFrom,
       otherHeardFrom,
       impressionRatings,
       willReturn,
+      otherWillReturn,
       satisfaction,
+      otherSatisfaction,
       feedback,
       isNewCustomer,
+      isSecondVisit,
+      isRepeater,
+      returnReasons,
+      otherReturnReasons,
       hasGoogleAccount,
       ...(isNewCustomer ? {} : {
         usagePurpose: usagePurposeKeys,
         usagePurposeLabels,
         satisfiedPoints: satisfiedPoints || {},
         improvementPoints: improvementPoints || {},
+        otherSatisfiedPoints: otherSatisfiedPoints || {},
+        otherImprovementPoints: otherImprovementPoints || {},
       }),
     };
 

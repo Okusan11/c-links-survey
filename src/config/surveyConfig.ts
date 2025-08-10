@@ -40,11 +40,32 @@ export const localSurveyConfig: SurveyConfig = {
       "行きたくない"
     ]
   },
+  "secondVisitOptions": {
+    "returnReasons": [
+      "前回のサービスに満足したため",
+      "スタッフの対応が良かったため",
+      "技術力が高いと感じたため",
+      "立地・アクセスが良いため",
+      "料金が適正だと感じたため",
+      "友人・知人に勧められたため",
+      "特別なキャンペーンがあったため",
+      "その他"
+    ],
+    "satisfactionOptions": [
+      "とても満足",
+      "満足",
+      "普通",
+      "やや不満",
+      "不満",
+      "その他"
+    ]
+  },
   "repeaterOptions": {
     "satisfactionOptions": [
       "良くなった",
       "同じ",
-      "悪くなった"
+      "悪くなった",
+      "その他"
     ]
   },
   "serviceDefinitions": [
@@ -55,7 +76,8 @@ export const localSurveyConfig: SurveyConfig = {
         "理想のスタイルに仕上がり、細かな要望もくみ取ってくれた",
         "スタイリングやホームケアのアドバイスをもらえた",
         "スタイリストの細やかな気配りが感じられた",
-        "特になし"
+        "特になし",
+        "その他"
       ],
       "improvementOptions": [
         "待ち時間を短くしてほしい",

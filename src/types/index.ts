@@ -22,7 +22,13 @@ export interface NewCustomerOptions {
   willReturnOptions: string[]; // また来たいと思うか
 }
 
-// リピーター向けアンケートの選択肢
+// 2回目来店顧客向けアンケートの選択肢
+export interface SecondVisitOptions {
+  returnReasons: string[]; // 再来店いただいた理由
+  satisfactionOptions: string[]; // 初回来店と比べた満足度
+}
+
+// リピーター向けアンケートの選択肢（3回以上来店）
 export interface RepeaterOptions {
   satisfactionOptions: string[]; // 前回と比べた満足度
 }
@@ -31,6 +37,7 @@ export interface RepeaterOptions {
 export interface SurveyConfig {
   serviceDefinitions: ServiceDefinition[];
   newCustomerOptions: NewCustomerOptions;
+  secondVisitOptions: SecondVisitOptions;
   repeaterOptions: RepeaterOptions;
 }
 
@@ -64,17 +71,9 @@ export function getServiceDefinition(
   return serviceDefinitions.find(service => service.key === key);
 }
 
-// 訪問日の型
-export interface VisitDate {
-  year: string;
-  month: string;
-  day: string;
-}
-
 // フォームのエラー型 - 動的サービスキーに対応
 export interface FormErrors {
   heardFrom: boolean;
-  visitDate: boolean;
   usagePurpose: boolean;
   satisfiedPoints: boolean;
   improvementPoints: boolean;

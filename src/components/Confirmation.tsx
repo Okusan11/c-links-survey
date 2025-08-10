@@ -50,29 +50,31 @@ const Confirmation: React.FC = () => {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
+      // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
+      if ('stopImmediatePropagation' in event.nativeEvent) {
+        event.nativeEvent.stopImmediatePropagation();
+      }
     }
 
     console.log('Back button clicked, navigating to review form');
 
-    // 戻るボタンが押されたことを明示
+    // 戻るボタンが押されたことを即座に明示
     setActionType('back');
     setIsNavigating(true);
 
-    // 少し遅延させてナビゲーションを実行
-    setTimeout(() => {
-      try {
-        // ReviewForm画面へ戻る際に現在のステートを引き継ぐ
-        navigate('/reviewform', { 
-          state,
-          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-        });
-      } catch (error) {
-        console.error('ナビゲーションエラー:', error);
-        // エラーが発生した場合はフラグをリセット
-        setIsNavigating(false);
-        setActionType(null);
-      }
-    }, 100);
+    // 即座にナビゲーションを実行（遅延を削除）
+    try {
+      // ReviewForm画面へ戻る際に現在のステートを引き継ぐ
+      navigate('/reviewform', { 
+        state,
+        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+      });
+    } catch (error) {
+      console.error('ナビゲーションエラー:', error);
+      // エラーが発生した場合はフラグをリセット
+      setIsNavigating(false);
+      setActionType(null);
+    }
   }, [navigate, state, isNavigating, isSubmitting]);
 
   // 送信ボタン - スマホフレンドリーに改善
@@ -182,8 +184,8 @@ const Confirmation: React.FC = () => {
     <div>
       <form onSubmit={(e) => {
         e.preventDefault();
-        // 戻るボタンが押された場合はsubmitを無視
-        if (actionType === 'back') {
+        // 戻るボタンが押された場合またはナビゲーション中・送信中の場合はsubmitを無視
+        if (actionType === 'back' || isNavigating || isSubmitting) {
           return;
         }
         handleSubmit(e);

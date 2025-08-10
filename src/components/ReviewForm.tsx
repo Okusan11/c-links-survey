@@ -34,32 +34,34 @@ const ReviewForm: React.FC = () => {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
+      // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
+      if ('stopImmediatePropagation' in event.nativeEvent) {
+        event.nativeEvent.stopImmediatePropagation();
+      }
     }
 
     console.log('Back button clicked, navigating to google account');
 
-    // 戻るボタンが押されたことを明示
+    // 戻るボタンが押されたことを即座に明示
     setActionType('back');
     setIsNavigating(true);
 
-    // 少し遅延させてナビゲーションを実行
-    setTimeout(() => {
-      try {
-        // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
-        navigate('/googleaccount', {
-          state: {
-            ...state,
-            feedback,
-          },
-          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-        });
-      } catch (error) {
-        console.error('ナビゲーションエラー:', error);
-        // エラーが発生した場合はフラグをリセット
-        setIsNavigating(false);
-        setActionType(null);
-      }
-    }, 100);
+    // 即座にナビゲーションを実行（遅延を削除）
+    try {
+      // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
+      navigate('/googleaccount', {
+        state: {
+          ...state,
+          feedback,
+        },
+        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+      });
+    } catch (error) {
+      console.error('ナビゲーションエラー:', error);
+      // エラーが発生した場合はフラグをリセット
+      setIsNavigating(false);
+      setActionType(null);
+    }
   }, [navigate, state, feedback, isNavigating]);
 
   // 次へボタン - スマホフレンドリーに改善
@@ -120,8 +122,8 @@ const ReviewForm: React.FC = () => {
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      // 戻るボタンが押された場合はsubmitを無視
-      if (actionType === 'back') {
+      // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
+      if (actionType === 'back' || isNavigating) {
         return;
       }
       handleNext(e);

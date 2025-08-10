@@ -85,6 +85,11 @@ const UnifiedSurvey: React.FC = () => {
       // 顧客属性
       if (state.customerType) setCustomerType(state.customerType);
       
+      // 顧客タイプフラグ
+      if (state.isNewCustomer !== undefined) setIsNewCustomer(state.isNewCustomer);
+      if (state.isSecondVisit !== undefined) setIsSecondVisit(state.isSecondVisit);
+      if (state.isRepeater !== undefined) setIsRepeater(state.isRepeater);
+      
       // 新規顧客データ
       if (state.heardFrom) setHeardFrom(state.heardFrom);
       if (state.otherHeardFrom) setOtherHeardFrom(state.otherHeardFrom);
@@ -113,6 +118,11 @@ const UnifiedSurvey: React.FC = () => {
 
   // 顧客属性選択
   const [customerType, setCustomerType] = useState<CustomerType>(state?.customerType || '');
+  
+  // 顧客タイプフラグ（即座に設定）
+  const [isNewCustomer, setIsNewCustomer] = useState<boolean>(state?.isNewCustomer || false);
+  const [isSecondVisit, setIsSecondVisit] = useState<boolean>(state?.isSecondVisit || false);
+  const [isRepeater, setIsRepeater] = useState<boolean>(state?.isRepeater || false);
 
   // 新規顧客用の状態
   const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
@@ -438,7 +448,7 @@ const UnifiedSurvey: React.FC = () => {
         impressionRatings,
         willReturn,
         otherWillReturn,
-        isNewCustomer: true,
+        isNewCustomer,
       };
     } else if (customerType === 'second-visit') {
       const usagePurposeLabels = usagePurpose.map((key) => {
@@ -458,7 +468,7 @@ const UnifiedSurvey: React.FC = () => {
         improvementPoints,
         otherSatisfiedPoints,
         otherImprovementPoints,
-        isSecondVisit: true,
+        isSecondVisit,
       };
     } else if (customerType === 'repeater') {
       const usagePurposeLabels = usagePurpose.map((key) => {
@@ -476,7 +486,7 @@ const UnifiedSurvey: React.FC = () => {
         improvementPoints,
         otherSatisfiedPoints,
         otherImprovementPoints,
-        isRepeater: true,
+        isRepeater,
       };
     }
 
@@ -547,6 +557,11 @@ const UnifiedSurvey: React.FC = () => {
                   onClick={() => {
                     setCustomerType(option.value);
                     setErrors(prev => ({ ...prev, customerType: false }));
+                    
+                    // 顧客タイプフラグを即座に設定
+                    setIsNewCustomer(option.value === 'new');
+                    setIsSecondVisit(option.value === 'second-visit');
+                    setIsRepeater(option.value === 'repeater');
                   }}
                   icon={option.icon}
                   variant="enhanced"

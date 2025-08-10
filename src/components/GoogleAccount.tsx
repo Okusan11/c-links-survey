@@ -77,33 +77,35 @@ const GoogleAccount: React.FC = () => {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
+      // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
+      if ('stopImmediatePropagation' in event.nativeEvent) {
+        event.nativeEvent.stopImmediatePropagation();
+      }
     }
 
     console.log('Back button clicked, navigating to survey');
 
-    // 戻るボタンが押されたことを明示
+    // 戻るボタンが押されたことを即座に明示
     setActionType('back');
     setIsNavigating(true);
 
-    // 少し遅延させてナビゲーションを実行
-    setTimeout(() => {
-      try {
-        // 統合アンケート画面に戻る（全ての顧客タイプで共通）
-        navigate('/survey', {
-          state: {
-            ...state, // 全ての状態を保持
-            hasGoogleAccount,
-            feedback,
-          },
-          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-        });
-      } catch (error) {
-        console.error('ナビゲーションエラー:', error);
-        // エラーが発生した場合はフラグをリセット
-        setIsNavigating(false);
-        setActionType(null);
-      }
-    }, 100);
+    // 即座にナビゲーションを実行（遅延を削除）
+    try {
+      // 統合アンケート画面に戻る（全ての顧客タイプで共通）
+      navigate('/survey', {
+        state: {
+          ...state, // 全ての状態を保持
+          hasGoogleAccount,
+          feedback,
+        },
+        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+      });
+    } catch (error) {
+      console.error('ナビゲーションエラー:', error);
+      // エラーが発生した場合はフラグをリセット
+      setIsNavigating(false);
+      setActionType(null);
+    }
   }, [navigate, state, hasGoogleAccount, feedback, isNavigating]);
   
   // 次へボタン - スマホフレンドリーに改善
@@ -318,8 +320,8 @@ const GoogleAccount: React.FC = () => {
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      // 戻るボタンが押された場合はsubmitを無視
-      if (actionType === 'back') {
+      // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
+      if (actionType === 'back' || isNavigating) {
         return;
       }
       handleNext(e);

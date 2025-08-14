@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { cn } from '../lib/utils';
+import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 
 // 共通コンポーネントのインポート
 import PageLayout from './common/PageLayout';
@@ -303,7 +303,7 @@ const UnifiedSurvey: React.FC = () => {
     setErrors(newErrors);
 
     // エラーがあれば最初のエラー項目にスクロール
-    if (hasErrors(newErrors)) {
+    if (hasUnifiedErrors(newErrors)) {
       scrollToFirstError(newErrors);
       return;
     }
@@ -361,8 +361,8 @@ const UnifiedSurvey: React.FC = () => {
     }
   };
 
-  // エラーの存在チェック
-  const hasErrors = (errors: UnifiedFormErrors): boolean => {
+  // エラーの存在チェック（UnifiedFormErrors用の拡張版）
+  const hasUnifiedErrors = (errors: UnifiedFormErrors): boolean => {
     const hasServiceErrors = Object.values(errors.serviceSatisfiedPoints).some(Boolean) || 
                              Object.values(errors.serviceImprovementPoints).some(Boolean);
     

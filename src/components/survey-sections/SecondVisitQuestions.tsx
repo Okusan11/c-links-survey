@@ -104,8 +104,9 @@ const SecondVisitQuestions: React.FC<SecondVisitQuestionsProps> = ({
   return (
     <>
       {/* 再来店いただいた理由 */}
-      <QuestionBox data-question="return-reasons">
-        <div className="space-y-8">
+      <QuestionBox>
+        <div data-question="return-reasons">
+          <div className="space-y-8">
           <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
             <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
               <Heart className="h-5 w-5 text-primary" />
@@ -167,11 +168,13 @@ const SecondVisitQuestions: React.FC<SecondVisitQuestionsProps> = ({
               )}
             </div>
           )}
+          </div>
         </div>
       </QuestionBox>
 
       {/* 初回来店と比べた満足度 */}
-      <QuestionBox data-question="satisfaction">
+      <QuestionBox>
+        <div data-question="satisfaction">
         <div className="space-y-8">
           <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
             <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
@@ -230,11 +233,13 @@ const SecondVisitQuestions: React.FC<SecondVisitQuestionsProps> = ({
               )}
             </div>
           )}
+          </div>
         </div>
       </QuestionBox>
 
       {/* 利用目的(サービス) */}
-      <QuestionBox data-question="usage-purpose">
+      <QuestionBox>
+        <div data-question="usage-purpose">
         <div className="space-y-8">
           <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
             <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
@@ -270,6 +275,7 @@ const SecondVisitQuestions: React.FC<SecondVisitQuestionsProps> = ({
           {errors.usagePurpose && (
             <ErrorMessage message="ご利用されたサービスを1つ以上選択してください" />
           )}
+          </div>
         </div>
       </QuestionBox>
 

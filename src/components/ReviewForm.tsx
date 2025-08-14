@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Typography } from '@mui/material';
-import { cn } from '../lib/utils';
+import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 import { AlertCircle } from 'lucide-react';
 
 // 共通コンポーネントのインポート
@@ -77,8 +77,21 @@ const ReviewForm: React.FC = () => {
       event.stopPropagation();
     }
 
+    // エラー状態をリセット
+    const newErrors = {
+      feedback: false
+    };
+
     if (!feedback.trim()) {
+      newErrors.feedback = true;
+    }
+
+    // エラーがあれば最初のエラー項目にスクロール
+    if (hasErrors(newErrors)) {
       setError(true);
+      scrollToFirstError(newErrors, {
+        feedback: '[data-question="feedback"]'
+      });
       return;
     }
 
@@ -140,7 +153,7 @@ const ReviewForm: React.FC = () => {
 
         <QuestionBox>
           <div className="space-y-4">
-            <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
+            <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100" data-question="feedback">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                 <AlertCircle className="h-5 w-5 text-primary" />
               </div>

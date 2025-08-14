@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { cn } from '../lib/utils';
+import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 
 // 共通コンポーネントのインポート
 import PageLayout from './common/PageLayout';
@@ -10,7 +10,7 @@ import RequiredBadge from './common/RequiredBadge';
 import { ProgressBar } from './common/ProgressBar';
 
 // アイコン
-import { Info, AlertCircle } from 'lucide-react';
+import { Info, AlertCircle, X } from 'lucide-react';
 
 // 型とデータのインポート
 import { getSurveyConfig } from '../config/surveyConfig';
@@ -28,7 +28,7 @@ const GoogleAccount: React.FC = () => {
   // SurveyConfigを読み込み
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
-  const [showGoogleConfirmation, setShowGoogleConfirmation] = useState<boolean>(false);
+  const [showPopup, setShowPopup] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'back' | 'next' | null>(null);
@@ -117,6 +117,12 @@ const GoogleAccount: React.FC = () => {
     }
   }, [navigate, state, hasGoogleAccount, feedback, isNavigating]);
   
+  // ポップアップを閉じる
+  const handleClosePopup = useCallback(() => {
+    setShowPopup(false);
+    setHasGoogleAccount('yes-confirmed');
+  }, []);
+
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.FormEvent | React.MouseEvent | React.TouchEvent) => {
     // 既にナビゲーション中、または戻るボタンが押された場合は処理しない
@@ -130,15 +136,27 @@ const GoogleAccount: React.FC = () => {
       event.stopPropagation();
     }
 
+    // エラー状態をリセット
+    const newErrors = {
+      hasGoogleAccount: false
+    };
+
     // バリデーション: Googleアカウントの選択状況をチェック
     if (!hasGoogleAccount) {
-      setError(true);
-      return;
+      newErrors.hasGoogleAccount = true;
     }
 
     // 「はい、持っています」を選択したが確認していない場合のエラー
     if (hasGoogleAccount === 'yes') {
+      newErrors.hasGoogleAccount = true;
+    }
+
+    // エラーがあれば最初のエラー項目にスクロール
+    if (hasErrors(newErrors)) {
       setError(true);
+      scrollToFirstError(newErrors, {
+        hasGoogleAccount: '[data-question="google-account"]'
+      });
       return;
     }
 
@@ -335,28 +353,66 @@ const GoogleAccount: React.FC = () => {
     </div>
   );
 
-  return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
-      if (actionType === 'back' || isNavigating) {
-        return;
-      }
-      handleNext(e);
-    }}>
-      <PageLayout
-        title="Google Map口コミ投稿のご依頼"
-        subtitle={subtitle}
-      >
-        <ProgressBar 
-          currentStep={2} 
-          totalSteps={3} 
-          steps={progressSteps}
-        />
-        
-        <QuestionBox>
-          <div className="space-y-8">
-            <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
+    return (
+    <>
+      {/* ポップアップ */}
+      {showPopup && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={handleClosePopup}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-blue-100 rounded-lg mt-1 flex-shrink-0">
+                  <Info className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    ご確認をお願いいたします
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    お客様のGoogleアカウント名での投稿となります。<br/>
+                    もし、アカウント名を公開したくない場合は「いいえ、持っていません」を選択し、感想はアンケート内にご記入いただけますと幸いです。
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleClosePopup}
+              className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
+        if (actionType === 'back' || isNavigating) {
+          return;
+        }
+        handleNext(e);
+      }}>
+        <PageLayout
+          title="Google Map口コミ投稿のご依頼"
+          subtitle={subtitle}
+        >
+          <ProgressBar 
+            currentStep={2} 
+            totalSteps={3} 
+            steps={progressSteps}
+          />
+          
+          <QuestionBox>
+            <div className="space-y-8">
+                          <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100" data-question="google-account">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                 <Info className="h-5 w-5 text-primary" />
               </div>
@@ -368,79 +424,61 @@ const GoogleAccount: React.FC = () => {
                 <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">口コミを投稿するにはGoogleアカウントが必要です</p>
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectOption
-                selected={hasGoogleAccount === 'yes' || hasGoogleAccount === 'yes-confirmed'}
-                onClick={() => {
-                  if (hasGoogleAccount !== 'yes' && hasGoogleAccount !== 'yes-confirmed') {
-                    setHasGoogleAccount('yes-confirmed');
-                    setShowGoogleConfirmation(true);
-                  }
-                  setError(false);
-                }}
-              >
-                はい、持っています
-              </SelectOption>
-              <SelectOption
-                selected={hasGoogleAccount === 'no'}
-                onClick={() => {
-                  setHasGoogleAccount('no');
-                  setShowGoogleConfirmation(false);
-                  setError(false);
-                }}
-              >
-                いいえ、持っていません
-              </SelectOption>
-            </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SelectOption
+                  selected={hasGoogleAccount === 'yes' || hasGoogleAccount === 'yes-confirmed'}
+                  onClick={() => {
+                    setHasGoogleAccount('yes');
+                    setShowPopup(true);
+                    setError(false);
+                  }}
+                >
+                  はい、持っています
+                </SelectOption>
+                <SelectOption
+                  selected={hasGoogleAccount === 'no'}
+                  onClick={() => {
+                    setHasGoogleAccount('no');
+                    setShowPopup(false);
+                    setError(false);
+                  }}
+                >
+                  いいえ、持っていません
+                </SelectOption>
+              </div>
 
-            {/* Google確認メッセージ - 優しいトーン */}
-            {showGoogleConfirmation && (
-              <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 animate-in slide-in-from-top-2 duration-300">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg mt-1">
-                    <Info className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1 space-y-4">
-                    <div>
-                      <p className="text-gray-600 text-sm leading-relaxed">
-                        お客様のGoogleアカウント名での投稿となります。<br/>
-                        お名前を公開したくない場合は「いいえ、持っていません」を選択し、感想はアンケート内にご記入いただけますと幸いです。
-                      </p>
-                    </div>
-                  </div>
+   
+              
+              {error && (
+                <div className="flex items-center gap-2 text-destructive mt-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <p className="text-[14px]">
+                    {hasGoogleAccount === 'yes' ? 'ご確認をお願いいたします' : '選択してください'}
+                  </p>
                 </div>
-              </div>
-            )}
-            
-            {error && (
-              <div className="flex items-center gap-2 text-destructive mt-2">
-                <AlertCircle className="h-4 w-4" />
-                <p className="text-[14px]">
-                  {hasGoogleAccount === 'yes' ? 'ご確認をお願いいたします' : '選択してください'}
-                </p>
-              </div>
-            )}
-          </div>
-        </QuestionBox>
+              )}
+            </div>
+          </QuestionBox>
 
-        <FormButtons 
-          onBack={handleBack} 
-          onNext={handleNext} 
-          backButtonText={
-            isNavigating && actionType === 'back' ? '処理中...' : '戻る'
-          }
-          nextButtonText={
-            isNavigating && actionType === 'next'
-              ? '処理中...' 
-              : hasGoogleAccount === 'yes-confirmed' 
-                ? 'Google Mapへ' 
-                : '感想入力画面へ'
-          }
-          disabled={isNavigating}
-        />
-      </PageLayout>
-    </form>
+          <FormButtons 
+            onBack={handleBack} 
+            onNext={handleNext} 
+            backButtonText={
+              isNavigating && actionType === 'back' ? '処理中...' : '戻る'
+            }
+            nextButtonText={
+              isNavigating && actionType === 'next'
+                ? '処理中...' 
+                : hasGoogleAccount === 'yes-confirmed' 
+                  ? 'Google Mapへ' 
+                  : '感想入力画面へ'
+            }
+            disabled={isNavigating}
+          />
+        </PageLayout>
+      </form>
+    </>
   );
 };
 

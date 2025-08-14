@@ -93,8 +93,9 @@ const RepeaterQuestions: React.FC<RepeaterQuestionsProps> = ({
   return (
     <>
       {/* 前回と比べた満足度 */}
-      <QuestionBox data-question="satisfaction">
-        <div className="space-y-8">
+      <QuestionBox>
+        <div data-question="satisfaction">
+          <div className="space-y-8">
           <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
             <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
               <Info className="h-5 w-5 text-primary" />
@@ -152,11 +153,13 @@ const RepeaterQuestions: React.FC<RepeaterQuestionsProps> = ({
               )}
             </div>
           )}
+          </div>
         </div>
       </QuestionBox>
 
       {/* 利用目的(サービス) */}
-      <QuestionBox data-question="usage-purpose">
+      <QuestionBox>
+        <div data-question="usage-purpose">
         <div className="space-y-8">
           <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
             <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
@@ -192,6 +195,7 @@ const RepeaterQuestions: React.FC<RepeaterQuestionsProps> = ({
           {errors.usagePurpose && (
             <ErrorMessage message="ご利用されたサービスを1つ以上選択してください" />
           )}
+          </div>
         </div>
       </QuestionBox>
 

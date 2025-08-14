@@ -76,7 +76,8 @@ const NewCustomerQuestions: React.FC<NewCustomerQuestionsProps> = ({
   return (
     <>
       {/* どこで知ったか */}
-      <QuestionBox data-question="heard-from">
+      <QuestionBox>
+        <div data-question="heard-from">
         <div className="space-y-8">
           <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
             <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
@@ -141,12 +142,14 @@ const NewCustomerQuestions: React.FC<NewCustomerQuestionsProps> = ({
               )}
             </div>
           )}
+          </div>
         </div>
       </QuestionBox>
 
       {/* 印象評価 */}
-      <QuestionBox data-question="impressions">
-        <div className="space-y-8">
+      <QuestionBox>
+        <div data-question="impressions">
+          <div className="space-y-8">
           <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
             <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
               <Star className="h-6 w-6 text-primary" />
@@ -238,12 +241,14 @@ const NewCustomerQuestions: React.FC<NewCustomerQuestionsProps> = ({
           {errors.impressions && (
             <ErrorMessage message="すべての項目について評価をお選びください" />
           )}
+          </div>
         </div>
       </QuestionBox>
 
       {/* また来たいと思うか */}
-      <QuestionBox data-question="will-return">
-        <div className="space-y-8">
+      <QuestionBox>
+        <div data-question="will-return">
+          <div className="space-y-8">
           <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
             <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
               <Info className="h-6 w-6 text-primary" />
@@ -302,6 +307,7 @@ const NewCustomerQuestions: React.FC<NewCustomerQuestionsProps> = ({
               )}
             </div>
           )}
+          </div>
         </div>
       </QuestionBox>
     </>

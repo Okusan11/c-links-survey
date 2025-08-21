@@ -1,211 +1,508 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 
 // 共通コンポーネントのインポート
 import PageLayout from './common/PageLayout';
-import RequiredBadge from './common/RequiredBadge';
-import QuestionBox from './common/QuestionBox';
 import FormButtons from './common/FormButtons';
 import { ProgressBar } from './common/ProgressBar';
-import SelectOption from './common/SelectOption';
-import ErrorMessage from './common/ErrorMessage';
-
-// 質問セクションコンポーネント
-import NewCustomerQuestions from './survey-sections/NewCustomerQuestions';
-import SecondVisitQuestions from './survey-sections/SecondVisitQuestions';
-import RepeaterQuestions from './survey-sections/RepeaterQuestions';
-
-// アイコン
-import {
-  UserPlus,
-  Repeat,
-  Users,
-  Crown,
-} from 'lucide-react';
 
 // 型とローカル設定のインポート
 import { getSurveyConfig } from '../config/surveyConfig';
-import { SurveyConfig, ServiceKey } from '../types';
+import { 
+  QuestionCard,
+  CustomerType,
+  SurveyConfig
+} from '../types';
 
-type CustomerType = 'new' | 'second-visit' | 'repeater' | '';
+// 動的質問レンダラー
+import DynamicQuestionRenderer, { QuestionResponse, QuestionErrors } from './common/DynamicQuestionRenderer';
 
-interface CustomerTypeOption {
-  value: CustomerType;
-  label: string;
-  icon: React.ReactNode;
-}
+// ユーティリティ関数
+import { saveStateToLocalStorage, loadStateFromLocalStorage } from '../lib/utils';
 
-interface ImpressionRating {
-  category: string;
-  rating: string;
-}
-
-// 統合されたエラー型
-interface UnifiedFormErrors {
-  // 顧客属性
-  customerType: boolean;
-  // 新規顧客
-  heardFrom: boolean;
-  impressions: boolean;
-  willReturn: boolean;
-  otherHeardFrom: boolean;
-  otherWillReturn: boolean;
-  // 2回目・リピーター共通
-  satisfaction: boolean;
-  usagePurpose: boolean;
-  satisfiedPoints: boolean;
-  improvementPoints: boolean;
-  otherSatisfaction: boolean;
-  otherSatisfiedPoints: boolean;
-  otherImprovementPoints: boolean;
-  serviceSatisfiedPoints: Partial<Record<ServiceKey, boolean>>;
-  serviceImprovementPoints: Partial<Record<ServiceKey, boolean>>;
-  // 2回目顧客専用
-  returnReasons: boolean;
-  otherReturnReasons: boolean;
-}
 
 const UnifiedSurvey: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  // SSMパラメータ（JSON）をパースして保持
+  // アンケート設定
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
+  
+  // 質問システム用の状態
+  const [responses, setResponses] = useState<QuestionResponse>({});
+  const [errors, setErrors] = useState<QuestionErrors>({});
+  const [currentQuestionFlow, setCurrentQuestionFlow] = useState<string[]>([]);
+  const [shouldScrollToError, setShouldScrollToError] = useState<string | null>(null);
 
   useEffect(() => {
     getSurveyConfig().then(config => {
       setSurveyConfig(config);
-    });
-  }, []);
-
-  // ナビゲーション時のstate変更を監視して状態を更新
-  useEffect(() => {
-    if (state) {
-      // 顧客属性
-      if (state.customerType) setCustomerType(state.customerType);
+      console.log('✓ アンケート設定を読み込みました');
       
-      // 顧客タイプフラグ
-      if (state.isNewCustomer !== undefined) setIsNewCustomer(state.isNewCustomer);
-      if (state.isSecondVisit !== undefined) setIsSecondVisit(state.isSecondVisit);
-      if (state.isRepeater !== undefined) setIsRepeater(state.isRepeater);
+      // 状態復元処理（優先順位: state > localStorage）
+      let restoredState = null;
       
-      // 新規顧客データ
-      if (state.heardFrom) setHeardFrom(state.heardFrom);
-      if (state.otherHeardFrom) setOtherHeardFrom(state.otherHeardFrom);
-      if (state.impressionRatings) setImpressionRatings(state.impressionRatings);
-      if (state.willReturn) setWillReturn(state.willReturn);
-      if (state.otherWillReturn) setOtherWillReturn(state.otherWillReturn);
-      
-      // 2回目顧客データ
-      if (state.returnReasons) setReturnReasons(state.returnReasons);
-      if (state.otherReturnReasons) setOtherReturnReasons(state.otherReturnReasons);
-      
-      // 2回目・リピーター共通データ
-      if (state.satisfaction) setSatisfaction(state.satisfaction);
-      if (state.otherSatisfaction) setOtherSatisfaction(state.otherSatisfaction);
-      if (state.usagePurpose) setUsagePurpose(state.usagePurpose);
-      if (state.satisfiedPoints) setSatisfiedPoints(state.satisfiedPoints);
-      if (state.improvementPoints) setImprovementPoints(state.improvementPoints);
-      if (state.otherSatisfiedPoints) setOtherSatisfiedPoints(state.otherSatisfiedPoints);
-      if (state.otherImprovementPoints) setOtherImprovementPoints(state.otherImprovementPoints);
-      
-      // 共通データ
-      if (state.hasGoogleAccount) setHasGoogleAccount(state.hasGoogleAccount);
-      if (state.feedback) setFeedback(state.feedback);
-    }
-  }, [state]);
-
-  // 顧客属性選択
-  const [customerType, setCustomerType] = useState<CustomerType>(state?.customerType || '');
-  
-  // 顧客タイプフラグ（即座に設定）
-  const [isNewCustomer, setIsNewCustomer] = useState<boolean>(state?.isNewCustomer || false);
-  const [isSecondVisit, setIsSecondVisit] = useState<boolean>(state?.isSecondVisit || false);
-  const [isRepeater, setIsRepeater] = useState<boolean>(state?.isRepeater || false);
-
-  // 新規顧客用の状態
-  const [heardFrom, setHeardFrom] = useState<string[]>(state?.heardFrom || []);
-  const [otherHeardFrom, setOtherHeardFrom] = useState<string>(state?.otherHeardFrom || '');
-  const [impressionRatings, setImpressionRatings] = useState<ImpressionRating[]>(state?.impressionRatings || []);
-  const [willReturn, setWillReturn] = useState<string>(state?.willReturn || '');
-  const [otherWillReturn, setOtherWillReturn] = useState<string>(state?.otherWillReturn || '');
-
-  // 2回目顧客用の状態
-  const [returnReasons, setReturnReasons] = useState<string[]>(state?.returnReasons || []);
-  const [otherReturnReasons, setOtherReturnReasons] = useState<string>(state?.otherReturnReasons || '');
-
-  // 2回目・リピーター共通の状態
-  const [satisfaction, setSatisfaction] = useState<string>(state?.satisfaction || '');
-  const [otherSatisfaction, setOtherSatisfaction] = useState<string>(state?.otherSatisfaction || '');
-  const [usagePurpose, setUsagePurpose] = useState<ServiceKey[]>(state?.usagePurpose || []);
-  const [satisfiedPoints, setSatisfiedPoints] = useState<Partial<Record<ServiceKey, string[]>>>(state?.satisfiedPoints || {});
-  const [improvementPoints, setImprovementPoints] = useState<Partial<Record<ServiceKey, string[]>>>(state?.improvementPoints || {});
-  const [otherSatisfiedPoints, setOtherSatisfiedPoints] = useState<Partial<Record<ServiceKey, string>>>(state?.otherSatisfiedPoints || {});
-  const [otherImprovementPoints, setOtherImprovementPoints] = useState<Partial<Record<ServiceKey, string>>>(state?.otherImprovementPoints || {});
-
-  // GoogleAccountから戻ってきた場合のstate
-  const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
-  const [feedback, setFeedback] = useState<string>(state?.feedback || '');
-
-  // エラー状態
-  const [errors, setErrors] = useState<UnifiedFormErrors>({
-    customerType: false,
-    heardFrom: false,
-    impressions: false,
-    willReturn: false,
-    otherHeardFrom: false,
-    otherWillReturn: false,
-    returnReasons: false,
-    otherReturnReasons: false,
-    satisfaction: false,
-    usagePurpose: false,
-    satisfiedPoints: false,
-    improvementPoints: false,
-    otherSatisfaction: false,
-    otherSatisfiedPoints: false,
-    otherImprovementPoints: false,
-    serviceSatisfiedPoints: {},
-    serviceImprovementPoints: {},
-  });
-
-  const customerTypeOptions: CustomerTypeOption[] = [
-    {
-      value: 'new',
-      label: '初回ご利用のお客様',
-      icon: <UserPlus className="h-6 w-6" />
-    },
-    {
-      value: 'second-visit',
-      label: '2回目ご利用のお客様',
-      icon: <Repeat className="h-6 w-6" />
-    },
-    {
-      value: 'repeater',
-      label: '3回以上ご利用のお客様',
-      icon: <Crown className="h-6 w-6" />
-    }
-  ];
-
-  // 印象評価の更新関数（新規顧客用）
-  const updateImpressionRating = (category: string, rating: string) => {
-    setImpressionRatings(prev => {
-      const existing = prev.find(item => item.category === category);
-      if (existing) {
-        return prev.map(item => 
-          item.category === category ? { ...item, rating } : item
-        );
+      if (state?.responses) {
+        console.log('✓ ナビゲーションstateから回答を復元中...', state.responses);
+        restoredState = state;
       } else {
-        return [...prev, { category, rating }];
+        // stateにresponsesがない場合はセッションストレージから復元を試行
+        const sessionStorageState = loadStateFromLocalStorage();
+        if (sessionStorageState?.responses) {
+          console.log('✓ セッションストレージから回答を復元中...', sessionStorageState.responses);
+          restoredState = sessionStorageState;
+        }
+      }
+      
+      if (restoredState?.responses) {
+        setResponses(restoredState.responses);
+        
+        // 顧客タイプに基づいて質問フローを復元
+        const customerType = restoredState.responses['customer-type'];
+        if (customerType && config.questionFlow[customerType as CustomerType]) {
+          const restoredFlow = ['customer-type', ...config.questionFlow[customerType as CustomerType]];
+          setCurrentQuestionFlow(restoredFlow);
+          console.log(`✓ 質問フローを復元: ${customerType} ->`, restoredFlow);
+        } else {
+          setCurrentQuestionFlow(['customer-type']);
+        }
+      } else {
+        // 初期の質問フローを設定（顧客タイプ選択前）
+        setCurrentQuestionFlow(['customer-type']);
       }
     });
+  }, [state]);
+
+  // エラー状態が更新された際の自動スクロール処理
+  useEffect(() => {
+    if (shouldScrollToError && surveyConfig) {
+      console.log('=== useEffect AUTO SCROLL TRIGGER ===');
+      console.log('Scrolling to error question:', shouldScrollToError);
+      
+      const scrollToElement = () => {
+        const selectors = [
+          `[data-question="${shouldScrollToError}"]`,
+          `*[data-question="${shouldScrollToError}"]`,
+          `div[data-question="${shouldScrollToError}"]`
+        ];
+        
+        let element = null;
+        for (const selector of selectors) {
+          element = document.querySelector(selector);
+          console.log(`useEffect trying selector "${selector}":`, element ? 'Found' : 'Not found');
+          if (element) break;
+        }
+        
+        if (element) {
+          console.log('useEffect found element, scrolling...');
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+          });
+          
+          // スクロール完了後にリセット
+          setTimeout(() => {
+            setShouldScrollToError(null);
+          }, 1000);
+        } else {
+          console.warn('useEffect could not find element for:', shouldScrollToError);
+          // 要素が見つからない場合は少し待ってリトライ
+          setTimeout(scrollToElement, 100);
+        }
+      };
+      
+      // 少し遅延を入れてDOMの更新を待つ
+      setTimeout(scrollToElement, 100);
+    }
+  }, [shouldScrollToError, errors, surveyConfig]);
+
+
+  // GoogleAccountから戻ってきた場合のstate
+  const [hasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
+  const [feedback] = useState<string>(state?.feedback || '');
+
+
+
+  // 質問システム用のレスポンス処理
+  const handleResponseChange = (questionId: string, value: any) => {
+    const newResponses = { ...responses, [questionId]: value };
+    setResponses(newResponses);
+    
+    // セッションストレージに自動保存（ページリロード時は自動クリア）
+    saveStateToLocalStorage({
+      responses: newResponses,
+      timestamp: new Date().toISOString()
+    });
+    
+    // 顧客タイプが変更された場合、質問フローを更新
+    if (questionId === 'customer-type' && surveyConfig) {
+      const customerType = value as CustomerType;
+      const newFlow = ['customer-type', ...surveyConfig.questionFlow[customerType]];
+      setCurrentQuestionFlow(newFlow);
+      console.log(`質問フローを更新: ${customerType} ->`, newFlow);
+      
+      // 新しい顧客タイプに関連しない回答をクリア
+      const filteredResponses: QuestionResponse = {};
+      
+      // customer-type の回答は保持
+      filteredResponses['customer-type'] = value;
+      
+      // 新しい質問フローに含まれる質問の既存回答のみを保持
+      for (const flowQuestionId of newFlow) {
+        if (flowQuestionId !== 'customer-type' && responses[flowQuestionId] !== undefined) {
+          filteredResponses[flowQuestionId] = responses[flowQuestionId];
+        }
+      }
+      
+      console.log(`顧客タイプ変更により回答をフィルタリング:`, {
+        before: Object.keys(responses).length,
+        after: Object.keys(filteredResponses).length,
+        customerType,
+        newFlow,
+        removedQuestions: Object.keys(responses).filter(key => !Object.keys(filteredResponses).includes(key))
+      });
+      
+      // フィルタリングされた回答でstateを更新
+      setResponses(filteredResponses);
+      
+      // フィルタリング後の状態でセッションストレージも更新
+      saveStateToLocalStorage({
+        responses: filteredResponses,
+        timestamp: new Date().toISOString()
+      });
+      
+      // エラー状態もクリア
+      setErrors({});
+    }
   };
 
-  // 印象評価の取得関数（新規顧客用）
-  const getImpressionRating = (category: string): string | null => {
-    const rating = impressionRatings.find(item => item.category === category);
-    return rating ? rating.rating : null;
+  // 質問システム用のエラークリア処理
+  const handleErrorClear = (questionId: string) => {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[questionId];
+      return newErrors;
+    });
   };
+
+  // 質問システム用の条件表示チェック
+  const shouldShowQuestion = (questionCard: QuestionCard): boolean => {
+    if (!questionCard.conditionalDisplay) {
+      return true; // 条件がない場合は常に表示
+    }
+    
+    const { dependsOn, showWhen } = questionCard.conditionalDisplay;
+    const dependentResponse = responses[dependsOn];
+    
+    // 依存する質問の回答を正規化
+    let dependentValue: string | string[] | null = null;
+    
+    if (!dependentResponse) {
+      return false;
+    }
+    
+    // レスポンス形式に応じて値を抽出
+    if (typeof dependentResponse === 'string') {
+      dependentValue = dependentResponse;
+    } else if (Array.isArray(dependentResponse)) {
+      dependentValue = dependentResponse;
+    } else if (typeof dependentResponse === 'object') {
+      // SingleChoiceResponse または MultipleChoiceResponse の場合
+      if ('value' in dependentResponse) {
+        dependentValue = dependentResponse.value;
+      } else if ('values' in dependentResponse) {
+        dependentValue = dependentResponse.values;
+      }
+    }
+    
+    if (!dependentValue) {
+      return false;
+    }
+    
+    // 条件チェック（デバッグ情報付き）
+    console.log(`[条件表示] 質問: ${questionCard.id}, 依存: ${dependsOn}, 条件: ${JSON.stringify(showWhen)}, 値: ${JSON.stringify(dependentValue)}`);
+    
+    let shouldShow = false;
+    if (Array.isArray(showWhen)) {
+      // showWhenが配列の場合 - dependentValueがいずれかの値を含むかチェック
+      if (Array.isArray(dependentValue)) {
+        shouldShow = showWhen.some(condition => dependentValue.includes(condition));
+      } else {
+        shouldShow = showWhen.includes(dependentValue);
+      }
+    } else {
+      // showWhenが単一値の場合
+      if (Array.isArray(dependentValue)) {
+        shouldShow = dependentValue.includes(showWhen);
+      } else {
+        shouldShow = dependentValue === showWhen;
+      }
+    }
+    
+    console.log(`[条件表示] 質問: ${questionCard.id}, 表示: ${shouldShow}`);
+    return shouldShow;
+  };
+
+  // 後方互換性のためのデータ抽出関数群
+  const extractUsagePurposeKeys = (responses: QuestionResponse, config: SurveyConfig): string[] => {
+    // service-usage タイプの質問から利用サービスを抽出
+    const serviceUsageQuestions = config.questionCards.filter(card => card.type === 'service-usage');
+    for (const question of serviceUsageQuestions) {
+      const response = responses[question.id];
+      // 新しいMultipleChoiceResponse形式と後方互換性をサポート
+      if (Array.isArray(response)) {
+        return response;
+      } else if (typeof response === 'object' && 'values' in response && Array.isArray(response.values)) {
+        return response.values;
+      }
+    }
+    return [];
+  };
+
+  const extractUsagePurposeLabels = (responses: QuestionResponse, config: SurveyConfig): string[] => {
+    const keys = extractUsagePurposeKeys(responses, config);
+    return keys.map(key => {
+      const serviceDef = config.serviceDefinitions.find(s => s.key === key);
+      return serviceDef ? serviceDef.label : key;
+    });
+  };
+
+  const extractHeardFrom = (responses: QuestionResponse): string[] => {
+    const heardFromResponse = responses['heard-from'];
+    // 新しいMultipleChoiceResponse形式と後方互換性をサポート
+    if (Array.isArray(heardFromResponse)) {
+      return heardFromResponse;
+    } else if (typeof heardFromResponse === 'object' && 'values' in heardFromResponse && Array.isArray(heardFromResponse.values)) {
+      return heardFromResponse.values;
+    }
+    return [];
+  };
+
+  const extractImpressionRatings = (responses: QuestionResponse): Array<{category: string; rating: string}> => {
+    const impressionsResponse = responses['impressions'];
+    if (typeof impressionsResponse === 'object' && impressionsResponse !== null) {
+      return Object.entries(impressionsResponse).map(([category, rating]) => ({
+        category,
+        rating: String(rating)
+      }));
+    }
+    return [];
+  };
+
+  const extractWillReturn = (responses: QuestionResponse): string => {
+    const willReturnResponse = responses['will-return'];
+    // 新しいSingleChoiceResponse形式と後方互換性をサポート
+    if (typeof willReturnResponse === 'string') {
+      return willReturnResponse;
+    } else if (typeof willReturnResponse === 'object' && 'value' in willReturnResponse) {
+      return willReturnResponse.value || '';
+    }
+    return '';
+  };
+
+  const extractReturnReasons = (responses: QuestionResponse): string[] => {
+    const returnReasonsResponse = responses['return-reasons'];
+    // 新しいMultipleChoiceResponse形式と後方互換性をサポート
+    if (Array.isArray(returnReasonsResponse)) {
+      return returnReasonsResponse;
+    } else if (typeof returnReasonsResponse === 'object' && 'values' in returnReasonsResponse && Array.isArray(returnReasonsResponse.values)) {
+      return returnReasonsResponse.values;
+    }
+    return [];
+  };
+
+  const extractSatisfiedPoints = (responses: QuestionResponse, config: SurveyConfig): Record<string, string[]> => {
+    const result: Record<string, string[]> = {};
+    const serviceEvalQuestions = config.questionCards.filter(card => 
+      card.type === 'service-evaluation' && 
+      (card.options as any)?.evaluationType?.includes('satisfaction')
+    );
+    
+    for (const question of serviceEvalQuestions) {
+      const response = responses[question.id];
+      const serviceKey = (question.options as any).serviceKey;
+      if (serviceKey) {
+        // 新しいサービス評価形式をサポート
+        if (Array.isArray(response)) {
+          // 後方互換性: 配列形式の場合
+          result[serviceKey] = response;
+        } else if (typeof response === 'object' && response !== null) {
+          if ('satisfied' in response && Array.isArray(response.satisfied)) {
+            // 新しい形式: { satisfied: [], improvement: [] }
+            result[serviceKey] = response.satisfied;
+          } else if ('values' in response && Array.isArray(response.values)) {
+            // MultipleChoiceResponse形式
+            result[serviceKey] = response.values;
+          }
+        }
+      }
+    }
+    return result;
+  };
+
+  const extractImprovementPoints = (responses: QuestionResponse, config: SurveyConfig): Record<string, string[]> => {
+    const result: Record<string, string[]> = {};
+    const serviceEvalQuestions = config.questionCards.filter(card => 
+      card.type === 'service-evaluation' && 
+      (card.options as any)?.evaluationType?.includes('improvement')
+    );
+    
+    for (const question of serviceEvalQuestions) {
+      const response = responses[question.id];
+      const serviceKey = (question.options as any).serviceKey;
+      if (serviceKey) {
+        // 新しいサービス評価形式をサポート
+        if (Array.isArray(response)) {
+          // 後方互換性: 配列形式の場合
+          result[serviceKey] = response;
+        } else if (typeof response === 'object' && response !== null) {
+          if ('improvement' in response && Array.isArray(response.improvement)) {
+            // 新しい形式: { satisfied: [], improvement: [] }
+            result[serviceKey] = response.improvement;
+          } else if ('values' in response && Array.isArray(response.values)) {
+            // MultipleChoiceResponse形式
+            result[serviceKey] = response.values;
+          }
+        }
+      }
+    }
+    return result;
+  };
+
+  const extractSatisfaction = (responses: QuestionResponse): string => {
+    const satisfactionResponse = responses['satisfaction-repeater'] || responses['satisfaction-second'];
+    // 新しいSingleChoiceResponse形式と後方互換性をサポート
+    if (typeof satisfactionResponse === 'string') {
+      return satisfactionResponse;
+    } else if (typeof satisfactionResponse === 'object' && 'value' in satisfactionResponse) {
+      return satisfactionResponse.value || '';
+    }
+    return '';
+  };
+
+  // 質問システム用のバリデーション
+  const validateResponses = (): { isValid: boolean; errors: QuestionErrors } => {
+    if (!surveyConfig) return { isValid: false, errors: {} };
+    
+    const newErrors: QuestionErrors = {};
+    let hasErrors = false;
+    
+    // 現在の質問フローで表示される質問のみをバリデーション
+    const visibleQuestions = surveyConfig.questionCards.filter(card => 
+      currentQuestionFlow.includes(card.id) && shouldShowQuestion(card)
+    );
+    
+    for (const questionCard of visibleQuestions) {
+      const response = responses[questionCard.id];
+      
+      if (questionCard.required) {
+        // 必須チェック - 新しいレスポンス形式に対応
+        let isEmpty = false;
+        
+        if (!response) {
+          isEmpty = true;
+        } else if (questionCard.type === 'single-choice') {
+          // SingleChoiceResponse または string をチェック
+          const value = typeof response === 'object' && 'value' in response ? response.value : response;
+          isEmpty = !value || (typeof value === 'string' && value.trim() === '');
+          
+          // 「その他」が選択されている場合、otherTextもチェック
+          if (!isEmpty && typeof response === 'object' && 'otherText' in response) {
+            const otherChoice = (questionCard.options as any)?.choices?.find((choice: any) => 
+              choice.isOther || choice.value === 'その他' || choice.label === 'その他'
+            );
+            if (otherChoice && response.value === otherChoice.value) {
+              isEmpty = !response.otherText || response.otherText.trim() === '';
+            }
+          }
+        } else if (questionCard.type === 'multiple-choice') {
+          // MultipleChoiceResponse または string[] をチェック
+          const values = typeof response === 'object' && 'values' in response ? response.values : response;
+          isEmpty = !Array.isArray(values) || values.length === 0;
+          
+          // 「その他」が選択されている場合、otherTextもチェック
+          if (!isEmpty && typeof response === 'object' && 'otherText' in response && Array.isArray(values)) {
+            const otherChoice = (questionCard.options as any)?.choices?.find((choice: any) => 
+              choice.isOther || choice.value === 'その他' || choice.label === 'その他'
+            );
+            if (otherChoice && values.includes(otherChoice.value)) {
+              isEmpty = !response.otherText || response.otherText.trim() === '';
+            }
+          }
+        } else if (Array.isArray(response)) {
+          isEmpty = response.length === 0;
+        } else if (typeof response === 'string') {
+          isEmpty = response.trim() === '';
+        } else if (questionCard.type === 'service-evaluation' && typeof response === 'object') {
+          // サービス評価の特別処理 - satisfied と improvement のどちらか一方でも選択されていればOK
+          const hasSelections = (response.satisfied && response.satisfied.length > 0) || 
+                              (response.improvement && response.improvement.length > 0);
+          isEmpty = !hasSelections;
+        }
+        
+        if (isEmpty) {
+          newErrors[questionCard.id] = true;
+          hasErrors = true;
+        }
+      }
+      
+      // バリデーションルールチェック - 新しいレスポンス形式に対応
+      if (questionCard.validation && response) {
+        const { minSelections, maxSelections, minLength, maxLength, pattern } = questionCard.validation;
+        
+        // 配列値の処理 (multiple-choice, service-evaluation)
+        let arrayValue: string[] | null = null;
+        if (Array.isArray(response)) {
+          arrayValue = response;
+        } else if (typeof response === 'object' && 'values' in response && Array.isArray(response.values)) {
+          arrayValue = response.values;
+        } else if (questionCard.type === 'service-evaluation' && typeof response === 'object') {
+          // サービス評価の場合は satisfied と improvement の合計をチェック
+          const totalSelections = (response.satisfied || []).length + (response.improvement || []).length;
+          arrayValue = Array(totalSelections).fill(''); // ダミー配列で数をチェック
+        }
+        
+        if (arrayValue) {
+          if (minSelections && arrayValue.length < minSelections) {
+            newErrors[questionCard.id] = true;
+            hasErrors = true;
+          }
+          if (maxSelections && arrayValue.length > maxSelections) {
+            newErrors[questionCard.id] = true;
+            hasErrors = true;
+          }
+        }
+        
+        // 文字列値の処理 (single-choice, text-input)
+        let stringValue: string | null = null;
+        if (typeof response === 'string') {
+          stringValue = response;
+        } else if (typeof response === 'object' && 'value' in response && typeof response.value === 'string') {
+          stringValue = response.value;
+        }
+        
+        if (stringValue) {
+          if (minLength && stringValue.length < minLength) {
+            newErrors[questionCard.id] = true;
+            hasErrors = true;
+          }
+          if (maxLength && stringValue.length > maxLength) {
+            newErrors[questionCard.id] = true;
+            hasErrors = true;
+          }
+          if (pattern && !new RegExp(pattern).test(stringValue)) {
+            newErrors[questionCard.id] = true;
+            hasErrors = true;
+          }
+        }
+      }
+    }
+    
+    setErrors(newErrors);
+    return { isValid: !hasErrors, errors: newErrors };
+  };
+
 
   /**
    * フォーム送信
@@ -215,283 +512,165 @@ const UnifiedSurvey: React.FC = () => {
       event.preventDefault();
     }
 
-    let newErrors: UnifiedFormErrors = {
-      customerType: false,
-      heardFrom: false,
-      impressions: false,
-      willReturn: false,
-      otherHeardFrom: false,
-      otherWillReturn: false,
-      returnReasons: false,
-      otherReturnReasons: false,
-      satisfaction: false,
-      usagePurpose: false,
-      satisfiedPoints: false,
-      improvementPoints: false,
-      otherSatisfaction: false,
-      otherSatisfiedPoints: false,
-      otherImprovementPoints: false,
-      serviceSatisfiedPoints: {},
-      serviceImprovementPoints: {},
-    };
+    // surveyConfigが読み込まれていない場合は処理を停止
+    if (!surveyConfig) {
+      console.error('surveyConfig is not loaded. Cannot proceed with form submission.');
+      return;
+    }
 
-    // 顧客属性が未選択の場合
-    if (!customerType) {
-      newErrors.customerType = true;
-      setErrors(newErrors);
+    // 質問システムのバリデーション
+    const validationResult = validateResponses();
+    if (!validationResult.isValid) {
+      console.log('=== AUTO SCROLL DEBUG START ===');
+      console.log('Validation failed, attempting auto-scroll');
+      console.log('Validation errors:', validationResult.errors);
+      console.log('Current question flow:', currentQuestionFlow);
+      
+      // エラーがある場合、最初のエラー項目にスクロール
       setTimeout(() => {
-        const element = document.querySelector('[data-question="customer-type"]');
-        element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+        console.log('Executing scroll timeout...');
+        
+        // 現在表示されている質問の中でエラーがあるものを見つける
+        const visibleQuestions = surveyConfig!.questionCards.filter(card => 
+          currentQuestionFlow.includes(card.id) && shouldShowQuestion(card)
+        );
+        console.log('Visible questions:', visibleQuestions.map(q => ({ id: q.id, title: q.title })));
+        
+        // DOM内の全data-question要素を確認
+        const allDataQuestionElements = Array.from(document.querySelectorAll('[data-question]'));
+        console.log('All data-question elements in DOM:', allDataQuestionElements.map(el => ({
+          id: el.getAttribute('data-question'),
+          tagName: el.tagName,
+          className: el.className
+        })));
+        
+        // エラーがある最初の質問を見つける
+        const firstErrorQuestion = visibleQuestions.find(card => validationResult.errors[card.id]);
+        console.log('First error question:', firstErrorQuestion ? { id: firstErrorQuestion.id, title: firstErrorQuestion.title } : 'None found');
+        
+        if (firstErrorQuestion) {
+          console.log(`Attempting to scroll to question: ${firstErrorQuestion.id}`);
+          
+          // より広範囲なセレクターを試す
+          const selectors = [
+            `[data-question="${firstErrorQuestion.id}"]`,
+            `*[data-question="${firstErrorQuestion.id}"]`,
+            `div[data-question="${firstErrorQuestion.id}"]`
+          ];
+          
+          let element = null;
+          for (const selector of selectors) {
+            element = document.querySelector(selector);
+            console.log(`Trying selector "${selector}":`, element ? 'Found' : 'Not found');
+            if (element) break;
+          }
+          
+          if (element) {
+            console.log(`Found element with selector, scrolling to: ${firstErrorQuestion.id}`);
+            console.log('Element details:', {
+              tagName: element.tagName,
+              className: element.className,
+              offsetTop: (element as HTMLElement).offsetTop,
+              scrollTop: document.documentElement.scrollTop
+            });
+            
+            // 複数の方法でスクロールを試行
+            try {
+              element.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start',
+                inline: 'nearest'
+              });
+              console.log('scrollIntoView executed successfully');
+            } catch (error) {
+              console.error('scrollIntoView failed:', error);
+              
+              // フォールバック: 直接スクロール
+              try {
+                const elementTop = (element as HTMLElement).offsetTop;
+                window.scrollTo({ top: elementTop - 100, behavior: 'smooth' });
+                console.log('Fallback window.scrollTo executed');
+              } catch (fallbackError) {
+                console.error('Fallback scroll also failed:', fallbackError);
+              }
+            }
+          } else {
+            console.warn(`Element not found for question: ${firstErrorQuestion.id}`);
+            console.warn(`Tried selectors:`, selectors);
+          }
+        } else {
+          console.warn('No error questions found in visible questions');
+          console.log('All errors in validationResult:', Object.entries(validationResult.errors));
+          console.log('Visible question IDs:', visibleQuestions.map(q => q.id));
+        }
+        
+        console.log('=== AUTO SCROLL DEBUG END ===');
+      }, 300); // タイムアウトをさらに延長
+      
+      // useEffectベースの自動スクロールもトリガー
+      const visibleQuestions = surveyConfig ? surveyConfig.questionCards.filter(card => 
+        currentQuestionFlow.includes(card.id) && shouldShowQuestion(card)
+      ) : [];
+      const firstErrorQuestion = visibleQuestions.find(card => validationResult.errors[card.id]);
+      
+      if (firstErrorQuestion) {
+        console.log('Setting shouldScrollToError for useEffect trigger:', firstErrorQuestion.id);
+        setShouldScrollToError(firstErrorQuestion.id);
+      } else {
+        // エラーがある最初の質問をIDから探す
+        const errorQuestionId = Object.keys(validationResult.errors).find(id => validationResult.errors[id]);
+        if (errorQuestionId) {
+          console.log('Setting shouldScrollToError from error keys:', errorQuestionId);
+          setShouldScrollToError(errorQuestionId);
+        }
+      }
+      
       return;
     }
-
-    // 顧客属性別のバリデーション
-    if (customerType === 'new') {
-      // 新規顧客のバリデーション
-      if (heardFrom.length === 0) {
-        newErrors.heardFrom = true;
+    
+    // セーフティネット: 現在の顧客タイプに関連する回答のみをフィルタリング
+    const currentCustomerType = responses['customer-type'] as CustomerType;
+    const currentQuestionFlowForType = currentCustomerType && surveyConfig
+      ? ['customer-type', ...surveyConfig.questionFlow[currentCustomerType]]
+      : ['customer-type'];
+    
+    const filteredResponses: QuestionResponse = {};
+    for (const questionId of currentQuestionFlowForType) {
+      if (responses[questionId] !== undefined) {
+        filteredResponses[questionId] = responses[questionId];
       }
-      if (surveyConfig?.newCustomerOptions.heardFromOptions.includes('その他') && heardFrom.includes('その他') && !otherHeardFrom) {
-        newErrors.otherHeardFrom = true;
-      }
-      if (impressionRatings.length === 0) {
-        newErrors.impressions = true;
-      }
-      if (!willReturn) {
-        newErrors.willReturn = true;
-      }
-      if (surveyConfig?.newCustomerOptions.willReturnOptions.includes('その他') && willReturn === 'その他' && !otherWillReturn) {
-        newErrors.otherWillReturn = true;
-      }
-    } else if (customerType === 'second-visit') {
-      // 2回目顧客のバリデーション
-      if (returnReasons.length === 0) {
-        newErrors.returnReasons = true;
-      }
-      if (surveyConfig?.secondVisitOptions.returnReasons.includes('その他') && returnReasons.includes('その他') && !otherReturnReasons) {
-        newErrors.otherReturnReasons = true;
-      }
-      if (!satisfaction) {
-        newErrors.satisfaction = true;
-      }
-      if (surveyConfig?.secondVisitOptions.satisfactionOptions.includes('その他') && satisfaction === 'その他' && !otherSatisfaction) {
-        newErrors.otherSatisfaction = true;
-      }
-      // サービス関連のバリデーション（共通）
-      if (usagePurpose.length === 0) {
-        newErrors.usagePurpose = true;
-      }
-      // サービス別チェック（共通ロジック）
-      validateServicePoints(newErrors);
-    } else if (customerType === 'repeater') {
-      // リピーター顧客のバリデーション
-      if (!satisfaction) {
-        newErrors.satisfaction = true;
-      }
-      if (surveyConfig?.repeaterOptions.satisfactionOptions.includes('その他') && satisfaction === 'その他' && !otherSatisfaction) {
-        newErrors.otherSatisfaction = true;
-      }
-      // サービス関連のバリデーション（共通）
-      if (usagePurpose.length === 0) {
-        newErrors.usagePurpose = true;
-      }
-      // サービス別チェック（共通ロジック）
-      validateServicePoints(newErrors);
     }
-
-    setErrors(newErrors);
-
-    // エラーがあれば最初のエラー項目にスクロール
-    if (hasUnifiedErrors(newErrors)) {
-      scrollToFirstError(newErrors);
-      return;
-    }
-
-    // Google確認画面に遷移（顧客属性に応じたデータを渡す）
-    const navigationState = buildNavigationState();
+    
+    console.log('ナビゲーション前の回答フィルタリング:', {
+      customerType: currentCustomerType,
+      allResponses: Object.keys(responses).length,
+      filteredResponses: Object.keys(filteredResponses).length,
+      questionFlow: currentQuestionFlowForType
+    });
+    
+    // 質問システムのナビゲーション用状態構築
+    const navigationState = {
+      responses: filteredResponses, // フィルタリングされた回答のみを渡す
+      customerType: currentCustomerType,
+      surveyConfig, // 完全な設定情報を渡す
+      hasGoogleAccount,
+      feedback,
+      // 後方互換性のため従来形式も生成（フィルタリング済みデータを使用）
+      usagePurpose: surveyConfig ? extractUsagePurposeKeys(filteredResponses, surveyConfig) : [],
+      usagePurposeLabels: surveyConfig ? extractUsagePurposeLabels(filteredResponses, surveyConfig) : [],
+      // その他の従来フィールドも必要に応じて生成
+      heardFrom: extractHeardFrom(filteredResponses),
+      impressionRatings: extractImpressionRatings(filteredResponses),
+      willReturn: extractWillReturn(filteredResponses),
+      returnReasons: extractReturnReasons(filteredResponses),
+      satisfiedPoints: surveyConfig ? extractSatisfiedPoints(filteredResponses, surveyConfig) : {},
+      improvementPoints: surveyConfig ? extractImprovementPoints(filteredResponses, surveyConfig) : {},
+      satisfaction: extractSatisfaction(filteredResponses)
+    };
+    
     navigate('/googleaccount', { state: navigationState });
   };
 
-  // サービス関連のバリデーション（共通ロジック）
-  const validateServicePoints = (newErrors: UnifiedFormErrors) => {
-    if (Object.keys(satisfiedPoints).length === 0) {
-      newErrors.satisfiedPoints = true;
-    }
-    if (Object.keys(improvementPoints).length === 0) {
-      newErrors.improvementPoints = true;
-    }
-
-    // サービス別の満足点・改善点チェック
-    for (const serviceKey of usagePurpose) {
-      const serviceSatisfiedPoints = satisfiedPoints[serviceKey] || [];
-      if (serviceSatisfiedPoints.length === 0) {
-        newErrors.serviceSatisfiedPoints[serviceKey] = true;
-      }
-
-      const serviceImprovementPoints = improvementPoints[serviceKey] || [];
-      if (serviceImprovementPoints.length === 0) {
-        newErrors.serviceImprovementPoints[serviceKey] = true;
-      }
-    }
-
-    // 「その他」選択時の自由記述欄チェック
-    if (surveyConfig) {
-      for (const serviceKey of usagePurpose) {
-        const service = surveyConfig.serviceDefinitions.find(s => s.key === serviceKey);
-        
-        // 満足点の「その他」チェック
-        if (service?.satisfiedOptions.includes('その他')) {
-          const selectedPoints = satisfiedPoints[serviceKey] || [];
-          if (selectedPoints.includes('その他') && !otherSatisfiedPoints[serviceKey]) {
-            newErrors.otherSatisfiedPoints = true;
-            break;
-          }
-        }
-
-        // 改善点の「その他」チェック  
-        if (service?.improvementOptions.includes('その他')) {
-          const selectedPoints = improvementPoints[serviceKey] || [];
-          if (selectedPoints.includes('その他') && !otherImprovementPoints[serviceKey]) {
-            newErrors.otherImprovementPoints = true;
-            break;
-          }
-        }
-      }
-    }
-  };
-
-  // エラーの存在チェック（UnifiedFormErrors用の拡張版）
-  const hasUnifiedErrors = (errors: UnifiedFormErrors): boolean => {
-    const hasServiceErrors = Object.values(errors.serviceSatisfiedPoints).some(Boolean) || 
-                             Object.values(errors.serviceImprovementPoints).some(Boolean);
-    
-    return Object.values(errors).some(error => 
-      typeof error === 'boolean' ? error : false
-    ) || hasServiceErrors;
-  };
-
-  // 最初のエラーにスクロール
-  const scrollToFirstError = (errors: UnifiedFormErrors) => {
-    setTimeout(() => {
-      if (errors.customerType) {
-        const element = document.querySelector('[data-question="customer-type"]');
-        element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (customerType === 'new') {
-        // 新規顧客のエラー優先順位
-        if (errors.heardFrom || errors.otherHeardFrom) {
-          const element = document.querySelector('[data-question="heard-from"]');
-          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else if (errors.impressions) {
-          const element = document.querySelector('[data-question="impressions"]');
-          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else if (errors.willReturn || errors.otherWillReturn) {
-          const element = document.querySelector('[data-question="will-return"]');
-          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      } else if (customerType === 'second-visit') {
-        // 2回目顧客のエラー優先順位
-        if (errors.returnReasons || errors.otherReturnReasons) {
-          const element = document.querySelector('[data-question="return-reasons"]');
-          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else if (errors.satisfaction || errors.otherSatisfaction) {
-          const element = document.querySelector('[data-question="satisfaction"]');
-          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else if (errors.usagePurpose) {
-          const element = document.querySelector('[data-question="usage-purpose"]');
-          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          scrollToServiceError(errors);
-        }
-      } else if (customerType === 'repeater') {
-        // リピーター顧客のエラー優先順位
-        if (errors.satisfaction || errors.otherSatisfaction) {
-          const element = document.querySelector('[data-question="satisfaction"]');
-          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else if (errors.usagePurpose) {
-          const element = document.querySelector('[data-question="usage-purpose"]');
-          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          scrollToServiceError(errors);
-        }
-      }
-    }, 100);
-  };
-
-  // サービスエラーへのスクロール
-  const scrollToServiceError = (errors: UnifiedFormErrors) => {
-    const hasServiceErrors = Object.values(errors.serviceSatisfiedPoints).some(Boolean) || 
-                             Object.values(errors.serviceImprovementPoints).some(Boolean);
-    if (hasServiceErrors) {
-      const firstErrorServiceKey = Object.keys(errors.serviceSatisfiedPoints).find(key => errors.serviceSatisfiedPoints[key]) ||
-                                  Object.keys(errors.serviceImprovementPoints).find(key => errors.serviceImprovementPoints[key]);
-      if (firstErrorServiceKey) {
-        const element = document.querySelector(`[data-service="${firstErrorServiceKey}"]`);
-        element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-  };
-
-  // ナビゲーション用の状態構築
-  const buildNavigationState = () => {
-    const baseState = {
-      customerType,
-      hasGoogleAccount,
-      feedback,
-    };
-
-    if (customerType === 'new') {
-      return {
-        ...baseState,
-        heardFrom,
-        otherHeardFrom,
-        impressionRatings,
-        willReturn,
-        otherWillReturn,
-        isNewCustomer,
-      };
-    } else if (customerType === 'second-visit') {
-      const usagePurposeLabels = usagePurpose.map((key) => {
-        const service = surveyConfig?.serviceDefinitions.find((sd) => sd.key === key);
-        return service ? service.label : key;
-      });
-
-      return {
-        ...baseState,
-        returnReasons,
-        otherReturnReasons,
-        satisfaction,
-        otherSatisfaction,
-        usagePurpose,
-        usagePurposeLabels,
-        satisfiedPoints,
-        improvementPoints,
-        otherSatisfiedPoints,
-        otherImprovementPoints,
-        isSecondVisit,
-      };
-    } else if (customerType === 'repeater') {
-      const usagePurposeLabels = usagePurpose.map((key) => {
-        const service = surveyConfig?.serviceDefinitions.find((sd) => sd.key === key);
-        return service ? service.label : key;
-      });
-
-      return {
-        ...baseState,
-        satisfaction,
-        otherSatisfaction,
-        usagePurpose,
-        usagePurposeLabels,
-        satisfiedPoints,
-        improvementPoints,
-        otherSatisfiedPoints,
-        otherImprovementPoints,
-        isRepeater,
-      };
-    }
-
-    return baseState;
-  };
 
   if (!surveyConfig) {
     return (
@@ -500,6 +679,28 @@ const UnifiedSurvey: React.FC = () => {
       </div>
     );
   }
+
+  // 質問システムでのレンダリング
+  const renderQuestions = () => {
+    if (!surveyConfig) return null;
+    
+    // 現在の質問フローに基づいて表示する質問カードを取得
+    const visibleQuestions = surveyConfig.questionCards.filter(card => 
+      currentQuestionFlow.includes(card.id) && shouldShowQuestion(card)
+    );
+    
+    return visibleQuestions.map(questionCard => (
+      <DynamicQuestionRenderer
+        key={questionCard.id}
+        questionCard={questionCard}
+        responses={responses}
+        errors={errors}
+        onResponseChange={handleResponseChange}
+        onErrorClear={handleErrorClear}
+        surveyConfig={surveyConfig}
+      />
+    ));
+  };
 
   const subtitle = `当サロンをご利用いただきありがとうございます。お客様に最適なアンケートをご案内いたしますので、まずはご来店回数をお選びください。`;
 
@@ -533,145 +734,10 @@ const UnifiedSurvey: React.FC = () => {
           steps={progressSteps}
         />
 
-        {/* 顧客属性選択 */}
-        <QuestionBox data-question="customer-type">
-          <div className="space-y-8">
-            <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
-              <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900 whitespace-normal text-wrap">
-                  ご来店いただいた回数をお選びください
-                  <RequiredBadge className="inline-block ml-1.5" />
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">お客様の来店回数に応じた質問をご用意しております</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-4">
-              {customerTypeOptions.map((option) => (
-                <SelectOption
-                  key={option.value}
-                  selected={customerType === option.value}
-                  onClick={() => {
-                    setCustomerType(option.value);
-                    setErrors(prev => ({ ...prev, customerType: false }));
-                    
-                    // 顧客タイプフラグを即座に設定
-                    setIsNewCustomer(option.value === 'new');
-                    setIsSecondVisit(option.value === 'second-visit');
-                    setIsRepeater(option.value === 'repeater');
-                  }}
-                  icon={option.icon}
-                  variant="enhanced"
-                >
-                  {option.label}
-                </SelectOption>
-              ))}
-            </div>
-            
-            {errors.customerType && (
-              <ErrorMessage message="ご来店回数を選択してください" />
-            )}
-          </div>
-        </QuestionBox>
-
-        {/* 顧客属性に応じた質問セクション */}
-        {customerType === 'new' && (
-          <NewCustomerQuestions
-            surveyConfig={surveyConfig}
-            heardFrom={heardFrom}
-            setHeardFrom={setHeardFrom}
-            otherHeardFrom={otherHeardFrom}
-            setOtherHeardFrom={setOtherHeardFrom}
-            impressionRatings={impressionRatings}
-            setImpressionRatings={setImpressionRatings}
-            willReturn={willReturn}
-            setWillReturn={setWillReturn}
-            otherWillReturn={otherWillReturn}
-            setOtherWillReturn={setOtherWillReturn}
-            errors={{
-              heardFrom: errors.heardFrom,
-              impressions: errors.impressions,
-              willReturn: errors.willReturn,
-              otherHeardFrom: errors.otherHeardFrom,
-              otherWillReturn: errors.otherWillReturn,
-            }}
-            updateImpressionRating={updateImpressionRating}
-            getImpressionRating={getImpressionRating}
-          />
-        )}
-
-        {customerType === 'second-visit' && (
-          <SecondVisitQuestions
-            surveyConfig={surveyConfig}
-            returnReasons={returnReasons}
-            setReturnReasons={setReturnReasons}
-            otherReturnReasons={otherReturnReasons}
-            setOtherReturnReasons={setOtherReturnReasons}
-            satisfaction={satisfaction}
-            setSatisfaction={setSatisfaction}
-            otherSatisfaction={otherSatisfaction}
-            setOtherSatisfaction={setOtherSatisfaction}
-            usagePurpose={usagePurpose}
-            setUsagePurpose={setUsagePurpose}
-            satisfiedPoints={satisfiedPoints}
-            setSatisfiedPoints={setSatisfiedPoints}
-            improvementPoints={improvementPoints}
-            setImprovementPoints={setImprovementPoints}
-            otherSatisfiedPoints={otherSatisfiedPoints}
-            setOtherSatisfiedPoints={setOtherSatisfiedPoints}
-            otherImprovementPoints={otherImprovementPoints}
-            setOtherImprovementPoints={setOtherImprovementPoints}
-            errors={{
-              returnReasons: errors.returnReasons,
-              satisfaction: errors.satisfaction,
-              usagePurpose: errors.usagePurpose,
-              satisfiedPoints: errors.satisfiedPoints,
-              improvementPoints: errors.improvementPoints,
-              otherReturnReasons: errors.otherReturnReasons,
-              otherSatisfaction: errors.otherSatisfaction,
-              otherSatisfiedPoints: errors.otherSatisfiedPoints,
-              otherImprovementPoints: errors.otherImprovementPoints,
-              serviceSatisfiedPoints: errors.serviceSatisfiedPoints,
-              serviceImprovementPoints: errors.serviceImprovementPoints,
-            }}
-          />
-        )}
-
-        {customerType === 'repeater' && (
-          <RepeaterQuestions
-            surveyConfig={surveyConfig}
-            satisfaction={satisfaction}
-            setSatisfaction={setSatisfaction}
-            otherSatisfaction={otherSatisfaction}
-            setOtherSatisfaction={setOtherSatisfaction}
-            usagePurpose={usagePurpose}
-            setUsagePurpose={setUsagePurpose}
-            satisfiedPoints={satisfiedPoints}
-            setSatisfiedPoints={setSatisfiedPoints}
-            improvementPoints={improvementPoints}
-            setImprovementPoints={setImprovementPoints}
-            otherSatisfiedPoints={otherSatisfiedPoints}
-            setOtherSatisfiedPoints={setOtherSatisfiedPoints}
-            otherImprovementPoints={otherImprovementPoints}
-            setOtherImprovementPoints={setOtherImprovementPoints}
-            errors={{
-              satisfaction: errors.satisfaction,
-              usagePurpose: errors.usagePurpose,
-              satisfiedPoints: errors.satisfiedPoints,
-              improvementPoints: errors.improvementPoints,
-              otherSatisfaction: errors.otherSatisfaction,
-              otherSatisfiedPoints: errors.otherSatisfiedPoints,
-              otherImprovementPoints: errors.otherImprovementPoints,
-              serviceSatisfiedPoints: errors.serviceSatisfiedPoints,
-              serviceImprovementPoints: errors.serviceImprovementPoints,
-            }}
-          />
-        )}
-
-        {customerType && (
+        {/* 動的質問レンダリング */}
+        {renderQuestions()}
+        {/* 顧客タイプが選択されている場合に次へボタンを表示 */}
+        {responses['customer-type'] && (
           <FormButtons 
             onNext={handleNext}
             rightAligned={true} 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { cn } from '../lib/utils';
+import { cn, clearStateFromLocalStorage } from '../lib/utils';
 import { 
   CheckCircle2, 
   Sparkles, 
@@ -114,6 +114,9 @@ const ThankYou: React.FC = () => {
 
   // 要素を段階的に表示するアニメーション
   useEffect(() => {
+    // アンケート完了時にセッションストレージをクリア
+    clearStateFromLocalStorage();
+    
     const timer = setInterval(() => {
       setVisibleElements(prev => prev < 5 ? prev + 1 : prev);
     }, 200);

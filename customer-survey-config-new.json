@@ -1,0 +1,666 @@
+{
+    "version": "2.0",
+    "meta": {
+      "createdAt": "2025-01-20T00:00:00.000Z",
+      "updatedAt": "2025-01-20T00:00:00.000Z",
+      "title": "顧客満足度アンケート",
+      "description": "当サロンのサービス向上のためのアンケートです"
+    },
+    "customerTypes": [
+      "new",
+      "second-visit",
+      "repeater"
+    ],
+    "questionFlow": {
+      "new": [
+        "heard-from",
+        "impressions",
+        "will-return"
+      ],
+      "second-visit": [
+        "return-reasons",
+        "satisfaction-second",
+        "service-usage",
+        "service-bridalShaving-evaluation",
+        "service-browPerm-evaluation",
+        "service-lashPerm-evaluation",
+        "service-facialBBL-evaluation",
+        "service-bridalSlim-evaluation",
+        "service-waxLaser-evaluation",
+        "service-gelNail-evaluation",
+        "service-herbScalp-evaluation",
+        "service-headBathAroma-evaluation",
+        "service-fatFreeze-evaluation"
+      ],
+      "repeater": [
+        "satisfaction-repeater",
+        "service-usage",
+        "service-bridalShaving-evaluation",
+        "service-browPerm-evaluation",
+        "service-lashPerm-evaluation",
+        "service-facialBBL-evaluation",
+        "service-bridalSlim-evaluation",
+        "service-waxLaser-evaluation",
+        "service-gelNail-evaluation",
+        "service-herbScalp-evaluation",
+        "service-headBathAroma-evaluation",
+        "service-fatFreeze-evaluation"
+      ]
+    },
+    "questionCards": [
+      {
+        "id": "customer-type",
+        "type": "customer-type",
+        "title": "ご来店いただいた回数をお選びください",
+        "description": "お客様の来店回数に応じた質問をご用意しております",
+        "required": true,
+        "options": {
+          "types": [
+            {
+              "value": "new",
+              "label": "初回ご利用のお客様",
+              "icon": "UserPlus"
+            },
+            {
+              "value": "second-visit",
+              "label": "2回目ご利用のお客様",
+              "icon": "Repeat"
+            },
+            {
+              "value": "repeater",
+              "label": "3回以上ご利用のお客様",
+              "icon": "Crown"
+            }
+          ]
+        }
+      },
+      {
+        "id": "heard-from",
+        "type": "multiple-choice",
+        "title": "当サロンをどこで知りましたか？",
+        "description": "複数選択可能です",
+        "required": true,
+        "options": {
+          "choices": [
+            {
+              "value": "Google検索",
+              "label": "Google検索"
+            },
+            {
+              "value": "当サロンのホームページ",
+              "label": "当サロンのホームページ"
+            },
+            {
+              "value": "SNS(Instagram、Xなど)",
+              "label": "SNS(Instagram、Xなど)"
+            },
+            {
+              "value": "ホットペッパービューティーなどの検索サイト",
+              "label": "ホットペッパービューティーなどの検索サイト"
+            },
+            {
+              "value": "ご友人・知人からのご紹介",
+              "label": "ご友人・知人からのご紹介"
+            },
+            {
+              "value": "広告(チラシ・看板など)",
+              "label": "広告(チラシ・看板など)"
+            },
+            {
+              "value": "その他",
+              "label": "その他",
+              "isOther": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "impressions",
+        "type": "rating-scale",
+        "title": "当サロンの印象をお聞かせください",
+        "description": "各項目について評価してください",
+        "required": true,
+        "options": {
+          "categories": [
+            {
+              "key": "店舗の雰囲気",
+              "label": "店舗の雰囲気",
+              "ratingOptions": [
+                "良い",
+                "普通",
+                "要改善"
+              ]
+            },
+            {
+              "key": "技術・仕上がり",
+              "label": "技術・仕上がり",
+              "ratingOptions": [
+                "良い",
+                "普通",
+                "要改善"
+              ]
+            },
+            {
+              "key": "接客サービス",
+              "label": "接客サービス",
+              "ratingOptions": [
+                "良い",
+                "普通",
+                "要改善"
+              ]
+            },
+            {
+              "key": "メニュー料金",
+              "label": "メニュー料金",
+              "ratingOptions": [
+                "良い",
+                "普通",
+                "要改善"
+              ]
+            },
+            {
+              "key": "総合満足度",
+              "label": "総合満足度",
+              "ratingOptions": [
+                "良い",
+                "普通",
+                "要改善"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "will-return",
+        "type": "single-choice",
+        "title": "また当サロンを利用したいと思いますか？",
+        "required": true,
+        "options": {
+          "choices": [
+            {
+              "value": "ぜひ行きたい",
+              "label": "ぜひ行きたい"
+            },
+            {
+              "value": "どちらとも言えない",
+              "label": "どちらとも言えない"
+            },
+            {
+              "value": "行きたくない",
+              "label": "行きたくない"
+            }
+          ]
+        }
+      },
+      {
+        "id": "return-reasons",
+        "type": "multiple-choice",
+        "title": "再来店いただいた理由をお選びください",
+        "description": "複数選択可能です",
+        "required": true,
+        "options": {
+          "choices": [
+            {
+              "value": "前回のサービスに満足したため",
+              "label": "前回のサービスに満足したため"
+            },
+            {
+              "value": "技術力が高いと感じたため",
+              "label": "技術力が高いと感じたため"
+            },
+            {
+              "value": "スタッフの接客が良かったため",
+              "label": "スタッフの接客が良かったため"
+            },
+            {
+              "value": "立地・アクセスが良いため",
+              "label": "立地・アクセスが良いため"
+            },
+            {
+              "value": "料金が適切だと感じたため",
+              "label": "料金が適切だと感じたため"
+            },
+            {
+              "value": "その他",
+              "label": "その他",
+              "isOther": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "satisfaction-second",
+        "type": "single-choice",
+        "title": "初回来店時と比べて満足度はいかがですか？",
+        "required": true,
+        "options": {
+          "choices": [
+            {
+              "value": "良くなった",
+              "label": "良くなった"
+            },
+            {
+              "value": "同じ",
+              "label": "同じ"
+            },
+            {
+              "value": "悪くなった",
+              "label": "悪くなった"
+            }
+          ]
+        }
+      },
+      {
+        "id": "satisfaction-repeater",
+        "type": "single-choice",
+        "title": "前回来店時と比べて満足度はいかがですか？",
+        "required": true,
+        "options": {
+          "choices": [
+            {
+              "value": "良くなった",
+              "label": "良くなった"
+            },
+            {
+              "value": "同じ",
+              "label": "同じ"
+            },
+            {
+              "value": "悪くなった",
+              "label": "悪くなった"
+            }
+          ]
+        }
+      },
+      {
+        "id": "service-usage",
+        "type": "service-usage",
+        "title": "今回利用されたサービスを選択してください",
+        "description": "複数選択可能です",
+        "required": true,
+        "options": {
+          "serviceKeys": [
+            "bridalShaving",
+            "browPerm",
+            "lashPerm",
+            "facialBBL",
+            "bridalSlim",
+            "waxLaser",
+            "gelNail",
+            "herbScalp",
+            "headBathAroma",
+            "fatFreeze"
+          ]
+        }
+      },
+      {
+        "id": "service-bridalShaving-evaluation",
+        "type": "service-evaluation",
+        "title": "ブライダル・シェービングについて評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "bridalShaving"
+          ]
+        },
+        "options": {
+          "serviceKey": "bridalShaving",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-browPerm-evaluation",
+        "type": "service-evaluation",
+        "title": "アイブロー&眉パーマについて評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "browPerm"
+          ]
+        },
+        "options": {
+          "serviceKey": "browPerm",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-lashPerm-evaluation",
+        "type": "service-evaluation",
+        "title": "まつ毛パーマについて評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "lashPerm"
+          ]
+        },
+        "options": {
+          "serviceKey": "lashPerm",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-facialBBL-evaluation",
+        "type": "service-evaluation",
+        "title": "美顔エステ&BBL光エステについて評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "facialBBL"
+          ]
+        },
+        "options": {
+          "serviceKey": "facialBBL",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-bridalSlim-evaluation",
+        "type": "service-evaluation",
+        "title": "ブライダル痩身&フェムケアについて評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "bridalSlim"
+          ]
+        },
+        "options": {
+          "serviceKey": "bridalSlim",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-waxLaser-evaluation",
+        "type": "service-evaluation",
+        "title": "匠道ワックス脱毛&光脱毛について評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "waxLaser"
+          ]
+        },
+        "options": {
+          "serviceKey": "waxLaser",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-gelNail-evaluation",
+        "type": "service-evaluation",
+        "title": "ジェルネイルについて評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "gelNail"
+          ]
+        },
+        "options": {
+          "serviceKey": "gelNail",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-herbScalp-evaluation",
+        "type": "service-evaluation",
+        "title": "ハーブマジック頭皮洗浄について評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "herbScalp"
+          ]
+        },
+        "options": {
+          "serviceKey": "herbScalp",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-headBathAroma-evaluation",
+        "type": "service-evaluation",
+        "title": "頭浸浴&アロマセラピスパについて評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "headBathAroma"
+          ]
+        },
+        "options": {
+          "serviceKey": "headBathAroma",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      },
+      {
+        "id": "service-fatFreeze-evaluation",
+        "type": "service-evaluation",
+        "title": "脂肪冷却マシーンについて評価をお聞かせください",
+        "required": false,
+        "conditionalDisplay": {
+          "dependsOn": "service-usage",
+          "showWhen": [
+            "fatFreeze"
+          ]
+        },
+        "options": {
+          "serviceKey": "fatFreeze",
+          "evaluationType": [
+            "satisfaction",
+            "improvement"
+          ]
+        }
+      }
+    ],
+    "serviceDefinitions": [
+      {
+        "key": "bridalShaving",
+        "label": "ブライダル・シェービング",
+        "satisfiedOptions": [
+          "産毛が取れて肌が明るくなったと感じた",
+          "シェービング後の保湿ケアが丁寧だった",
+          "背中までしっかり処理してもらえた",
+          "シェービングとマッサージで癒された",
+          "その他"
+        ],
+        "improvementOptions": [
+          "赤みリスクについて詳しく説明してほしかった",
+          "料金プランをもっとわかりやすくしてほしい",
+          "部位別のオプションプランが欲しいと思った",
+          "ブライダルエステのセットプランがあると良いと思った",
+          "その他"
+        ]
+      },
+      {
+        "key": "browPerm",
+        "label": "アイブロー&眉パーマ",
+        "satisfiedOptions": [
+          "骨格に合う眉提案で垢抜けたと感じた",
+          "丁寧な聞き取りで安心だった",
+          "眉メイクのコツが分かり助かった",
+          "施術中の雰囲気がよくリラックスできた",
+          "その他"
+        ],
+        "improvementOptions": [
+          "長持ちのコツについて詳しく説明してほしかった",
+          "薬剤リスクについて詳しく説明してほしかった",
+          "仕上がり例について事前にもっと見せてほしかった",
+          "サービスのオプションを増やして欲しい",
+          "その他"
+        ]
+      },
+      {
+        "key": "lashPerm",
+        "label": "まつ毛パーマ",
+        "satisfiedOptions": [
+          "希望通りのカールで満足だった",
+          "自分の顔や目の形に合う提案が良かった",
+          "毎日のまつ毛のケアなど詳しく説明してくれて安心した",
+          "施術中の雰囲気がよくリラックスできた",
+          "その他"
+        ],
+        "improvementOptions": [
+          "長持ちさせるためのケア方法をもっと説明してほしかった",
+          "まつ毛ケアのオプションが欲しいと思った",
+          "パーマの強弱による仕上がりの差について事前に知りたかった",
+          "まつげメニューを増やして欲しい",
+          "その他"
+        ]
+      },
+      {
+        "key": "facialBBL",
+        "label": "美顔エステ&BBL光エステ",
+        "satisfiedOptions": [
+          "くすみシミが薄くなってトーンアップした",
+          "リフトアップ効果を感じた",
+          "施術中の雰囲気がよくリラックスできた",
+          "美容と癒しが両立されていて満足だった",
+          "その他"
+        ],
+        "improvementOptions": [
+          "効果持続についてもっと説明してほしかった",
+          "敏感肌テストが欲しいと思った",
+          "オプションによる追加料金の説明が不明瞭だった",
+          "その他"
+        ]
+      },
+      {
+        "key": "bridalSlim",
+        "label": "ブライダル痩身&フェムケア",
+        "satisfiedOptions": [
+          "ドレス映えボディを実感できた",
+          "効果について丁寧な説明があり安心できた",
+          "機器と手技の効果が高いと感じた",
+          "施術中の雰囲気がよくリラックスできた",
+          "セルフケア指導が的確だった"
+        ],
+        "improvementOptions": [
+          "体験プランが欲しいと思った",
+          "リスクについてもっと説明してほしかった",
+          "挙式までの毎日のケアについてもっと知りたかった",
+          "ビフォーアフター例について事前に見たかった",
+          "その他"
+        ]
+      },
+      {
+        "key": "waxLaser",
+        "label": "匠道ワックス脱毛&光脱毛",
+        "satisfiedOptions": [
+          "産毛までツルツルになって嬉しい",
+          "痛みに配慮されていて安心できた",
+          "保湿ローション完備で安心した",
+          "施術中の雰囲気がよくリラックスできた",
+          "その他"
+        ],
+        "improvementOptions": [
+          "痛みについてもっと説明してほしかった",
+          "料金プランについての説明が不明瞭だと思った",
+          "目安となる回数について説明不足だと感じた",
+          "脱毛後の肌トラブルについての対処をもっと教えてほしかった",
+          "その他"
+        ]
+      },
+      {
+        "key": "gelNail",
+        "label": "ジェルネイル",
+        "satisfiedOptions": [
+          "デザインがイメージ通りで嬉しい",
+          "好みに沿ったカラー・デザイン提案が豊富で楽しかった",
+          "施術中の雰囲気がよくリラックスできた",
+          "自宅ケアについての説明も丁寧だった",
+          "その他"
+        ],
+        "improvementOptions": [
+          "料金プランについての説明が不明瞭だと思った",
+          "自宅ケアについてもっと教えてほしかった",
+          "オフ時ダメージ対策についてもっと教えてほしかった",
+          "その他"
+        ]
+      },
+      {
+        "key": "herbScalp",
+        "label": "ハーブマジック頭皮洗浄",
+        "satisfiedOptions": [
+          "根元がふんわり軽くなったと感じた",
+          "頭皮への刺激・ダメージについて丁寧な説明があった",
+          "ツヤやハリが増したと感じた",
+          "香りに癒されリラックスできた",
+          "その他"
+        ],
+        "improvementOptions": [
+          "ハーブブレンドについてもっと説明してほしかった",
+          "ホームケアについてもっと教えてほしかった",
+          "施術中にあまりリラックスできなかった",
+          "その他"
+        ]
+      },
+      {
+        "key": "headBathAroma",
+        "label": "頭浸浴&アロマセラピスパ",
+        "satisfiedOptions": [
+          "頭湯で血行促進し癒された",
+          "アロマ香に包まれリラックスできた",
+          "首頭コリがほぐれスッキリした",
+          "セルフケアについてのアドバイスが丁寧で的確だった",
+          "その他"
+        ],
+        "improvementOptions": [
+          "香りの選択肢をもっと増やして欲しい",
+          "温度や時間を個別調整して欲しい",
+          "音楽などの癒し演出が欲しいと思った",
+          "その他"
+        ]
+      },
+      {
+        "key": "fatFreeze",
+        "label": "脂肪冷却マシーン",
+        "satisfiedOptions": [
+          "部分脂肪を集中ケアできた",
+          "痛み熱さが少なく楽だった",
+          "仕組みについての説明が丁寧で安心した",
+          "セルライト改善を実感できた",
+          "その他"
+        ],
+        "improvementOptions": [
+          "赤みや違和感についてもっと説明してほしかった",
+          "割引プランを充実させて欲しい",
+          "効果期間についてもっと説明して欲しい",
+          "施術中快適に過ごせるようなサービスをしてほしい",
+          "その他"
+        ]
+      }
+    ]
+  }
+  

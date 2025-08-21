@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 
@@ -25,8 +25,8 @@ const GoogleAccount: React.FC = () => {
     process.env.REACT_APP_GMAP_REVIEW_URL || 'https://www.google.com/maps';
   const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
 
-  // SurveyConfigを読み込み
-  const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
+  // SurveyConfigを読み込み（stateから優先取得、フォールバック対応）
+  const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(state?.surveyConfig || null);
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
@@ -34,23 +34,40 @@ const GoogleAccount: React.FC = () => {
   const [actionType, setActionType] = useState<'back' | 'next' | null>(null);
 
   useEffect(() => {
-    getSurveyConfig().then(config => {
-      setSurveyConfig(config);
-    });
-  }, []);
+    // stateからsurveyConfigが渡されていない場合のみ読み込み
+    if (!surveyConfig) {
+      getSurveyConfig().then(config => {
+        setSurveyConfig(config);
+      });
+    }
+  }, [surveyConfig]);
 
   // serviceKey -> label を返すヘルパー
-  const getLabelFromKey = (key: ServiceKey): string => {
+  const getLabelFromKey = useCallback((key: ServiceKey): string => {
     if (!surveyConfig) return '';
-    const found = surveyConfig.serviceDefinitions.find((item) => item.key === key);
+    const found = surveyConfig.serviceDefinitions.find((item: any) => item.key === key);
     return found ? found.label : '';
-  };
+  }, [surveyConfig]);
 
-  // usagePurpose は serviceKey[] (SurveyForm.tsx でそう送ってきた想定)
-  const usagePurposeKeys: ServiceKey[] = state?.usagePurpose || [];
+  // 新しい形式と従来形式の両方をサポート
+  const usagePurposeKeys: ServiceKey[] = useMemo(() => {
+    // 新しい形式（UnifiedSurveyから渡される）
+    if (state?.usagePurpose) {
+      return state.usagePurpose;
+    }
+    // 従来形式のフォールバック
+    return [];
+  }, [state?.usagePurpose]);
 
-  // usagePurposeKeys をラベルに変換した配列
-  const usagePurposeLabels = usagePurposeKeys.map((key) => getLabelFromKey(key));
+  // usagePurposeKeys をラベルに変換した配列（新しい形式優先）
+  const usagePurposeLabels = useMemo(() => {
+    // 新しい形式で既にラベルが渡されている場合はそれを使用
+    if (state?.usagePurposeLabels && Array.isArray(state.usagePurposeLabels)) {
+      return state.usagePurposeLabels;
+    }
+    // キーからラベルに変換
+    return usagePurposeKeys.map((key) => getLabelFromKey(key));
+  }, [usagePurposeKeys, state?.usagePurposeLabels, getLabelFromKey]);
 
   // 必要であればデストラクチャリングしておく
   const {
@@ -63,9 +80,6 @@ const GoogleAccount: React.FC = () => {
     willReturn,
     satisfaction,
     feedback,
-    isNewCustomer,
-    isSecondVisit,
-    isRepeater,
     returnReasons,
     otherReturnReasons,
     otherSatisfaction,
@@ -106,6 +120,8 @@ const GoogleAccount: React.FC = () => {
           ...state, // 全ての状態を保持
           hasGoogleAccount,
           feedback,
+          // responsesが存在する場合は明示的に保持
+          responses: state?.responses || {},
         },
         replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
       });
@@ -165,6 +181,10 @@ const GoogleAccount: React.FC = () => {
     setIsNavigating(true);
 
     const data = {
+      // 新しい形式のデータを優先
+      ...state, // 全ての状態を引き継ぎ
+      hasGoogleAccount,
+      // 従来形式も保持（後方互換性）
       customerType,
       heardFrom,
       otherHeardFrom,
@@ -174,20 +194,17 @@ const GoogleAccount: React.FC = () => {
       satisfaction,
       otherSatisfaction,
       feedback,
-      isNewCustomer,
-      isSecondVisit,
-      isRepeater,
+      isNewCustomer: state?.customerType === 'new',
+      isSecondVisit: state?.customerType === 'second-visit',
+      isRepeater: state?.customerType === 'repeater',
       returnReasons,
       otherReturnReasons,
-      hasGoogleAccount,
-      ...(isNewCustomer ? {} : {
-        usagePurpose: usagePurposeKeys,
-        usagePurposeLabels,
-        satisfiedPoints: satisfiedPoints || {},
-        improvementPoints: improvementPoints || {},
-        otherSatisfiedPoints: otherSatisfiedPoints || {},
-        otherImprovementPoints: otherImprovementPoints || {},
-      }),
+      usagePurpose: usagePurposeKeys,
+      usagePurposeLabels,
+      satisfiedPoints: satisfiedPoints || {},
+      improvementPoints: improvementPoints || {},
+      otherSatisfiedPoints: otherSatisfiedPoints || {},
+      otherImprovementPoints: otherImprovementPoints || {},
     };
 
     // 送信データの確認
@@ -206,11 +223,9 @@ const GoogleAccount: React.FC = () => {
         // AWS SESバックエンド（Lambda）のためにデータ構造を整える
         const submitData = {
           ...data,
-          // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
-          ...(isNewCustomer ? {} : {
-            usagePurposeKeys: data.usagePurpose,
-            usagePurposeLabels: data.usagePurposeLabels,
-          }),
+          // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している（後方互換性）
+          usagePurposeKeys: data.usagePurpose,
+          usagePurposeLabels: data.usagePurposeLabels,
           // GoogleMapの口コミとしての投稿であることを示す
           isGoogleReview: true
         };
@@ -246,9 +261,9 @@ const GoogleAccount: React.FC = () => {
     actionType,
     hasGoogleAccount,
     apiEndpoint,
-    isNewCustomer,
     navigate,
     googleReviewUrl,
+    customerType,
     heardFrom,
     otherHeardFrom,
     impressionRatings,
@@ -259,6 +274,13 @@ const GoogleAccount: React.FC = () => {
     usagePurposeLabels,
     satisfiedPoints,
     improvementPoints,
+    otherImprovementPoints,
+    otherReturnReasons,
+    otherSatisfaction,
+    otherSatisfiedPoints,
+    otherWillReturn,
+    returnReasons,
+    state
   ]);
 
   if (!surveyConfig) {

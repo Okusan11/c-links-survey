@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Typography } from '@mui/material';
 import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 import { AlertCircle } from 'lucide-react';
 
@@ -11,12 +10,11 @@ import FormButtons from './common/FormButtons';
 import RequiredBadge from './common/RequiredBadge';
 import { ProgressBar } from './common/ProgressBar';
 
-// UI コンポーネント
-import { Textarea } from '../ui/textarea';
-
 const ReviewForm: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
+  
+  // 新しいSurveyConfig形式に対応（state内の全ての値を適切に受け取り、引き継ぎ）
   const [feedback, setFeedback] = useState<string>(state?.feedback || '');
   const [error, setError] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
@@ -49,10 +47,13 @@ const ReviewForm: React.FC = () => {
     // 即座にナビゲーションを実行（遅延を削除）
     try {
       // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
+      // 新しいSurveyConfig形式の全ての状態を適切に引き継ぎ
       navigate('/googleaccount', {
         state: {
-          ...state,
+          ...state, // responses、surveyConfig、その他全ての状態を保持
           feedback,
+          // responsesが存在する場合は明示的に保持
+          responses: state?.responses || {},
         },
         replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
       });
@@ -100,10 +101,10 @@ const ReviewForm: React.FC = () => {
     setIsNavigating(true);
 
     try {
-      // 確認画面へ遷移
+      // 確認画面へ遷移（新しいSurveyConfig形式の全ての状態を引き継ぎ）
       navigate('/confirmation', {
         state: {
-          ...state,
+          ...state, // responses、surveyConfig、その他全ての状態を保持
           feedback,
         },
         replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする

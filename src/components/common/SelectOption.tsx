@@ -7,7 +7,7 @@ interface SelectOptionProps {
   children: React.ReactNode;
   icon?: React.ReactNode;
   description?: string;
-  variant?: 'default' | 'enhanced';
+  variant?: 'default' | 'enhanced' | 'checkbox';
   className?: string;
 }
 
@@ -54,6 +54,22 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       iconUnselected: "text-primary/60 group-hover:text-primary/80",
       checkmark: "absolute top-2 right-2 w-6 h-6 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-medium animate-scale-in",
       checkmarkIcon: "w-3.5 h-3.5"
+    },
+    checkbox: {
+      container: "gap-3 p-3 rounded-lg border-2 transition-all",
+      selected: "border-primary bg-primary/5",
+      unselected: "border-transparent hover:border-gray-200 hover:bg-accent/10",
+      indicator: "flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center",
+      indicatorSelected: "border-primary bg-primary",
+      indicatorUnselected: "border-gray-300",
+      indicatorDot: "w-2 h-2",
+      text: "text-base leading-normal cursor-pointer",
+      textSelected: "text-gray-900",
+      textUnselected: "text-gray-700",
+      iconSelected: "text-primary",
+      iconUnselected: "text-gray-500",
+      checkmark: "hidden",
+      checkmarkIcon: "w-2.5 h-2.5"
     }
   };
 
@@ -74,7 +90,19 @@ const SelectOption: React.FC<SelectOptionProps> = ({
         styles.indicator,
         selected ? styles.indicatorSelected : styles.indicatorUnselected
       )}>
-        {selected && (
+        {selected && variant === 'checkbox' ? (
+          <svg 
+            viewBox="0 0 24 24"
+            width="10"
+            height="10"
+            stroke="currentColor" 
+            strokeWidth="3" 
+            fill="none" 
+            className="text-white"
+          >
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        ) : selected && (
           <div className={styles.indicatorDot} />
         )}
       </div>
@@ -110,7 +138,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       </div>
       
       {/* 選択時のチェックマーク */}
-      {selected && (
+      {selected && variant !== 'checkbox' && (
         <div className={styles.checkmark}>
           <svg 
             viewBox="0 0 24 24"

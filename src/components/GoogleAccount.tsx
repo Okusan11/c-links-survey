@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { cn } from '../lib/utils';
+import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 
 // 共通コンポーネントのインポート
 import PageLayout from './common/PageLayout';
@@ -10,7 +10,7 @@ import RequiredBadge from './common/RequiredBadge';
 import { ProgressBar } from './common/ProgressBar';
 
 // アイコン
-import { Info, AlertCircle } from 'lucide-react';
+import { Info, AlertCircle, X } from 'lucide-react';
 
 // 型とデータのインポート
 import { getSurveyConfig } from '../config/surveyConfig';
@@ -25,35 +25,53 @@ const GoogleAccount: React.FC = () => {
     process.env.REACT_APP_GMAP_REVIEW_URL || 'https://www.google.com/maps';
   const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
 
-  // SurveyConfigを読み込み
-  const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
+  // SurveyConfigを読み込み（stateから優先取得、フォールバック対応）
+  const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(state?.surveyConfig || null);
   const [hasGoogleAccount, setHasGoogleAccount] = useState<string>(state?.hasGoogleAccount || '');
-  const [showGoogleConfirmation, setShowGoogleConfirmation] = useState<boolean>(false);
+  const [showPopup, setShowPopup] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'back' | 'next' | null>(null);
 
   useEffect(() => {
-    getSurveyConfig().then(config => {
-      setSurveyConfig(config);
-    });
-  }, []);
+    // stateからsurveyConfigが渡されていない場合のみ読み込み
+    if (!surveyConfig) {
+      getSurveyConfig().then(config => {
+        setSurveyConfig(config);
+      });
+    }
+  }, [surveyConfig]);
 
   // serviceKey -> label を返すヘルパー
-  const getLabelFromKey = (key: ServiceKey): string => {
+  const getLabelFromKey = useCallback((key: ServiceKey): string => {
     if (!surveyConfig) return '';
-    const found = surveyConfig.serviceDefinitions.find((item) => item.key === key);
+    const found = surveyConfig.serviceDefinitions.find((item: any) => item.key === key);
     return found ? found.label : '';
-  };
+  }, [surveyConfig]);
 
-  // usagePurpose は serviceKey[] (SurveyForm.tsx でそう送ってきた想定)
-  const usagePurposeKeys: ServiceKey[] = state?.usagePurpose || [];
+  // 新しい形式と従来形式の両方をサポート
+  const usagePurposeKeys: ServiceKey[] = useMemo(() => {
+    // 新しい形式（UnifiedSurveyから渡される）
+    if (state?.usagePurpose) {
+      return state.usagePurpose;
+    }
+    // 従来形式のフォールバック
+    return [];
+  }, [state?.usagePurpose]);
 
-  // usagePurposeKeys をラベルに変換した配列
-  const usagePurposeLabels = usagePurposeKeys.map((key) => getLabelFromKey(key));
+  // usagePurposeKeys をラベルに変換した配列（新しい形式優先）
+  const usagePurposeLabels = useMemo(() => {
+    // 新しい形式で既にラベルが渡されている場合はそれを使用
+    if (state?.usagePurposeLabels && Array.isArray(state.usagePurposeLabels)) {
+      return state.usagePurposeLabels;
+    }
+    // キーからラベルに変換
+    return usagePurposeKeys.map((key) => getLabelFromKey(key));
+  }, [usagePurposeKeys, state?.usagePurposeLabels, getLabelFromKey]);
 
   // 必要であればデストラクチャリングしておく
   const {
+    customerType,
     heardFrom,
     otherHeardFrom,
     satisfiedPoints,
@@ -62,13 +80,19 @@ const GoogleAccount: React.FC = () => {
     willReturn,
     satisfaction,
     feedback,
-    isNewCustomer
+    returnReasons,
+    otherReturnReasons,
+    otherSatisfaction,
+    otherWillReturn,
+    otherSatisfiedPoints,
+    otherImprovementPoints
   } = state || {};
 
   // 戻るボタン - スマホフレンドリーに改善
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
     // 既にナビゲーション中の場合は処理しない
     if (isNavigating) {
+      console.log('Navigation already in progress, ignoring back button');
       return;
     }
 
@@ -76,66 +100,45 @@ const GoogleAccount: React.FC = () => {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
+      // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
+      if ('stopImmediatePropagation' in event.nativeEvent) {
+        event.nativeEvent.stopImmediatePropagation();
+      }
     }
 
-    // 戻るボタンが押されたことを明示
+    console.log('Back button clicked, navigating to survey');
+
+    // 戻るボタンが押されたことを即座に明示
     setActionType('back');
     setIsNavigating(true);
 
+    // 即座にナビゲーションを実行（遅延を削除）
     try {
-      // 新規・リピーターで適切な画面に戻る
-      if (isNewCustomer) {
-        // 新規のお客様は新規アンケート画面に戻る
-        navigate('/new-customer', {
-          state: {
-            heardFrom,
-            otherHeardFrom,
-            impressionRatings,
-            willReturn,
-            hasGoogleAccount,
-            feedback,
-          },
-          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-        });
-      } else {
-        // リピーターのお客様はリピーターアンケート画面に戻る
-        navigate('/repeater-customer', {
-          state: {
-            satisfaction,
-            usagePurpose: usagePurposeKeys,
-            usagePurposeLabels,
-            satisfiedPoints: satisfiedPoints || {},
-            improvementPoints: improvementPoints || {},
-            hasGoogleAccount,
-            feedback,
-          },
-          replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
-        });
-      }
+      // 統合アンケート画面に戻る（全ての顧客タイプで共通）
+      navigate('/survey', {
+        state: {
+          ...state, // 全ての状態を保持
+          hasGoogleAccount,
+          feedback,
+          // responsesが存在する場合は明示的に保持
+          responses: state?.responses || {},
+        },
+        replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
+      });
     } catch (error) {
       console.error('ナビゲーションエラー:', error);
       // エラーが発生した場合はフラグをリセット
       setIsNavigating(false);
       setActionType(null);
     }
-  }, [
-    isNavigating,
-    actionType,
-    isNewCustomer,
-    navigate,
-    heardFrom,
-    otherHeardFrom,
-    impressionRatings,
-    willReturn,
-    hasGoogleAccount,
-    feedback,
-    satisfaction,
-    usagePurposeKeys,
-    usagePurposeLabels,
-    satisfiedPoints,
-    improvementPoints,
-  ]);
+  }, [navigate, state, hasGoogleAccount, feedback, isNavigating]);
   
+  // ポップアップを閉じる
+  const handleClosePopup = useCallback(() => {
+    setShowPopup(false);
+    setHasGoogleAccount('yes-confirmed');
+  }, []);
+
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.FormEvent | React.MouseEvent | React.TouchEvent) => {
     // 既にナビゲーション中、または戻るボタンが押された場合は処理しない
@@ -149,15 +152,27 @@ const GoogleAccount: React.FC = () => {
       event.stopPropagation();
     }
 
+    // エラー状態をリセット
+    const newErrors = {
+      hasGoogleAccount: false
+    };
+
     // バリデーション: Googleアカウントの選択状況をチェック
     if (!hasGoogleAccount) {
-      setError(true);
-      return;
+      newErrors.hasGoogleAccount = true;
     }
 
     // 「はい、持っています」を選択したが確認していない場合のエラー
     if (hasGoogleAccount === 'yes') {
+      newErrors.hasGoogleAccount = true;
+    }
+
+    // エラーがあれば最初のエラー項目にスクロール
+    if (hasErrors(newErrors)) {
       setError(true);
+      scrollToFirstError(newErrors, {
+        hasGoogleAccount: '[data-question="google-account"]'
+      });
       return;
     }
 
@@ -166,20 +181,30 @@ const GoogleAccount: React.FC = () => {
     setIsNavigating(true);
 
     const data = {
+      // 新しい形式のデータを優先
+      ...state, // 全ての状態を引き継ぎ
+      hasGoogleAccount,
+      // 従来形式も保持（後方互換性）
+      customerType,
       heardFrom,
       otherHeardFrom,
       impressionRatings,
       willReturn,
+      otherWillReturn,
       satisfaction,
+      otherSatisfaction,
       feedback,
-      isNewCustomer,
-      hasGoogleAccount,
-      ...(isNewCustomer ? {} : {
-        usagePurpose: usagePurposeKeys,
-        usagePurposeLabels,
-        satisfiedPoints: satisfiedPoints || {},
-        improvementPoints: improvementPoints || {},
-      }),
+      isNewCustomer: state?.customerType === 'new',
+      isSecondVisit: state?.customerType === 'second-visit',
+      isRepeater: state?.customerType === 'repeater',
+      returnReasons,
+      otherReturnReasons,
+      usagePurpose: usagePurposeKeys,
+      usagePurposeLabels,
+      satisfiedPoints: satisfiedPoints || {},
+      improvementPoints: improvementPoints || {},
+      otherSatisfiedPoints: otherSatisfiedPoints || {},
+      otherImprovementPoints: otherImprovementPoints || {},
     };
 
     // 送信データの確認
@@ -198,11 +223,9 @@ const GoogleAccount: React.FC = () => {
         // AWS SESバックエンド（Lambda）のためにデータ構造を整える
         const submitData = {
           ...data,
-          // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している
-          ...(isNewCustomer ? {} : {
-            usagePurposeKeys: data.usagePurpose,
-            usagePurposeLabels: data.usagePurposeLabels,
-          }),
+          // バックエンドがusagePurposeKeysとusagePurposeLabelsを期待している（後方互換性）
+          usagePurposeKeys: data.usagePurpose,
+          usagePurposeLabels: data.usagePurposeLabels,
           // GoogleMapの口コミとしての投稿であることを示す
           isGoogleReview: true
         };
@@ -238,9 +261,9 @@ const GoogleAccount: React.FC = () => {
     actionType,
     hasGoogleAccount,
     apiEndpoint,
-    isNewCustomer,
     navigate,
     googleReviewUrl,
+    customerType,
     heardFrom,
     otherHeardFrom,
     impressionRatings,
@@ -251,6 +274,13 @@ const GoogleAccount: React.FC = () => {
     usagePurposeLabels,
     satisfiedPoints,
     improvementPoints,
+    otherImprovementPoints,
+    otherReturnReasons,
+    otherSatisfaction,
+    otherSatisfiedPoints,
+    otherWillReturn,
+    returnReasons,
+    state
   ]);
 
   if (!surveyConfig) {
@@ -345,28 +375,73 @@ const GoogleAccount: React.FC = () => {
     </div>
   );
 
-  return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      // 戻るボタンが押された場合はsubmitを無視
-      if (actionType === 'back') {
-        return;
-      }
-      handleNext(e);
-    }}>
-      <PageLayout
-        title="Google Map口コミ投稿のご依頼"
-        subtitle={subtitle}
-      >
-        <ProgressBar 
-          currentStep={2} 
-          totalSteps={3} 
-          steps={progressSteps}
-        />
-        
-        <QuestionBox>
-          <div className="space-y-8">
-            <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
+    return (
+    <>
+      {/* ポップアップ */}
+      {showPopup && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={handleClosePopup}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-blue-100 rounded-lg mt-1 flex-shrink-0">
+                  <Info className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    ご確認をお願いいたします
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    お客様のGoogleアカウント名での投稿となります。<br/>
+                    もし、アカウント名を公開したくない場合は「いいえ、持っていません」を選択し、感想はアンケート内にご記入いただけますと幸いです。
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleClosePopup}
+              className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
+        if (actionType === 'back' || isNavigating) {
+          console.log('Form submit ignored due to back action or navigation in progress');
+          return;
+        }
+        // フォーカスされた要素が戻るボタンの場合もsubmitを無視
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.textContent?.includes('戻る')) {
+          console.log('Form submit ignored due to back button focus');
+          return;
+        }
+        handleNext(e);
+      }}>
+        <PageLayout
+          title="Google Map口コミ投稿のご依頼"
+          subtitle={subtitle}
+        >
+          <ProgressBar 
+            currentStep={2} 
+            totalSteps={3} 
+            steps={progressSteps}
+          />
+          
+          <QuestionBox>
+            <div className="space-y-8">
+                          <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100" data-question="google-account">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                 <Info className="h-5 w-5 text-primary" />
               </div>
@@ -378,79 +453,61 @@ const GoogleAccount: React.FC = () => {
                 <p className="text-[14px] text-gray-500 mt-1 leading-relaxed">口コミを投稿するにはGoogleアカウントが必要です</p>
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectOption
-                selected={hasGoogleAccount === 'yes' || hasGoogleAccount === 'yes-confirmed'}
-                onClick={() => {
-                  if (hasGoogleAccount !== 'yes' && hasGoogleAccount !== 'yes-confirmed') {
-                    setHasGoogleAccount('yes-confirmed');
-                    setShowGoogleConfirmation(true);
-                  }
-                  setError(false);
-                }}
-              >
-                はい、持っています
-              </SelectOption>
-              <SelectOption
-                selected={hasGoogleAccount === 'no'}
-                onClick={() => {
-                  setHasGoogleAccount('no');
-                  setShowGoogleConfirmation(false);
-                  setError(false);
-                }}
-              >
-                いいえ、持っていません
-              </SelectOption>
-            </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SelectOption
+                  selected={hasGoogleAccount === 'yes' || hasGoogleAccount === 'yes-confirmed'}
+                  onClick={() => {
+                    setHasGoogleAccount('yes');
+                    setShowPopup(true);
+                    setError(false);
+                  }}
+                >
+                  はい、持っています
+                </SelectOption>
+                <SelectOption
+                  selected={hasGoogleAccount === 'no'}
+                  onClick={() => {
+                    setHasGoogleAccount('no');
+                    setShowPopup(false);
+                    setError(false);
+                  }}
+                >
+                  いいえ、持っていません
+                </SelectOption>
+              </div>
 
-            {/* Google確認メッセージ - 優しいトーン */}
-            {showGoogleConfirmation && (
-              <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 animate-in slide-in-from-top-2 duration-300">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg mt-1">
-                    <Info className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1 space-y-4">
-                    <div>
-                      <p className="text-gray-600 text-sm leading-relaxed">
-                        お客様のGoogleアカウント名での投稿となります。<br/>
-                        お名前を公開したくない場合は「いいえ、持っていません」を選択し、感想はアンケート内にご記入いただけますと幸いです。
-                      </p>
-                    </div>
-                  </div>
+   
+              
+              {error && (
+                <div className="flex items-center gap-2 text-destructive mt-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <p className="text-[14px]">
+                    {hasGoogleAccount === 'yes' ? 'ご確認をお願いいたします' : '選択してください'}
+                  </p>
                 </div>
-              </div>
-            )}
-            
-            {error && (
-              <div className="flex items-center gap-2 text-destructive mt-2">
-                <AlertCircle className="h-4 w-4" />
-                <p className="text-[14px]">
-                  {hasGoogleAccount === 'yes' ? 'ご確認をお願いいたします' : '選択してください'}
-                </p>
-              </div>
-            )}
-          </div>
-        </QuestionBox>
+              )}
+            </div>
+          </QuestionBox>
 
-        <FormButtons 
-          onBack={handleBack} 
-          onNext={handleNext} 
-          backButtonText={
-            isNavigating && actionType === 'back' ? '処理中...' : '戻る'
-          }
-          nextButtonText={
-            isNavigating && actionType === 'next'
-              ? '処理中...' 
-              : hasGoogleAccount === 'yes-confirmed' 
-                ? 'Google Mapへ' 
-                : '感想入力画面へ'
-          }
-          disabled={isNavigating}
-        />
-      </PageLayout>
-    </form>
+          <FormButtons 
+            onBack={handleBack} 
+            onNext={handleNext} 
+            backButtonText={
+              isNavigating && actionType === 'back' ? '処理中...' : '戻る'
+            }
+            nextButtonText={
+              isNavigating && actionType === 'next'
+                ? '処理中...' 
+                : hasGoogleAccount === 'yes-confirmed' 
+                  ? 'Google Mapへ' 
+                  : '感想入力画面へ'
+            }
+            disabled={isNavigating}
+          />
+        </PageLayout>
+      </form>
+    </>
   );
 };
 

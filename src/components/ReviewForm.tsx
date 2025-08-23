@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Typography } from '@mui/material';
-import { cn } from '../lib/utils';
+import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 import { AlertCircle } from 'lucide-react';
 
 // 共通コンポーネントのインポート
@@ -11,12 +10,11 @@ import FormButtons from './common/FormButtons';
 import RequiredBadge from './common/RequiredBadge';
 import { ProgressBar } from './common/ProgressBar';
 
-// UI コンポーネント
-import { Textarea } from '../ui/textarea';
-
 const ReviewForm: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
+  
+  // 新しいSurveyConfig形式に対応（state内の全ての値を適切に受け取り、引き継ぎ）
   const [feedback, setFeedback] = useState<string>(state?.feedback || '');
   const [error, setError] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
@@ -26,6 +24,7 @@ const ReviewForm: React.FC = () => {
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
     // 既にナビゲーション中の場合は処理しない
     if (isNavigating) {
+      console.log('Navigation already in progress, ignoring back button');
       return;
     }
 
@@ -33,18 +32,28 @@ const ReviewForm: React.FC = () => {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
+      // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
+      if ('stopImmediatePropagation' in event.nativeEvent) {
+        event.nativeEvent.stopImmediatePropagation();
+      }
     }
 
-    // 戻るボタンが押されたことを明示
+    console.log('Back button clicked, navigating to google account');
+
+    // 戻るボタンが押されたことを即座に明示
     setActionType('back');
     setIsNavigating(true);
 
+    // 即座にナビゲーションを実行（遅延を削除）
     try {
       // Google確認画面に戻る際に、現在のフィードバックを含めて状態を保持
+      // 新しいSurveyConfig形式の全ての状態を適切に引き継ぎ
       navigate('/googleaccount', {
         state: {
-          ...state,
+          ...state, // responses、surveyConfig、その他全ての状態を保持
           feedback,
+          // responsesが存在する場合は明示的に保持
+          responses: state?.responses || {},
         },
         replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
       });
@@ -54,7 +63,7 @@ const ReviewForm: React.FC = () => {
       setIsNavigating(false);
       setActionType(null);
     }
-  }, [isNavigating, navigate, state, feedback]);
+  }, [navigate, state, feedback, isNavigating]);
 
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.MouseEvent | React.FormEvent | React.TouchEvent) => {
@@ -69,8 +78,21 @@ const ReviewForm: React.FC = () => {
       event.stopPropagation();
     }
 
+    // エラー状態をリセット
+    const newErrors = {
+      feedback: false
+    };
+
     if (!feedback.trim()) {
+      newErrors.feedback = true;
+    }
+
+    // エラーがあれば最初のエラー項目にスクロール
+    if (hasErrors(newErrors)) {
       setError(true);
+      scrollToFirstError(newErrors, {
+        feedback: '[data-question="feedback"]'
+      });
       return;
     }
 
@@ -79,10 +101,10 @@ const ReviewForm: React.FC = () => {
     setIsNavigating(true);
 
     try {
-      // 確認画面へ遷移
+      // 確認画面へ遷移（新しいSurveyConfig形式の全ての状態を引き継ぎ）
       navigate('/confirmation', {
         state: {
-          ...state,
+          ...state, // responses、surveyConfig、その他全ての状態を保持
           feedback,
         },
         replace: true, // ブラウザの戻るボタンでこの画面に戻らないようにする
@@ -114,8 +136,15 @@ const ReviewForm: React.FC = () => {
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      // 戻るボタンが押された場合はsubmitを無視
-      if (actionType === 'back') {
+      // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
+      if (actionType === 'back' || isNavigating) {
+        console.log('Form submit ignored due to back action or navigation in progress');
+        return;
+      }
+      // フォーカスされた要素が戻るボタンの場合もsubmitを無視
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.textContent?.includes('戻る')) {
+        console.log('Form submit ignored due to back button focus');
         return;
       }
       handleNext(e);
@@ -132,7 +161,7 @@ const ReviewForm: React.FC = () => {
 
         <QuestionBox>
           <div className="space-y-4">
-            <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100">
+            <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100" data-question="feedback">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
                 <AlertCircle className="h-5 w-5 text-primary" />
               </div>

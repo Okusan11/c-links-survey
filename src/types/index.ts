@@ -9,29 +9,202 @@ export interface ServiceDefinition {
   improvementOptions: string[];
 }
 
-// 印象評価のカテゴリと評価オプション
-export interface ImpressionEvaluation {
+// ============================================
+// 新しい柔軟な質問カードシステム（V2）
+// ============================================
+
+// 質問カードの種類
+export type QuestionCardType = 
+  | 'single-choice'      // 単一選択（ラジオボタン）
+  | 'multiple-choice'    // 複数選択（チェックボックス）
+  | 'rating-scale'       // 印象評価/レーティング
+  | 'text-input'         // 自由記述
+  | 'service-evaluation' // サービス別評価
+  | 'service-usage'      // サービス利用選択
+  | 'date-time'          // 日時選択
+  | 'customer-type';     // 顧客タイプ選択（特別な単一選択）
+
+// 選択肢の定義
+export interface ChoiceOption {
+  value: string;
+  label: string;
+  icon?: string;  // アイコン名（Lucide Reactのアイコン名）
+  description?: string;
+  isOther?: boolean;  // 「その他」選択肢フラグ
+}
+
+// レーティングカテゴリの定義
+export interface RatingCategory {
   category: string;
   ratingOptions: string[];
 }
 
-// 新規のお客様向けアンケートの選択肢
-export interface NewCustomerOptions {
-  heardFromOptions: string[]; // どこで知ったか
-  impressionEvaluations: ImpressionEvaluation[]; // 印象評価（カテゴリごと）
-  willReturnOptions: string[]; // また来たいと思うか
+// 条件表示の設定
+export interface ConditionalDisplay {
+  dependsOn: string;  // 依存する質問のID
+  showWhen: string | string[];  // 表示条件となる値
 }
 
-// リピーター向けアンケートの選択肢
-export interface RepeaterOptions {
-  satisfactionOptions: string[]; // 前回と比べた満足度
+// カードタイプ別のオプション設定
+export interface SingleChoiceOptions {
+  choices: ChoiceOption[];
+  variant?: 'default' | 'enhanced';
+  otherLabel?: string;  // 「その他」選択肢のテキスト入力ラベル
+  otherPlaceholder?: string;  // 「その他」選択肢のプレースホルダー
 }
 
-// SSMに格納したJSON全体を受け取るための型
+export interface MultipleChoiceOptions {
+  choices: ChoiceOption[];
+  maxSelections?: number;  // 最大選択数制限
+  otherLabel?: string;  // 「その他」選択肢のテキスト入力ラベル
+  otherPlaceholder?: string;  // 「その他」選択肢のプレースホルダー
+}
+
+// レーティングスケールの種類
+export type RatingScaleType = '3-point' | '5-point';
+
+// レーティングスケールのプリセット設定
+export interface RatingScalePreset {
+  type: RatingScaleType;
+  options: Array<{
+    value: string;
+    label: string;
+    emoji: string;
+    color: {
+      selected: string;
+      unselected: string;
+      hover: string;
+    };
+  }>;
+}
+
+export interface RatingScaleOptions {
+  categories: RatingCategory[];
+  preset?: RatingScaleType; // プリセットタイプ（3段階 or 5段階）
+}
+
+export interface TextInputOptions {
+  placeholder?: string;
+  maxLength?: number;
+  multiline?: boolean;
+}
+
+export interface ServiceEvaluationOptions {
+  serviceKey: ServiceKey;
+  evaluationType: 'satisfaction' | 'improvement' | 'both';
+}
+
+export interface ServiceUsageOptions {
+  availableServices: string[]; // 利用可能なサービス一覧
+}
+
+export interface DateTimeOptions {
+  format: 'date' | 'time' | 'datetime';
+  minDate?: string;
+  maxDate?: string;
+}
+
+export interface CustomerTypeOptions {
+  types: Array<{
+    value: 'new' | 'second-visit' | 'repeater';
+    label: string;
+    icon: string;
+  }>;
+}
+
+// 「その他」選択肢のレスポンス型
+export interface SingleChoiceResponse {
+  value: string;
+  otherText?: string;  // 「その他」が選択された場合のテキスト
+}
+
+export interface MultipleChoiceResponse {
+  values: string[];
+  otherText?: string;  // 「その他」が選択された場合のテキスト
+}
+
+// すべてのオプション型のユニオン
+export type QuestionOptions = 
+  | SingleChoiceOptions
+  | MultipleChoiceOptions  
+  | RatingScaleOptions
+  | TextInputOptions
+  | ServiceEvaluationOptions
+  | ServiceUsageOptions
+  | DateTimeOptions
+  | CustomerTypeOptions;
+
+// 質問カード定義
+export interface QuestionCard {
+  id: string;
+  type: QuestionCardType;
+  title: string;
+  description?: string;
+  required: boolean;
+  conditionalDisplay?: ConditionalDisplay;
+  options: QuestionOptions;
+  validation?: {
+    minSelections?: number;
+    maxSelections?: number;
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string;  // 正規表現パターン
+  };
+}
+
+
+// ============================================
+// 新しい柔軟なアンケート設定構造（V2）
+// ============================================
+
+// 顧客タイプの定義
+export type CustomerType = 'new' | 'second-visit' | 'repeater';
+
+// 質問フローの定義（顧客タイプごとの質問順序）
+export type QuestionFlow = {
+  [K in CustomerType]: string[];  // 質問IDの配列
+};
+
+// アンケートテンプレートの定義
+export interface SurveyTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;  // 例: 'beauty-salon', 'restaurant', 'retail'
+  questionCards: QuestionCard[];
+  questionFlow: QuestionFlow;
+}
+
+// アンケート設定構造
 export interface SurveyConfig {
-  serviceDefinitions: ServiceDefinition[];
-  newCustomerOptions: NewCustomerOptions;
-  repeaterOptions: RepeaterOptions;
+  version: '2.0';
+  meta: {
+    createdAt: string;
+    updatedAt: string;
+    title: string;
+    description?: string;
+  };
+  customerTypes: CustomerType[];
+  questionFlow: QuestionFlow;
+  questionCards: QuestionCard[];
+  serviceDefinitions: ServiceDefinition[];  // 後方互換性のため保持
+  templates?: {
+    [templateId: string]: SurveyTemplate;
+  };
+  settings?: {
+    allowSkipOptional?: boolean;
+    showProgress?: boolean;
+    theme?: {
+      primaryColor?: string;
+      accentColor?: string;
+      variant?: 'default' | 'enhanced';
+    };
+  };
+}
+
+// 設定の型ガード
+export function isSurveyConfig(config: SurveyConfig): config is SurveyConfig {
+  return 'version' in config && config.version === '2.0';
 }
 
 // 型安全性を保ちながら動的にServiceKeyを扱うためのユーティリティ型
@@ -64,17 +237,9 @@ export function getServiceDefinition(
   return serviceDefinitions.find(service => service.key === key);
 }
 
-// 訪問日の型
-export interface VisitDate {
-  year: string;
-  month: string;
-  day: string;
-}
-
 // フォームのエラー型 - 動的サービスキーに対応
 export interface FormErrors {
   heardFrom: boolean;
-  visitDate: boolean;
   usagePurpose: boolean;
   satisfiedPoints: boolean;
   improvementPoints: boolean;

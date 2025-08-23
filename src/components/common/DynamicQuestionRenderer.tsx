@@ -628,9 +628,30 @@ const ServiceEvaluationRenderer: React.FC<{
   }, [value, onChange]);
 
   // サービス定義を取得
+  console.log(`[ServiceEvaluationRenderer] サービス定義取得開始:`, {
+    serviceKey,
+    hasSurveyConfig: !!surveyConfig,
+    hasServiceDefinitions: !!(surveyConfig?.serviceDefinitions),
+    serviceDefinitionsLength: surveyConfig?.serviceDefinitions?.length || 0,
+    serviceDefinitionsKeys: surveyConfig?.serviceDefinitions?.map((s: any) => s.key) || []
+  });
+  
   const service = surveyConfig?.serviceDefinitions?.find((s: any) => s.key === serviceKey);
+  
+  console.log(`[ServiceEvaluationRenderer] サービス定義検索結果:`, {
+    serviceKey,
+    serviceFound: !!service,
+    service: service
+  });
+  
   if (!service) {
-    return <div>サービス定義が見つかりません: {serviceKey}</div>;
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-800 font-medium">サービス定義が見つかりません</p>
+        <p className="text-red-600 text-sm mt-1">サービスキー: {serviceKey}</p>
+        <p className="text-red-600 text-sm">利用可能なサービス: {surveyConfig?.serviceDefinitions?.map((s: any) => s.key).join(', ') || 'なし'}</p>
+      </div>
+    );
   }
 
   return (

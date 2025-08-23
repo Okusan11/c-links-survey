@@ -121,9 +121,10 @@
         "description": "各項目について評価してください",
         "required": true,
         "options": {
+          "preset": "3-point",
           "categories": [
             {
-              "key": "店舗の雰囲気",
+              "category": "店舗の雰囲気",
               "label": "店舗の雰囲気",
               "ratingOptions": [
                 "良い",
@@ -132,7 +133,7 @@
               ]
             },
             {
-              "key": "技術・仕上がり",
+              "category": "技術・仕上がり",
               "label": "技術・仕上がり",
               "ratingOptions": [
                 "良い",
@@ -141,7 +142,7 @@
               ]
             },
             {
-              "key": "接客サービス",
+              "category": "接客サービス",
               "label": "接客サービス",
               "ratingOptions": [
                 "良い",
@@ -150,7 +151,7 @@
               ]
             },
             {
-              "key": "メニュー料金",
+              "category": "メニュー料金",
               "label": "メニュー料金",
               "ratingOptions": [
                 "良い",
@@ -159,7 +160,7 @@
               ]
             },
             {
-              "key": "総合満足度",
+              "category": "総合満足度",
               "label": "総合満足度",
               "ratingOptions": [
                 "良い",
@@ -279,7 +280,7 @@
         "description": "複数選択可能です",
         "required": true,
         "options": {
-          "serviceKeys": [
+          "availableServices": [
             "bridalShaving",
             "browPerm",
             "lashPerm",
@@ -306,10 +307,7 @@
         },
         "options": {
           "serviceKey": "bridalShaving",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -325,10 +323,7 @@
         },
         "options": {
           "serviceKey": "browPerm",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -344,10 +339,7 @@
         },
         "options": {
           "serviceKey": "lashPerm",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -363,10 +355,7 @@
         },
         "options": {
           "serviceKey": "facialBBL",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -382,10 +371,7 @@
         },
         "options": {
           "serviceKey": "bridalSlim",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -401,10 +387,7 @@
         },
         "options": {
           "serviceKey": "waxLaser",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -420,10 +403,7 @@
         },
         "options": {
           "serviceKey": "gelNail",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -439,10 +419,7 @@
         },
         "options": {
           "serviceKey": "herbScalp",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -458,10 +435,7 @@
         },
         "options": {
           "serviceKey": "headBathAroma",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       },
       {
@@ -477,10 +451,7 @@
         },
         "options": {
           "serviceKey": "fatFreeze",
-          "evaluationType": [
-            "satisfaction",
-            "improvement"
-          ]
+          "evaluationType": "both"
         }
       }
     ],

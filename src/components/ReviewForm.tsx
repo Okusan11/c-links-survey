@@ -138,6 +138,13 @@ const ReviewForm: React.FC = () => {
       e.preventDefault();
       // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
       if (actionType === 'back' || isNavigating) {
+        console.log('Form submit ignored due to back action or navigation in progress');
+        return;
+      }
+      // フォーカスされた要素が戻るボタンの場合もsubmitを無視
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.textContent?.includes('戻る')) {
+        console.log('Form submit ignored due to back button focus');
         return;
       }
       handleNext(e);

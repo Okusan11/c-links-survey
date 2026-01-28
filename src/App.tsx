@@ -7,9 +7,29 @@ import Confirmation from './components/Confirmation';
 import Thankyou from './components/Thankyou';
 
 const App: React.FC = () => {
-  // 環境変数からベースパスを取得（店舗ID付きのパス）
-  const basename = process.env.REACT_APP_BASENAME || '';
-  
+  // URLから店舗IDを動的に検出（クエリパラメータ形式: /survey?storeId={storeId}）
+  const detectBasename = (): string => {
+    // 環境変数が設定されている場合はそれを優先
+    if (process.env.REACT_APP_BASENAME) {
+      return process.env.REACT_APP_BASENAME;
+    }
+
+    // クエリパラメータから店舗IDを検出
+    const urlParams = new URLSearchParams(window.location.search);
+    const storeId = urlParams.get('storeId');
+
+    if (storeId) {
+      console.log(`✓ Detected store from query parameter: ${storeId}`);
+      return '/survey'; // basenameは/surveyに固定
+    }
+
+    // デフォルト: basenameなし（開発環境）
+    console.log('ℹ️ No store ID detected, using root path');
+    return '';
+  };
+
+  const basename = detectBasename();
+
   return (
     <Router basename={basename}>
       <Routes>

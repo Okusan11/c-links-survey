@@ -8,7 +8,7 @@ import { ProgressBar } from './common/ProgressBar';
 
 // 型とローカル設定のインポート
 import { getSurveyConfig } from '../config/surveyConfig';
-import { 
+import {
   QuestionCard,
   CustomerType,
   SurveyConfig
@@ -19,15 +19,21 @@ import DynamicQuestionRenderer, { QuestionResponse, QuestionErrors } from './com
 
 // ユーティリティ関数
 import { saveStateToLocalStorage, loadStateFromLocalStorage } from '../lib/utils';
+import { extractStoreIdFromUrl } from '../lib/storeUtils';
+import { getStoreInfo } from '../config/storeConfig';
 
 
 const UnifiedSurvey: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
+  // 店舗情報
+  const [storeName, setStoreName] = useState<string>('');
+  const [storeId, setStoreId] = useState<string | null>(null);
+
   // アンケート設定
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
-  
+
   // 質問システム用の状態
   const [responses, setResponses] = useState<QuestionResponse>({});
   const [errors, setErrors] = useState<QuestionErrors>({});
@@ -35,10 +41,27 @@ const UnifiedSurvey: React.FC = () => {
   const [shouldScrollToError, setShouldScrollToError] = useState<string | null>(null);
 
   useEffect(() => {
+    // 店舗情報を取得
+    const currentStoreId = extractStoreIdFromUrl();
+    setStoreId(currentStoreId);
+
+    if (currentStoreId) {
+      getStoreInfo(currentStoreId).then(storeInfo => {
+        if (storeInfo) {
+          setStoreName(storeInfo.name);
+          console.log(`✓ 店舗情報を読み込みました: ${currentStoreId} - ${storeInfo.name}`);
+        } else {
+          console.warn(`⚠️ 店舗情報が見つかりません: ${currentStoreId}`);
+        }
+      });
+    } else {
+      console.log('ℹ️ URLから店舗IDを検出できませんでした（開発環境）');
+    }
+
     getSurveyConfig().then(config => {
       setSurveyConfig(config);
       console.log('✓ アンケート設定を読み込みました');
-      
+
       // 状態復元処理（優先順位: state > localStorage）
       let restoredState = null;
       
@@ -54,21 +77,45 @@ const UnifiedSurvey: React.FC = () => {
         }
       }
       
+      // customer-type質問のIDを動的に検出
+      const customerTypeQuestion = config.questionCards.find(q => q.type === 'customer-type')
+      const customerTypeQuestionId = customerTypeQuestion?.id || 'customer-type'
+      
+      // 質問モードを取得（デフォルト: customer-type-based）
+      const questionMode = config.questionMode || 'customer-type-based'
+      
       if (restoredState?.responses) {
         setResponses(restoredState.responses);
         
-        // 顧客タイプに基づいて質問フローを復元
-        const customerType = restoredState.responses['customer-type'];
-        if (customerType && config.questionFlow[customerType as CustomerType]) {
-          const restoredFlow = ['customer-type', ...config.questionFlow[customerType as CustomerType]];
-          setCurrentQuestionFlow(restoredFlow);
-          console.log(`✓ 質問フローを復元: ${customerType} ->`, restoredFlow);
+        // 共通質問モードの場合
+        if (questionMode === 'unified') {
+          // 最初の顧客タイプのフローを使用（customer-type質問は含めない）
+          const firstCustomerType = config.customerTypes[0] || Object.keys(config.questionFlow)[0] || 'new'
+          const unifiedFlow = config.questionFlow[firstCustomerType] || []
+          setCurrentQuestionFlow(unifiedFlow)
+          console.log(`✓ 共通質問モード: 質問フローを復元 ->`, unifiedFlow)
         } else {
-          setCurrentQuestionFlow(['customer-type']);
+          // 顧客タイプ別モードの場合
+          const customerType = restoredState.responses[customerTypeQuestionId]
+          if (customerType && config.questionFlow[customerType]) {
+            const restoredFlow = [customerTypeQuestionId, ...config.questionFlow[customerType]]
+            setCurrentQuestionFlow(restoredFlow)
+            console.log(`✓ 質問フローを復元: ${customerType} ->`, restoredFlow)
+          } else {
+            setCurrentQuestionFlow([customerTypeQuestionId])
+          }
         }
       } else {
-        // 初期の質問フローを設定（顧客タイプ選択前）
-        setCurrentQuestionFlow(['customer-type']);
+        // 初期の質問フローを設定
+        if (questionMode === 'unified') {
+          // 共通質問モード: customer-type質問なし
+          const firstCustomerType = config.customerTypes[0] || Object.keys(config.questionFlow)[0] || 'new'
+          const unifiedFlow = config.questionFlow[firstCustomerType] || []
+          setCurrentQuestionFlow(unifiedFlow)
+        } else {
+          // 顧客タイプ別モード: customer-type質問から開始
+          setCurrentQuestionFlow([customerTypeQuestionId])
+        }
       }
     });
   }, [state]);
@@ -135,23 +182,27 @@ const UnifiedSurvey: React.FC = () => {
       timestamp: new Date().toISOString()
     });
     
-    // 顧客タイプが変更された場合、質問フローを更新
-    if (questionId === 'customer-type' && surveyConfig) {
-      const customerType = value as CustomerType;
-      const newFlow = ['customer-type', ...surveyConfig.questionFlow[customerType]];
-      setCurrentQuestionFlow(newFlow);
-      console.log(`質問フローを更新: ${customerType} ->`, newFlow);
+    // customer-type質問のIDを動的に検出
+    const customerTypeQuestion = surveyConfig?.questionCards.find(q => q.type === 'customer-type')
+    const customerTypeQuestionId = customerTypeQuestion?.id || 'customer-type'
+    
+    // 顧客タイプが変更された場合、質問フローを更新（顧客タイプ別モードのみ）
+    if (questionId === customerTypeQuestionId && surveyConfig && surveyConfig.questionMode !== 'unified') {
+      const customerType = value as CustomerType
+      const newFlow = [customerTypeQuestionId, ...(surveyConfig.questionFlow[customerType] || [])]
+      setCurrentQuestionFlow(newFlow)
+      console.log(`質問フローを更新: ${customerType} ->`, newFlow)
       
       // 新しい顧客タイプに関連しない回答をクリア
-      const filteredResponses: QuestionResponse = {};
+      const filteredResponses: QuestionResponse = {}
       
       // customer-type の回答は保持
-      filteredResponses['customer-type'] = value;
+      filteredResponses[customerTypeQuestionId] = value
       
       // 新しい質問フローに含まれる質問の既存回答のみを保持
       for (const flowQuestionId of newFlow) {
-        if (flowQuestionId !== 'customer-type' && responses[flowQuestionId] !== undefined) {
-          filteredResponses[flowQuestionId] = responses[flowQuestionId];
+        if (flowQuestionId !== customerTypeQuestionId && responses[flowQuestionId] !== undefined) {
+          filteredResponses[flowQuestionId] = responses[flowQuestionId]
         }
       }
       
@@ -161,19 +212,19 @@ const UnifiedSurvey: React.FC = () => {
         customerType,
         newFlow,
         removedQuestions: Object.keys(responses).filter(key => !Object.keys(filteredResponses).includes(key))
-      });
+      })
       
       // フィルタリングされた回答でstateを更新
-      setResponses(filteredResponses);
+      setResponses(filteredResponses)
       
       // フィルタリング後の状態でセッションストレージも更新
       saveStateToLocalStorage({
         responses: filteredResponses,
         timestamp: new Date().toISOString()
-      });
+      })
       
       // エラー状態もクリア
-      setErrors({});
+      setErrors({})
     }
   };
 
@@ -629,10 +680,25 @@ const UnifiedSurvey: React.FC = () => {
     }
     
     // セーフティネット: 現在の顧客タイプに関連する回答のみをフィルタリング
-    const currentCustomerType = responses['customer-type'] as CustomerType;
-    const currentQuestionFlowForType = currentCustomerType && surveyConfig
-      ? ['customer-type', ...surveyConfig.questionFlow[currentCustomerType]]
-      : ['customer-type'];
+    // customer-type質問のIDを動的に検出
+    const customerTypeQuestion = surveyConfig?.questionCards.find(q => q.type === 'customer-type')
+    const customerTypeQuestionId = customerTypeQuestion?.id || 'customer-type'
+    
+    // 質問モードを取得
+    const questionMode = surveyConfig?.questionMode || 'customer-type-based'
+    
+    let currentQuestionFlowForType: string[] = []
+    if (questionMode === 'unified') {
+      // 共通質問モード: customer-type質問なし、最初の顧客タイプのフローを使用
+      const firstCustomerType = surveyConfig?.customerTypes[0] || Object.keys(surveyConfig?.questionFlow || {})[0] || 'new'
+      currentQuestionFlowForType = surveyConfig?.questionFlow[firstCustomerType] || []
+    } else {
+      // 顧客タイプ別モード
+      const currentCustomerType = responses[customerTypeQuestionId] as CustomerType
+      currentQuestionFlowForType = currentCustomerType && surveyConfig
+        ? [customerTypeQuestionId, ...(surveyConfig.questionFlow[currentCustomerType] || [])]
+        : [customerTypeQuestionId]
+    }
     
     const filteredResponses: QuestionResponse = {};
     for (const questionId of currentQuestionFlowForType) {
@@ -702,11 +768,16 @@ const UnifiedSurvey: React.FC = () => {
     ));
   };
 
+  // 店舗名をタイトルに、アンケートタイトルは進行状況に表示
+  const title = storeName || 'アンケートにご協力ください';
   const subtitle = `当サロンをご利用いただきありがとうございます。お客様に最適なアンケートをご案内いたしますので、まずはご来店回数をお選びください。`;
+
+  // アンケートタイトルはsurvey-dashboard-appで設定される
+  const surveyTitle = surveyConfig?.meta?.title || 'アンケート入力';
 
   const progressSteps = [
     {
-      title: "アンケート入力",
+      title: surveyTitle,
       description: "ご利用に関する質問"
     },
     {
@@ -725,7 +796,7 @@ const UnifiedSurvey: React.FC = () => {
       handleNext();
     }}>
       <PageLayout
-        title="アンケートにご協力ください"
+        title={title}
         subtitle={subtitle}
       >
         <ProgressBar 
@@ -737,7 +808,19 @@ const UnifiedSurvey: React.FC = () => {
         {/* 動的質問レンダリング */}
         {renderQuestions()}
         {/* 顧客タイプが選択されている場合に次へボタンを表示 */}
-        {responses['customer-type'] && (
+        {(() => {
+          // customer-type質問のIDを動的に検出
+          const customerTypeQuestion = surveyConfig?.questionCards.find(q => q.type === 'customer-type')
+          const customerTypeQuestionId = customerTypeQuestion?.id || 'customer-type'
+          const questionMode = surveyConfig?.questionMode || 'customer-type-based'
+          
+          // 共通質問モードの場合はcustomer-type質問を表示しない
+          if (questionMode === 'unified') {
+            return false
+          }
+          
+          return responses[customerTypeQuestionId]
+        })() && (
           <FormButtons 
             onNext={handleNext}
             rightAligned={true} 

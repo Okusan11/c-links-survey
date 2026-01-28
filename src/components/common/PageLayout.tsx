@@ -28,7 +28,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
           <div className="hidden sm:block absolute top-1/2 left-1/3 w-16 h-16 bg-white/5 rounded-full blur-lg animate-float" style={{ animationDelay: '4s' }} />
           
           {/* グリッドパターン - モバイルで控えめ */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] sm:bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:16px_16px] sm:bg-[size:20px_20px] md:bg-[size:32px_32px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(3, 2, 2, 0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] sm:bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:16px_16px] sm:bg-[size:20px_20px] md:bg-[size:32px_32px]" />
           
           {/* グラスモーフィズム効果 - モバイルで非表示 */}
           <div className="hidden md:block absolute right-0 top-1/4 w-80 h-80 glass rounded-full" />

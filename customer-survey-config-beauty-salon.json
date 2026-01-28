@@ -298,7 +298,7 @@
         "id": "service-bridalShaving-evaluation",
         "type": "service-evaluation",
         "title": "ブライダル・シェービングについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -314,7 +314,7 @@
         "id": "service-browPerm-evaluation",
         "type": "service-evaluation",
         "title": "アイブロー&眉パーマについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -330,7 +330,7 @@
         "id": "service-lashPerm-evaluation",
         "type": "service-evaluation",
         "title": "まつ毛パーマについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -346,7 +346,7 @@
         "id": "service-facialBBL-evaluation",
         "type": "service-evaluation",
         "title": "美顔エステ&BBL光エステについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -362,7 +362,7 @@
         "id": "service-bridalSlim-evaluation",
         "type": "service-evaluation",
         "title": "ブライダル痩身&フェムケアについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -378,7 +378,7 @@
         "id": "service-waxLaser-evaluation",
         "type": "service-evaluation",
         "title": "匠道ワックス脱毛&光脱毛について評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -394,7 +394,7 @@
         "id": "service-gelNail-evaluation",
         "type": "service-evaluation",
         "title": "ジェルネイルについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -410,7 +410,7 @@
         "id": "service-herbScalp-evaluation",
         "type": "service-evaluation",
         "title": "ハーブマジック頭皮洗浄について評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -426,7 +426,7 @@
         "id": "service-headBathAroma-evaluation",
         "type": "service-evaluation",
         "title": "頭浸浴&アロマセラピスパについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -442,7 +442,7 @@
         "id": "service-fatFreeze-evaluation",
         "type": "service-evaluation",
         "title": "脂肪冷却マシーンについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [

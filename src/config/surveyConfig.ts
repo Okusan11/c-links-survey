@@ -1,13 +1,15 @@
-import { 
+import type { 
   SurveyConfig, 
   ServiceDefinition, 
   ServiceKey, 
+  QuestionCard,
+  CustomerType
+} from '../types';
+import { 
   getServiceKeys, 
   getServiceDefinition, 
   isValidServiceKey, 
-  isSurveyConfig,
-  QuestionCard,
-  CustomerType
+  isSurveyConfig
 } from '../types';
 
 /**
@@ -24,6 +26,7 @@ function getDefaultConfig(): SurveyConfig {
       title: '顧客満足度アンケート',
       description: '当サロンのサービス向上のためのアンケートです'
     },
+    questionMode: 'customer-type-based', // デフォルトは顧客タイプ別
     customerTypes: ['new', 'second-visit', 'repeater'],
     questionFlow: {
       'new': ['heard-from', 'impressions', 'will-return'],

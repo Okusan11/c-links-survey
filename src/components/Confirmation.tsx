@@ -654,9 +654,27 @@ const Confirmation: React.FC = () => {
       accent?: 'primary' | 'green' | 'amber';
     }> = [];
 
+    // customer-type質問のIDを動的に検出
+    const customerTypeQuestion = surveyConfig.questionCards.find(q => q.type === 'customer-type')
+    const customerTypeQuestionId = customerTypeQuestion?.id || 'customer-type'
+    
+    // 質問モードを取得（デフォルト: customer-type-based）
+    const questionMode = surveyConfig.questionMode || 'customer-type-based'
+    
     // ユーザーが回答した順序（質問フロー順）で表示
-    const questionFlow = surveyConfig.questionFlow[customerType] || [];
-    const orderedQuestionIds = ['customer-type', ...questionFlow];
+    let questionFlow: string[] = []
+    let orderedQuestionIds: string[] = []
+    
+    if (questionMode === 'unified') {
+      // 共通質問モード: customer-type質問なし
+      const firstCustomerType = surveyConfig.customerTypes[0] || Object.keys(surveyConfig.questionFlow)[0] || 'new'
+      questionFlow = surveyConfig.questionFlow[firstCustomerType] || []
+      orderedQuestionIds = questionFlow
+    } else {
+      // 顧客タイプ別モード
+      questionFlow = surveyConfig.questionFlow[customerType] || []
+      orderedQuestionIds = [customerTypeQuestionId, ...questionFlow]
+    }
     
     // 現在の顧客タイプに関連する回答のみをフィルタリング
     const filteredResponses: Record<string, any> = {};

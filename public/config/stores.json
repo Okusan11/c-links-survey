@@ -1,0 +1,22 @@
+{
+  "$schema": "./stores.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-28T00:00:00Z",
+  "stores": [
+    {
+      "storeId": "ginza",
+      "storeName": "銀座店",
+      "displayName": "affi-t 銀座店"
+    },
+    {
+      "storeId": "aoyama",
+      "storeName": "青山店",
+      "displayName": "affi-t 青山店"
+    },
+    {
+      "storeId": "shibuya",
+      "storeName": "渋谷店",
+      "displayName": "affi-t 渋谷店"
+    }
+  ]
+}

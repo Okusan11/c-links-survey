@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { Sparkles, Clock, Star } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 interface PageLayoutProps {
   title: string;
@@ -37,18 +37,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
 
         {/* コンテンツ */}
         <div className="relative z-10 flex flex-col items-center text-center">
-          {/* アイコン装飾 - モバイルで小さく */}
-          <div className="mb-3 sm:mb-6 flex items-center gap-1.5 sm:gap-2">
-            <div className="p-2 sm:p-3 glass-card rounded-xl sm:rounded-2xl animate-scale-in">
-              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white/90" />
-            </div>
-            <div className="accent-line w-8 sm:w-12" />
-            <div className="p-2 sm:p-3 glass-card rounded-xl sm:rounded-2xl animate-scale-in" style={{ animationDelay: '0.1s' }}>
-              <Star className="w-4 h-4 sm:w-6 sm:h-6 text-white/90" />
-            </div>
-          </div>
-
-          {/* タイトル - モバイルで小さく */}
+          {/* タイトル */}
           <div className="space-y-1 sm:space-y-2">
             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight max-w-4xl animate-fade-in-up">
               {title.split('\n').map((line, index) => (

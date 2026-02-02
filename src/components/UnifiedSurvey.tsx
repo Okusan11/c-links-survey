@@ -7,7 +7,7 @@ import FormButtons from './common/FormButtons';
 import { ProgressBar } from './common/ProgressBar';
 
 // 型とローカル設定のインポート
-import { getSurveyConfig } from '../config/surveyConfig';
+import { getSurveyConfig, SurveyConfigError } from '../config/surveyConfig';
 import {
   QuestionCard,
   CustomerType,
@@ -33,6 +33,7 @@ const UnifiedSurvey: React.FC = () => {
 
   // アンケート設定
   const [surveyConfig, setSurveyConfig] = useState<SurveyConfig | null>(null);
+  const [configError, setConfigError] = useState<{ message: string; details?: string } | null>(null);
 
   // 質問システム用の状態
   const [responses, setResponses] = useState<QuestionResponse>({});
@@ -58,66 +59,79 @@ const UnifiedSurvey: React.FC = () => {
       console.log('ℹ️ URLから店舗IDを検出できませんでした（開発環境）');
     }
 
-    getSurveyConfig().then(config => {
-      setSurveyConfig(config);
-      console.log('✓ アンケート設定を読み込みました');
+    getSurveyConfig()
+      .then(config => {
+        setSurveyConfig(config);
+        setConfigError(null);
+        console.log('✓ アンケート設定を読み込みました');
 
-      // 状態復元処理（優先順位: state > localStorage）
-      let restoredState = null;
-      
-      if (state?.responses) {
-        console.log('✓ ナビゲーションstateから回答を復元中...', state.responses);
-        restoredState = state;
-      } else {
-        // stateにresponsesがない場合はセッションストレージから復元を試行
-        const sessionStorageState = loadStateFromLocalStorage();
-        if (sessionStorageState?.responses) {
-          console.log('✓ セッションストレージから回答を復元中...', sessionStorageState.responses);
-          restoredState = sessionStorageState;
-        }
-      }
-      
-      // customer-type質問のIDを動的に検出
-      const customerTypeQuestion = config.questionCards.find(q => q.type === 'customer-type')
-      const customerTypeQuestionId = customerTypeQuestion?.id || 'customer-type'
-      
-      // 質問モードを取得（デフォルト: customer-type-based）
-      const questionMode = config.questionMode || 'customer-type-based'
-      
-      if (restoredState?.responses) {
-        setResponses(restoredState.responses);
-        
-        // 共通質問モードの場合
-        if (questionMode === 'unified') {
-          // 最初の顧客タイプのフローを使用（customer-type質問は含めない）
-          const firstCustomerType = config.customerTypes[0] || Object.keys(config.questionFlow)[0] || 'new'
-          const unifiedFlow = config.questionFlow[firstCustomerType] || []
-          setCurrentQuestionFlow(unifiedFlow)
-          console.log(`✓ 共通質問モード: 質問フローを復元 ->`, unifiedFlow)
+        // 状態復元処理（優先順位: state > localStorage）
+        let restoredState = null;
+
+        if (state?.responses) {
+          console.log('✓ ナビゲーションstateから回答を復元中...', state.responses);
+          restoredState = state;
         } else {
-          // 顧客タイプ別モードの場合
-          const customerType = restoredState.responses[customerTypeQuestionId]
-          if (customerType && config.questionFlow[customerType]) {
-            const restoredFlow = [customerTypeQuestionId, ...config.questionFlow[customerType]]
-            setCurrentQuestionFlow(restoredFlow)
-            console.log(`✓ 質問フローを復元: ${customerType} ->`, restoredFlow)
+          // stateにresponsesがない場合はセッションストレージから復元を試行
+          const sessionStorageState = loadStateFromLocalStorage();
+          if (sessionStorageState?.responses) {
+            console.log('✓ セッションストレージから回答を復元中...', sessionStorageState.responses);
+            restoredState = sessionStorageState;
+          }
+        }
+
+        // customer-type質問のIDを動的に検出
+        const customerTypeQuestion = config.questionCards.find(q => q.type === 'customer-type')
+        const customerTypeQuestionId = customerTypeQuestion?.id || 'customer-type'
+
+        // 質問モードを取得（デフォルト: customer-type-based）
+        const questionMode = config.questionMode || 'customer-type-based'
+
+        if (restoredState?.responses) {
+          setResponses(restoredState.responses);
+
+          // 共通質問モードの場合
+          if (questionMode === 'unified') {
+            // 最初の顧客タイプのフローを使用（customer-type質問は含めない）
+            const firstCustomerType = config.customerTypes[0] || Object.keys(config.questionFlow)[0] || 'new'
+            const unifiedFlow = config.questionFlow[firstCustomerType] || []
+            setCurrentQuestionFlow(unifiedFlow)
+            console.log(`✓ 共通質問モード: 質問フローを復元 ->`, unifiedFlow)
           } else {
+            // 顧客タイプ別モードの場合
+            const customerType = restoredState.responses[customerTypeQuestionId]
+            if (customerType && config.questionFlow[customerType]) {
+              const restoredFlow = [customerTypeQuestionId, ...config.questionFlow[customerType]]
+              setCurrentQuestionFlow(restoredFlow)
+              console.log(`✓ 質問フローを復元: ${customerType} ->`, restoredFlow)
+            } else {
+              setCurrentQuestionFlow([customerTypeQuestionId])
+            }
+          }
+        } else {
+          // 初期の質問フローを設定
+          if (questionMode === 'unified') {
+            // 共通質問モード: customer-type質問なし
+            const firstCustomerType = config.customerTypes[0] || Object.keys(config.questionFlow)[0] || 'new'
+            const unifiedFlow = config.questionFlow[firstCustomerType] || []
+            setCurrentQuestionFlow(unifiedFlow)
+          } else {
+            // 顧客タイプ別モード: customer-type質問から開始
             setCurrentQuestionFlow([customerTypeQuestionId])
           }
         }
-      } else {
-        // 初期の質問フローを設定
-        if (questionMode === 'unified') {
-          // 共通質問モード: customer-type質問なし
-          const firstCustomerType = config.customerTypes[0] || Object.keys(config.questionFlow)[0] || 'new'
-          const unifiedFlow = config.questionFlow[firstCustomerType] || []
-          setCurrentQuestionFlow(unifiedFlow)
+      })
+      .catch(err => {
+        console.error('アンケート設定の読み込みに失敗しました:', err);
+        if (err instanceof SurveyConfigError) {
+          setConfigError({ message: err.message, details: err.details });
         } else {
-          // 顧客タイプ別モード: customer-type質問から開始
-          setCurrentQuestionFlow([customerTypeQuestionId])
+          setConfigError({
+            message: 'アンケート設定の読み込みに失敗しました',
+            details: err instanceof Error ? err.message : String(err)
+          });
         }
-      }
-    });
+      });
   }, [state]);
 
   // エラー状態が更新された際の自動スクロール処理
@@ -738,10 +752,40 @@ const UnifiedSurvey: React.FC = () => {
   };
 
 
+  // エラー状態の表示
+  if (configError) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen px-4">
+        <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <div className="text-red-600 text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-red-700 mb-2">
+            {configError.message}
+          </h2>
+          {configError.details && (
+            <p className="text-sm text-red-600 mb-4">
+              {configError.details}
+            </p>
+          )}
+          <p className="text-gray-600 text-sm">
+            お手数ですが、しばらく経ってから再度アクセスしてください。<br />
+            問題が続く場合は、店舗スタッフまでお問い合わせください。
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            再読み込み
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ローディング状態の表示
   if (!surveyConfig) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-lg text-destructive">アンケートを読み込んでいます...</p>
+        <p className="text-lg text-gray-600">アンケートを読み込んでいます...</p>
       </div>
     );
   }

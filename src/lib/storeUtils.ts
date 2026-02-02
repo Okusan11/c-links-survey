@@ -33,14 +33,3 @@ export function extractStoreIdFromUrl(): string | null {
   return null;
 }
 
-/**
- * 店舗IDが有効かどうかをチェック
- *
- * @param storeId チェックする店舗ID
- * @param validStoreIds 有効な店舗IDの配列
- * @returns 有効な場合true
- */
-export function isValidStoreId(storeId: string | null, validStoreIds: string[]): boolean {
-  if (!storeId) return false;
-  return validStoreIds.includes(storeId);
-}

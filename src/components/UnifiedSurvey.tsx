@@ -20,15 +20,11 @@ import DynamicQuestionRenderer, { QuestionResponse, QuestionErrors } from './com
 // ユーティリティ関数
 import { saveStateToLocalStorage, loadStateFromLocalStorage } from '../lib/utils';
 import { extractStoreIdFromUrl, getExpectedStoreId } from '../lib/storeUtils';
-import { getStoreInfo } from '../config/storeConfig';
-
 
 const UnifiedSurvey: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  // 店舗情報
-  const [storeName, setStoreName] = useState<string>('');
   const [storeId, setStoreId] = useState<string | null>(null);
 
   // アンケート設定
@@ -64,19 +60,6 @@ const UnifiedSurvey: React.FC = () => {
         setSurveyConfig(null);
         return;
       }
-    }
-
-    if (currentStoreId) {
-      getStoreInfo(currentStoreId).then(storeInfo => {
-        if (storeInfo) {
-          setStoreName(storeInfo.name);
-          console.log(`✓ 店舗情報を読み込みました: ${currentStoreId} - ${storeInfo.name}`);
-        } else {
-          console.warn(`⚠️ 店舗情報が見つかりません: ${currentStoreId}`);
-        }
-      });
-    } else {
-      console.log('ℹ️ URLから店舗IDを検出できませんでした（開発環境）');
     }
 
     getSurveyConfig()
@@ -832,8 +815,7 @@ const UnifiedSurvey: React.FC = () => {
     ));
   };
 
-  // 店舗名をタイトルに、アンケートタイトルは進行状況に表示
-  const title = storeName || 'アンケートにご協力ください';
+  const title = 'アンケートにご協力ください';
   const subtitle = `当サロンをご利用いただきありがとうございます。お客様に最適なアンケートをご案内いたしますので、まずはご来店回数をお選びください。`;
 
   // アンケートタイトルはsurvey-dashboard-appで設定される

@@ -2,8 +2,9 @@
  * 店舗設定管理
  *
  * 環境に応じて店舗マスターを読み込みます：
- * - 本番環境: REACT_APP_STORE_MASTER環境変数（SSMから取得）
- * - 開発環境: /config/stores.json（ローカルファイル）
+ * - 本番/ステージング: REACT_APP_STORE_MASTER 環境変数のみ使用（SSMから取得）。
+ *   /config/stores.json は参照しない。
+ * - 開発環境（NODE_ENV=development）のみ: /config/stores.json をフォールバックとして参照。
  */
 
 import type {
@@ -61,10 +62,17 @@ async function loadDefaultStores(): Promise<StoreMasterConfig> {
 }
 
 /**
+ * ローカル開発環境かどうか（/config/stores.json を参照してよいか）
+ */
+function isLocalDevelopment(): boolean {
+  return process.env.NODE_ENV === 'development';
+}
+
+/**
  * 店舗設定を読み込み（非同期）
  */
 export async function loadStoreConfiguration(): Promise<Record<string, StoreInfo>> {
-  // 1. 環境変数から取得を試行（本番環境）
+  // 1. 環境変数から取得を試行（本番/ステージングで SSM から注入される想定）
   const storeMaster = loadStoreMasterFromEnv();
 
   if (storeMaster) {
@@ -73,11 +81,17 @@ export async function loadStoreConfiguration(): Promise<Record<string, StoreInfo
     return StoreUtils.toStoreInfoMap(activeStores);
   }
 
-  // 2. フォールバック: デフォルト設定を読み込み（開発環境）
-  console.log('ℹ️  Loading default store configuration from /config/stores.json');
-  const defaultConfig = await loadDefaultStores();
-  const activeStores = StoreUtils.filterActive(defaultConfig.stores);
-  return StoreUtils.toStoreInfoMap(activeStores);
+  // 2. フォールバック: ローカル開発環境の場合のみ /config/stores.json を参照
+  if (isLocalDevelopment()) {
+    console.log('ℹ️  Loading default store configuration from /config/stores.json (local only)');
+    const defaultConfig = await loadDefaultStores();
+    const activeStores = StoreUtils.filterActive(defaultConfig.stores);
+    return StoreUtils.toStoreInfoMap(activeStores);
+  }
+
+  // 本番/ステージングで REACT_APP_STORE_MASTER が無い場合は空（stores.json は参照しない）
+  console.log('ℹ️  REACT_APP_STORE_MASTER not set; not loading /config/stores.json in non-local environment');
+  return {};
 }
 
 /**
@@ -101,19 +115,21 @@ export function getAvailableStores(): Store[] {
  * 利用可能な店舗一覧を取得（非同期版）
  */
 export async function getAvailableStoresAsync(): Promise<Store[]> {
-  // 環境変数から取得を試行
   const storeMaster = loadStoreMasterFromEnv();
 
   if (storeMaster) {
-    console.log('✓ Loaded stores from REACT_APP_STORE_MASTER (production):', storeMaster.stores.length, 'stores');
+    console.log('✓ Loaded stores from REACT_APP_STORE_MASTER:', storeMaster.stores.length, 'stores');
     return StoreUtils.filterActive(storeMaster.stores);
   }
 
-  // フォールバック: デフォルト設定（ローカル環境）
-  console.log('ℹ️  Loading stores from /config/stores.json (local development)');
-  const defaultConfig = await loadDefaultStores();
-  console.log('✓ Loaded', defaultConfig.stores.length, 'stores from stores.json');
-  return StoreUtils.filterActive(defaultConfig.stores);
+  // ローカル開発環境の場合のみ /config/stores.json を参照
+  if (isLocalDevelopment()) {
+    console.log('ℹ️  Loading stores from /config/stores.json (local development only)');
+    const defaultConfig = await loadDefaultStores();
+    return StoreUtils.filterActive(defaultConfig.stores);
+  }
+
+  return [];
 }
 
 /**

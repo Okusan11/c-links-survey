@@ -19,7 +19,7 @@ import DynamicQuestionRenderer, { QuestionResponse, QuestionErrors } from './com
 
 // ユーティリティ関数
 import { saveStateToLocalStorage, loadStateFromLocalStorage } from '../lib/utils';
-import { extractStoreIdFromUrl } from '../lib/storeUtils';
+import { extractStoreIdFromUrl, getExpectedStoreId } from '../lib/storeUtils';
 import { getStoreInfo } from '../config/storeConfig';
 
 
@@ -42,9 +42,29 @@ const UnifiedSurvey: React.FC = () => {
   const [shouldScrollToError, setShouldScrollToError] = useState<string | null>(null);
 
   useEffect(() => {
-    // 店舗情報を取得
     const currentStoreId = extractStoreIdFromUrl();
+    const expectedStoreId = getExpectedStoreId();
     setStoreId(currentStoreId);
+
+    // 本番ビルドで REACT_APP_STORE_ID が設定されている場合、URL に正しい storeId が必要
+    if (expectedStoreId) {
+      if (!currentStoreId) {
+        setConfigError({
+          message: '店舗IDが指定されていません。',
+          details: 'URLに storeId パラメータを含めてアクセスしてください。（例: /survey?storeId=xxx）'
+        });
+        setSurveyConfig(null);
+        return;
+      }
+      if (currentStoreId !== expectedStoreId) {
+        setConfigError({
+          message: 'このアンケートは指定された店舗用ではありません。',
+          details: `URLのstoreId（${currentStoreId}）がこのページの店舗（${expectedStoreId}）と一致しません。正しいリンクからアクセスしてください。`
+        });
+        setSurveyConfig(null);
+        return;
+      }
+    }
 
     if (currentStoreId) {
       getStoreInfo(currentStoreId).then(storeInfo => {

@@ -47,7 +47,7 @@ const UnifiedSurvey: React.FC = () => {
       if (!currentStoreId) {
         setConfigError({
           message: '店舗IDが指定されていません。',
-          details: 'URLに storeId パラメータを含めてアクセスしてください。（例: /survey?storeId=xxx）'
+          details: '正しいURLでアクセスしてください。（例: /survey/beautysalon）。互換: /survey?storeId=beautysalon（CloudFront が 302 で上に寄せます）'
         });
         setSurveyConfig(null);
         return;

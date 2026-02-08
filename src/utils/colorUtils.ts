@@ -49,30 +49,52 @@ export function getContrastRatio(
 }
 
 /**
+ * 背景色に黒をブレンドして「インクカラー」を生成
+ * プライマリカラーの色相を保ったまま暗い色を作成
+ *
+ * @param backgroundColor 背景色（HEX形式）
+ * @param alpha ブレンド率（0-1、大きいほど暗い。デフォルト: 0.6）
+ * @returns ブレンドされた暗い色
+ */
+export function generateInkColor(backgroundColor: string, alpha: number = 0.6): string {
+  const rgb = hexToRgb(backgroundColor)
+  if (!rgb) return '#111827' // フォールバック
+
+  // 黒(0,0,0)をalphaでブレンド: 結果 = 元の色 × (1 - alpha)
+  const newR = Math.round(rgb.r * (1 - alpha))
+  const newG = Math.round(rgb.g * (1 - alpha))
+  const newB = Math.round(rgb.b * (1 - alpha))
+
+  const toHex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0')
+  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`
+}
+
+/**
  * 背景色に対して適切なテキストカラーを自動計算
- * WCAG AA 基準（4.5:1）を満たすかどうかで白/黒を判定
+ * 明るい背景の場合は「インクカラー」（色相を保った暗い色）を生成
+ * 暗い背景の場合は白を返す
  *
  * @param backgroundColor 背景色（HEX形式）
  * @param lightColor 明るい色（デフォルト: white）
- * @param darkColor 暗い色（デフォルト: black）
+ * @param inkAlpha インクカラーのブレンド率（デフォルト: 0.6）
  * @returns 適切なテキストカラー
  */
 export function getContrastingTextColor(
   backgroundColor: string,
   lightColor: string = '#FFFFFF',
-  darkColor: string = '#000000'
+  inkAlpha: number = 0.6
 ): string {
   const bgRgb = hexToRgb(backgroundColor)
-  if (!bgRgb) return darkColor
+  if (!bgRgb) return '#111827' // フォールバック
 
-  const whiteRgb = { r: 255, g: 255, b: 255 }
-  const blackRgb = { r: 0, g: 0, b: 0 }
+  const luminance = getRelativeLuminance(bgRgb.r, bgRgb.g, bgRgb.b)
 
-  const contrastWithWhite = getContrastRatio(bgRgb, whiteRgb)
-  const contrastWithBlack = getContrastRatio(bgRgb, blackRgb)
-
-  // より高いコントラスト比を持つ色を選択
-  return contrastWithWhite >= contrastWithBlack ? lightColor : darkColor
+  // 輝度が高い（明るい背景）場合は「インクカラー」を生成
+  // 輝度が低い（暗い背景）場合は白を返す
+  if (luminance > 0.5) {
+    return generateInkColor(backgroundColor, inkAlpha)
+  }
+  return lightColor
 }
 
 /**

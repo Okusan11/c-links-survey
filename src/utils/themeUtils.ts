@@ -58,7 +58,8 @@ export function applyThemeColors(): void {
     document.documentElement.style.setProperty('--primary', primaryHsl);
 
     // プライマリカラーの輝度に基づいて foreground を自動計算
-    const foregroundColor = getContrastingTextColor(primary, '#FFFFFF', '#1A1A1A');
+    // 明るい背景の場合は色相を保った「インクカラー」、暗い背景の場合は白
+    const foregroundColor = getContrastingTextColor(primary);
     const foregroundHsl = hexToHslString(foregroundColor);
     document.documentElement.style.setProperty('--primary-foreground', foregroundHsl);
 
@@ -88,7 +89,8 @@ export function applyThemeColors(): void {
     document.documentElement.style.setProperty('--accent', accentHsl);
 
     // アクセントカラーの輝度に基づいて foreground を自動計算
-    const accentForegroundColor = getContrastingTextColor(accent, '#FFFFFF', '#1A1A1A');
+    // 明るい背景の場合は色相を保った「インクカラー」、暗い背景の場合は白
+    const accentForegroundColor = getContrastingTextColor(accent);
     const accentForegroundHsl = hexToHslString(accentForegroundColor);
     document.documentElement.style.setProperty('--accent-foreground', accentForegroundHsl);
 

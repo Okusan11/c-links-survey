@@ -74,11 +74,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, step
                       )}
                     >
                       {isCompleted ? (
-                        <Check className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+                        <Check className="w-4 h-4 sm:w-6 sm:h-6 text-primary-foreground" />
                       ) : (
                         <span className={cn(
                           "text-xs sm:text-sm font-bold z-10",
-                          isCurrent || isCompleted ? "text-white" : "text-gray-600"
+                          isCurrent || isCompleted ? "text-primary-foreground" : "text-gray-600"
                         )}>
                           {stepNumber}
                         </span>

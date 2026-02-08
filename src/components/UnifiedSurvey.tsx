@@ -705,13 +705,15 @@ const UnifiedSurvey: React.FC = () => {
     const questionMode = surveyConfig?.questionMode || 'customer-type-based'
     
     let currentQuestionFlowForType: string[] = []
+    let currentCustomerType: CustomerType | undefined
     if (questionMode === 'unified') {
       // 共通質問モード: customer-type質問なし、最初の顧客タイプのフローを使用
       const firstCustomerType = surveyConfig?.customerTypes[0] || Object.keys(surveyConfig?.questionFlow || {})[0] || 'new'
+      currentCustomerType = firstCustomerType as CustomerType
       currentQuestionFlowForType = surveyConfig?.questionFlow[firstCustomerType] || []
     } else {
       // 顧客タイプ別モード
-      const currentCustomerType = responses[customerTypeQuestionId] as CustomerType
+      currentCustomerType = responses[customerTypeQuestionId] as CustomerType
       currentQuestionFlowForType = currentCustomerType && surveyConfig
         ? [customerTypeQuestionId, ...(surveyConfig.questionFlow[currentCustomerType] || [])]
         : [customerTypeQuestionId]

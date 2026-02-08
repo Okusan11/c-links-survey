@@ -39,7 +39,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
         <div className="relative z-10 flex flex-col items-center text-center">
           {/* タイトル */}
           <div className="space-y-1 sm:space-y-2">
-            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight max-w-4xl animate-fade-in-up">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground tracking-tight leading-tight max-w-4xl animate-fade-in-up">
               {title.split('\n').map((line, index) => (
                 <div key={index} className="block">
                   {line}
@@ -59,7 +59,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
           {/* サブタイトル - モバイルでコンパクト */}
           {subtitle && (
             <div className="mt-4 sm:mt-8 md:mt-12 space-y-3 sm:space-y-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <div className="text-sm sm:text-lg md:text-2xl text-white/95 max-w-3xl leading-relaxed px-2 sm:px-0">
+              <div className="text-sm sm:text-lg md:text-2xl text-primary-foreground/95 max-w-3xl leading-relaxed px-2 sm:px-0">
                 {subtitle.split('\n').map((line, index) => (
                   <p key={index} className="mb-2 sm:mb-3 font-medium tracking-wide">
                     {line}
@@ -70,8 +70,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
               {/* 所要時間インジケーター - モバイルでコンパクト */}
               <div className="mt-4 sm:mt-8 sm:mt-10 flex items-center justify-center">
                 <div className="inline-flex items-center gap-2 sm:gap-3 glass-card px-4 py-2.5 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl animate-scale-in" style={{ animationDelay: '0.4s' }}>
-                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white/80" />
-                  <div className="text-xs sm:text-sm md:text-base font-medium text-white/90">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground/80" />
+                  <div className="text-xs sm:text-sm md:text-base font-medium text-primary-foreground/90">
                     約1分で完了
                   </div>
                   <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-accent rounded-full animate-pulse" />

@@ -267,7 +267,7 @@ const ThankYou: React.FC = () => {
                     <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary mx-auto mb-2 sm:mb-3" />
                     <p className="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed">
                       頂いたご意見は、当サロンの
-                      <span className="inline-block mx-1 sm:mx-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-primary to-accent text-white rounded-full text-xs sm:text-sm font-semibold shadow-md">
+                      <span className="inline-block mx-1 sm:mx-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-full text-xs sm:text-sm font-semibold shadow-md">
                         サービス向上
                       </span>
                       のために大切に活用させていただきます。

@@ -909,7 +909,7 @@ const Confirmation: React.FC = () => {
         gradient: 'bg-gradient-to-br from-primary/8 via-primary/5 to-primary/12',
         border: 'border-primary/25',
         headerBg: 'bg-gradient-to-r from-primary/15 to-primary/20',
-        iconBg: 'bg-primary text-white shadow-primary/25',
+        iconBg: 'bg-primary text-primary-foreground shadow-primary/25',
         titleColor: 'text-primary'
       },
       green: {

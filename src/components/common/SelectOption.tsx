@@ -91,14 +91,14 @@ const SelectOption: React.FC<SelectOptionProps> = ({
         selected ? styles.indicatorSelected : styles.indicatorUnselected
       )}>
         {selected && variant === 'checkbox' ? (
-          <svg 
+          <svg
             viewBox="0 0 24 24"
             width="10"
             height="10"
-            stroke="currentColor" 
-            strokeWidth="3" 
-            fill="none" 
-            className="text-white"
+            stroke="currentColor"
+            strokeWidth="3"
+            fill="none"
+            className="text-primary-foreground"
           >
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
@@ -140,14 +140,14 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       {/* 選択時のチェックマーク */}
       {selected && variant !== 'checkbox' && (
         <div className={styles.checkmark}>
-          <svg 
+          <svg
             viewBox="0 0 24 24"
             width={styles.checkmarkIcon.includes('3.5') ? '14' : '12'}
             height={styles.checkmarkIcon.includes('3.5') ? '14' : '12'}
-            stroke="currentColor" 
-            strokeWidth="3" 
-            fill="none" 
-            className="text-white"
+            stroke="currentColor"
+            strokeWidth="3"
+            fill="none"
+            className="text-primary-foreground"
           >
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>

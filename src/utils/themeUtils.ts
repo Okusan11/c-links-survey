@@ -1,4 +1,4 @@
-import { getContrastingTextColor } from './colorUtils';
+import { getContrastingTextColor, isLightBackground } from './colorUtils';
 
 /**
  * HEX カラーを HSL 形式に変換（CSS変数用）
@@ -76,8 +76,22 @@ export function applyThemeColors(): void {
     // ring カラーも更新
     document.documentElement.style.setProperty('--ring', primaryHsl);
 
+    // プライマリカラーが明るい場合は primary-700 をテキストカラーとして使用
+    const isLight = isLightBackground(primary);
+    if (isLight) {
+      // primary-700 (lightness: 35%) を使用
+      document.documentElement.style.setProperty(
+        '--primary-text',
+        hslWithLightness(h, s, 35)
+      );
+    } else {
+      // 暗いカラーはそのまま使用
+      document.documentElement.style.setProperty('--primary-text', primaryHsl);
+    }
+
     console.log(`✓ Theme primary applied: ${primary} → ${primaryHsl}`);
     console.log(`✓ Theme primary-foreground: ${foregroundColor} → ${foregroundHsl}`);
+    console.log(`✓ Theme primary-text applied: ${isLight ? 'primary-700' : 'primary'}`);
   }
 
   if (accent && accent.startsWith('#')) {

@@ -425,7 +425,7 @@ const RatingScaleRenderer: React.FC<{
                         "px-4 py-2 rounded-lg border-2 transition-all duration-200",
                         "hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/30",
                         currentRating === rating
-                          ? "border-primary bg-primary/10 text-primary font-medium"
+                          ? "border-primary bg-primary/10 text-primary-text font-medium"
                           : "border-gray-200 text-gray-700 hover:bg-gray-50"
                       )}
                     >
@@ -881,7 +881,7 @@ const DynamicQuestionRenderer: React.FC<DynamicQuestionRendererProps> = ({
         {/* 質問ヘッダー */}
         <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
           <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
-            <LucideIcons.MessageSquare className="h-6 w-6 text-primary" />
+            <LucideIcons.MessageSquare className="h-6 w-6 text-primary-text" />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-lg text-gray-900 whitespace-normal text-wrap">

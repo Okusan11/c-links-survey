@@ -338,7 +338,7 @@ const GoogleAccount: React.FC = () => {
         <div className="flex items-center gap-2">
           {icon && (
             <div className={cn(
-              "flex-shrink-0 text-primary/80",
+              "flex-shrink-0 text-primary-text/80",
               selected ? "scale-105" : ""
             )}>
               {icon}
@@ -346,7 +346,7 @@ const GoogleAccount: React.FC = () => {
           )}
           <span className={cn(
             "text-[16px] sm:text-[17px] leading-tight font-medium",
-            selected ? "text-primary" : "text-gray-700"
+            selected ? "text-primary-text" : "text-gray-700"
           )}>
             {children}
           </span>
@@ -443,7 +443,7 @@ const GoogleAccount: React.FC = () => {
             <div className="space-y-8">
                           <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100" data-question="google-account">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
-                <Info className="h-5 w-5 text-primary" />
+                <Info className="h-5 w-5 text-primary-text" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 tracking-wide whitespace-normal text-wrap">

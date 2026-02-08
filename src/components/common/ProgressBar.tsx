@@ -18,12 +18,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, step
       <div className="flex justify-between items-center mb-4 sm:mb-8">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg sm:rounded-xl">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-text" />
           </div>
           <h3 className="text-lg sm:text-xl font-bold gradient-text">進行状況</h3>
         </div>
         <div className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 rounded-xl sm:rounded-2xl border border-primary/20">
-          <span className="text-xs sm:text-sm font-semibold text-primary">
+          <span className="text-xs sm:text-sm font-semibold text-primary-text">
             {`${currentStep} / ${totalSteps}`}
           </span>
         </div>
@@ -100,14 +100,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, step
                   <div className="mt-2 sm:mt-4 text-center w-21 sm:w-28">
                     <p className={cn(
                       "text-xs sm:text-sm font-semibold mb-1 transition-colors duration-300 leading-tight",
-                      isCurrent ? "text-primary" : isCompleted ? "text-primary/80" : "text-gray-600"
+                      isCurrent ? "text-primary-text" : isCompleted ? "text-primary-text/80" : "text-gray-600"
                     )}>
                       {step.title}
                     </p>
                     {step.description && (
                       <p className={cn(
                         "text-xs transition-colors duration-300 leading-tight",
-                        isCurrent ? "text-primary/70" : "text-gray-500"
+                        isCurrent ? "text-primary-text/70" : "text-gray-500"
                       )}>
                         {step.description}
                       </p>

@@ -156,7 +156,7 @@ const Confirmation: React.FC = () => {
       primary: {
         container: 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/15',
         header: 'bg-primary/10 border-primary/20',
-        titleColor: 'text-primary',
+        titleColor: 'text-primary-text',
         iconBg: 'bg-primary'
       },
       green: {
@@ -320,7 +320,7 @@ const Confirmation: React.FC = () => {
         return (
           <div className="flex items-center gap-3 px-3 py-2.5 md:px-4 md:py-3 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl border border-primary/15 shadow-sm">
             <span className="text-lg md:text-xl">{typeIcons[response as keyof typeof typeIcons] || '👤'}</span>
-            <span className="font-semibold text-primary text-sm md:text-base">{customerTypeLabels[response as keyof typeof customerTypeLabels] || response}</span>
+            <span className="font-semibold text-primary-text text-sm md:text-base">{customerTypeLabels[response as keyof typeof customerTypeLabels] || response}</span>
           </div>
         );
       
@@ -339,7 +339,7 @@ const Confirmation: React.FC = () => {
               {singleResponse.otherText && (
                 <div className="ml-6 md:ml-8 px-3 py-2 md:px-4 md:py-2.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 rounded-lg border-l-3 md:border-l-4 border-primary/40 shadow-sm">
                   <div className="flex items-start gap-1.5 md:gap-2">
-                    <span className="text-primary text-xs md:text-sm font-medium">その他:</span>
+                    <span className="text-primary-text text-xs md:text-sm font-medium">その他:</span>
                     <span className="text-gray-700 text-xs md:text-sm leading-relaxed italic font-medium">"{singleResponse.otherText}"</span>
                   </div>
                 </div>
@@ -376,7 +376,7 @@ const Confirmation: React.FC = () => {
               {multiResponse.otherText && (
                 <div className="ml-6 md:ml-8 px-3 py-2 md:px-4 md:py-2.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 rounded-lg border-l-3 md:border-l-4 border-primary/40 shadow-sm">
                   <div className="flex items-start gap-1.5 md:gap-2">
-                    <span className="text-primary text-xs md:text-sm font-medium">その他:</span>
+                    <span className="text-primary-text text-xs md:text-sm font-medium">その他:</span>
                     <span className="text-gray-700 text-xs md:text-sm leading-relaxed italic font-medium">"{multiResponse.otherText}"</span>
                   </div>
                 </div>
@@ -470,7 +470,7 @@ const Confirmation: React.FC = () => {
               {Object.entries(response).map(([category, rating]) => (
                 <div key={category} className="flex justify-between items-center px-4 py-3 bg-white rounded-lg border border-gray-100 shadow-sm">
                   <span className="text-sm font-medium text-gray-700">{category}:</span>
-                  <span className="font-semibold text-primary">{String(rating)}</span>
+                  <span className="font-semibold text-primary-text">{String(rating)}</span>
                 </div>
               ))}
             </div>
@@ -526,7 +526,7 @@ const Confirmation: React.FC = () => {
               {multiResponse.otherText && (
                 <div className="ml-6 md:ml-8 px-3 py-2 md:px-4 md:py-2.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 rounded-lg border-l-3 md:border-l-4 border-primary/40 shadow-sm">
                   <div className="flex items-start gap-1.5 md:gap-2">
-                    <span className="text-primary text-xs md:text-sm font-medium">その他:</span>
+                    <span className="text-primary-text text-xs md:text-sm font-medium">その他:</span>
                     <span className="text-gray-700 text-xs md:text-sm leading-relaxed italic font-medium">"{multiResponse.otherText}"</span>
                   </div>
                 </div>
@@ -534,7 +534,7 @@ const Confirmation: React.FC = () => {
             </div>
           );
         }
-        
+
         console.warn(`[service-usage] 予期しない形式:`, response);
         return <span className="text-red-500">表示エラー: 予期しない形式</span>;
       
@@ -910,7 +910,7 @@ const Confirmation: React.FC = () => {
         border: 'border-primary/25',
         headerBg: 'bg-gradient-to-r from-primary/15 to-primary/20',
         iconBg: 'bg-primary text-primary-foreground shadow-primary/25',
-        titleColor: 'text-primary'
+        titleColor: 'text-primary-text'
       },
       green: {
         gradient: 'bg-gradient-to-br from-emerald-50 via-green-50/80 to-emerald-100/60',
@@ -1011,7 +1011,7 @@ const Confirmation: React.FC = () => {
                     title="ご利用状況"
                     content={
                       <div className="flex items-start gap-2">
-                        <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-primary-text mt-0.5 flex-shrink-0" />
                         <div className="text-[14px] text-gray-700">
                           {state.isNewCustomer && "🆕 初めてのご利用"}
                           {state.isSecondVisit && "🔄 2回目のご利用"}

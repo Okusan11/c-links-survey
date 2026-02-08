@@ -163,7 +163,7 @@ const ReviewForm: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100" data-question="feedback">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
-                <AlertCircle className="h-5 w-5 text-primary" />
+                <AlertCircle className="h-5 w-5 text-primary-text" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 tracking-wide whitespace-normal text-wrap">

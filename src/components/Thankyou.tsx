@@ -233,7 +233,7 @@ const ThankYou: React.FC = () => {
                     </div>
                     {/* 周りのキラキラ */}
                     <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-accent animate-pulse" style={{ animationDelay: '0.5s' }} />
-                    <Sparkles className="absolute -bottom-1 -left-1 w-4 h-4 text-primary animate-pulse" style={{ animationDelay: '1.5s' }} />
+                    <Sparkles className="absolute -bottom-1 -left-1 w-4 h-4 text-primary-text animate-pulse" style={{ animationDelay: '1.5s' }} />
                   </div>
                 </div>
 
@@ -264,7 +264,7 @@ const ThankYou: React.FC = () => {
                   )}
                 >
                   <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-2xl p-3 sm:p-4 lg:p-6 border border-primary/10">
-                    <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary mx-auto mb-2 sm:mb-3" />
+                    <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary-text mx-auto mb-2 sm:mb-3" />
                     <p className="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed">
                       頂いたご意見は、当サロンの
                       <span className="inline-block mx-1 sm:mx-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-full text-xs sm:text-sm font-semibold shadow-md">

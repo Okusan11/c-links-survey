@@ -23,8 +23,11 @@ const ReviewForm: React.FC = () => {
 
   // 戻るボタン - スマホフレンドリーに改善
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
-    // 即座にrefを更新（同期的）
+    // 即座にrefを更新（同期的）- 最優先で設定
     actionTypeRef.current = 'back';
+
+    // エラー状態を即座にクリア（バリデーションメッセージを非表示に）
+    setError(false);
 
     // 既にナビゲーション中の場合は処理しない
     if (isNavigating) {
@@ -37,8 +40,8 @@ const ReviewForm: React.FC = () => {
       event.preventDefault();
       event.stopPropagation();
       // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
-      if ('stopImmediatePropagation' in event.nativeEvent) {
-        event.nativeEvent.stopImmediatePropagation();
+      if ('nativeEvent' in event && 'stopImmediatePropagation' in event.nativeEvent) {
+        (event.nativeEvent as Event).stopImmediatePropagation();
       }
     }
 

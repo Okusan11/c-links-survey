@@ -778,7 +778,7 @@ const Confirmation: React.FC = () => {
 
   // 戻るボタン - スマホフレンドリーに改善
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
-    // 即座にrefを更新（同期的）
+    // 即座にrefを更新（同期的）- 最優先で設定
     actionTypeRef.current = 'back';
 
     // 既にナビゲーション中または送信中の場合は処理しない
@@ -792,8 +792,8 @@ const Confirmation: React.FC = () => {
       event.preventDefault();
       event.stopPropagation();
       // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
-      if ('stopImmediatePropagation' in event.nativeEvent) {
-        event.nativeEvent.stopImmediatePropagation();
+      if ('nativeEvent' in event && 'stopImmediatePropagation' in event.nativeEvent) {
+        (event.nativeEvent as Event).stopImmediatePropagation();
       }
     }
 

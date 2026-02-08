@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import UnifiedSurvey from './components/UnifiedSurvey';
 import GoogleAccount from './components/GoogleAccount';
 import ReviewForm from './components/ReviewForm';
 import Confirmation from './components/Confirmation';
 import Thankyou from './components/Thankyou';
+import { applyThemeColors } from './utils/themeUtils';
 
 const App: React.FC = () => {
+  // 環境変数からテーマカラーを適用
+  useEffect(() => {
+    applyThemeColors();
+  }, []);
   // URLから店舗IDを動的に検出（クエリパラメータ形式: /survey?storeId={storeId}）
   const detectBasename = (): string => {
     // 環境変数が設定されている場合はそれを優先

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 
@@ -32,6 +32,7 @@ const GoogleAccount: React.FC = () => {
   const [error, setError] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'back' | 'next' | null>(null);
+  const actionTypeRef = useRef<'back' | 'next' | null>(null);
 
   useEffect(() => {
     // stateからsurveyConfigが渡されていない場合のみ読み込み
@@ -90,6 +91,9 @@ const GoogleAccount: React.FC = () => {
 
   // 戻るボタン - スマホフレンドリーに改善
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
+    // 即座にrefを更新（同期的）
+    actionTypeRef.current = 'back';
+
     // 既にナビゲーション中の場合は処理しない
     if (isNavigating) {
       console.log('Navigation already in progress, ignoring back button');
@@ -115,7 +119,8 @@ const GoogleAccount: React.FC = () => {
     // 即座にナビゲーションを実行（遅延を削除）
     try {
       // 統合アンケート画面に戻る（全ての顧客タイプで共通）
-      navigate('/survey', {
+      // ルートパスに遷移（basename相対）
+      navigate('/', {
         state: {
           ...state, // 全ての状態を保持
           hasGoogleAccount,
@@ -130,6 +135,7 @@ const GoogleAccount: React.FC = () => {
       // エラーが発生した場合はフラグをリセット
       setIsNavigating(false);
       setActionType(null);
+      actionTypeRef.current = null;
     }
   }, [navigate, state, hasGoogleAccount, feedback, isNavigating]);
   
@@ -141,8 +147,8 @@ const GoogleAccount: React.FC = () => {
 
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.FormEvent | React.MouseEvent | React.TouchEvent) => {
-    // 既にナビゲーション中、または戻るボタンが押された場合は処理しない
-    if (isNavigating || actionType === 'back') {
+    // refで即座にチェック（同期的）
+    if (actionTypeRef.current === 'back' || isNavigating) {
       return;
     }
 
@@ -176,7 +182,8 @@ const GoogleAccount: React.FC = () => {
       return;
     }
 
-    // 次へボタンが押されたことを明示
+    // 次へボタンが押されたことを明示（refも更新）
+    actionTypeRef.current = 'next';
     setActionType('next');
     setIsNavigating(true);
 
@@ -258,7 +265,6 @@ const GoogleAccount: React.FC = () => {
     }
   }, [
     isNavigating,
-    actionType,
     hasGoogleAccount,
     apiEndpoint,
     navigate,
@@ -416,8 +422,8 @@ const GoogleAccount: React.FC = () => {
 
       <form onSubmit={(e) => {
         e.preventDefault();
-        // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
-        if (actionType === 'back' || isNavigating) {
+        // refで即座にチェック（同期的）
+        if (actionTypeRef.current === 'back' || isNavigating) {
           console.log('Form submit ignored due to back action or navigation in progress');
           return;
         }

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
@@ -27,6 +27,7 @@ const Confirmation: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'back' | 'submit' | null>(null);
+  const actionTypeRef = useRef<'back' | 'submit' | null>(null);
   
   // 環境変数からAPIエンドポイントを取得
   const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
@@ -777,6 +778,9 @@ const Confirmation: React.FC = () => {
 
   // 戻るボタン - スマホフレンドリーに改善
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
+    // 即座にrefを更新（同期的）
+    actionTypeRef.current = 'back';
+
     // 既にナビゲーション中または送信中の場合は処理しない
     if (isNavigating || isSubmitting) {
       console.log('Navigation or submission already in progress, ignoring back button');
@@ -802,7 +806,7 @@ const Confirmation: React.FC = () => {
     // 即座にナビゲーションを実行（遅延を削除）
     try {
       // ReviewForm画面へ戻る際に現在のステートを引き継ぐ
-      navigate('/reviewform', { 
+      navigate('/reviewform', {
         state: {
           ...state,
           // 現在のフィードバック内容も含めて渡す
@@ -815,13 +819,14 @@ const Confirmation: React.FC = () => {
       // エラーが発生した場合はフラグをリセット
       setIsNavigating(false);
       setActionType(null);
+      actionTypeRef.current = null;
     }
   }, [navigate, state, isNavigating, isSubmitting]);
 
   // 送信ボタン - スマホフレンドリーに改善
   const handleSubmit = useCallback(async (event?: React.MouseEvent | React.FormEvent | React.TouchEvent) => {
-    // 既にナビゲーション中、送信中、または戻るボタンが押された場合は処理しない
-    if (isNavigating || isSubmitting || actionType === 'back') {
+    // refで即座にチェック（同期的）
+    if (actionTypeRef.current === 'back' || isNavigating || isSubmitting) {
       return;
     }
 
@@ -831,7 +836,8 @@ const Confirmation: React.FC = () => {
       event.stopPropagation();
     }
 
-    // 送信ボタンが押されたことを明示
+    // 送信ボタンが押されたことを明示（refも更新）
+    actionTypeRef.current = 'submit';
     setActionType('submit');
     setIsSubmitting(true);
 
@@ -879,7 +885,7 @@ const Confirmation: React.FC = () => {
       setIsSubmitting(false);
       setActionType(null);
     }
-  }, [isNavigating, isSubmitting, actionType, apiEndpoint, state, navigate]);
+  }, [isNavigating, isSubmitting, apiEndpoint, state, navigate]);
 
   const progressSteps = [
     {
@@ -967,8 +973,8 @@ const Confirmation: React.FC = () => {
     <div>
       <form onSubmit={(e) => {
         e.preventDefault();
-        // 戻るボタンが押された場合またはナビゲーション中・送信中の場合はsubmitを無視
-        if (actionType === 'back' || isNavigating || isSubmitting) {
+        // refで即座にチェック（同期的）
+        if (actionTypeRef.current === 'back' || isNavigating || isSubmitting) {
           return;
         }
         handleSubmit(e);

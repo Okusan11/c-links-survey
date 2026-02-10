@@ -40,7 +40,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
             {/* メインのスピナー */}
             <div className="relative w-16 h-16 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center animate-spin">
               <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-                <Send className="h-6 w-6 text-primary animate-pulse" />
+                <Send className="h-6 w-6 text-primary-text animate-pulse" />
               </div>
             </div>
             

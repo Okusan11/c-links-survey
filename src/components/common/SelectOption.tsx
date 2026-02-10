@@ -32,10 +32,10 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       indicatorUnselected: "border-gray-300",
       indicatorDot: "w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary",
       text: "text-[16px] sm:text-[17px] leading-tight font-medium",
-      textSelected: "text-primary",
+      textSelected: "text-primary-text",
       textUnselected: "text-gray-700",
-      iconSelected: "text-primary/80 scale-105",
-      iconUnselected: "text-primary/80",
+      iconSelected: "text-primary-text/80 scale-105",
+      iconUnselected: "text-primary-text/80",
       checkmark: "absolute top-0 right-0 w-5 h-5 bg-primary rounded-bl-xl rounded-tr-xl flex items-center justify-center",
       checkmarkIcon: "w-3 h-3"
     },
@@ -48,10 +48,10 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       indicatorUnselected: "border-gray-300 group-hover:border-primary/40",
       indicatorDot: "w-3 h-3 rounded-full bg-white animate-scale-in",
       text: "text-base sm:text-lg leading-tight font-medium transition-colors duration-300",
-      textSelected: "text-primary",
+      textSelected: "text-primary-text",
       textUnselected: "text-gray-700 group-hover:text-gray-900",
-      iconSelected: "text-primary scale-110",
-      iconUnselected: "text-primary/60 group-hover:text-primary/80",
+      iconSelected: "text-primary-text scale-110",
+      iconUnselected: "text-primary-text/60 group-hover:text-primary-text/80",
       checkmark: "absolute top-2 right-2 w-6 h-6 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-medium animate-scale-in",
       checkmarkIcon: "w-3.5 h-3.5"
     },
@@ -66,7 +66,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       text: "text-base leading-normal cursor-pointer",
       textSelected: "text-gray-900",
       textUnselected: "text-gray-700",
-      iconSelected: "text-primary",
+      iconSelected: "text-primary-text",
       iconUnselected: "text-gray-500",
       checkmark: "hidden",
       checkmarkIcon: "w-2.5 h-2.5"
@@ -91,14 +91,14 @@ const SelectOption: React.FC<SelectOptionProps> = ({
         selected ? styles.indicatorSelected : styles.indicatorUnselected
       )}>
         {selected && variant === 'checkbox' ? (
-          <svg 
+          <svg
             viewBox="0 0 24 24"
             width="10"
             height="10"
-            stroke="currentColor" 
-            strokeWidth="3" 
-            fill="none" 
-            className="text-white"
+            stroke="currentColor"
+            strokeWidth="3"
+            fill="none"
+            className="text-primary-foreground"
           >
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
@@ -128,8 +128,8 @@ const SelectOption: React.FC<SelectOptionProps> = ({
         {description && (
           <p className={cn(
             "text-[14px] pl-0.5 mt-1 transition-colors duration-300",
-            variant === 'enhanced' 
-              ? (selected ? "text-primary/70" : "text-gray-500 group-hover:text-gray-600")
+            variant === 'enhanced'
+              ? (selected ? "text-primary-text/70" : "text-gray-500 group-hover:text-gray-600")
               : "text-gray-500"
           )}>
             {description}
@@ -140,14 +140,14 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       {/* 選択時のチェックマーク */}
       {selected && variant !== 'checkbox' && (
         <div className={styles.checkmark}>
-          <svg 
+          <svg
             viewBox="0 0 24 24"
             width={styles.checkmarkIcon.includes('3.5') ? '14' : '12'}
             height={styles.checkmarkIcon.includes('3.5') ? '14' : '12'}
-            stroke="currentColor" 
-            strokeWidth="3" 
-            fill="none" 
-            className="text-white"
+            stroke="currentColor"
+            strokeWidth="3"
+            fill="none"
+            className="text-primary-foreground"
           >
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>

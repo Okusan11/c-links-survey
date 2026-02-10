@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
@@ -27,6 +27,7 @@ const Confirmation: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'back' | 'submit' | null>(null);
+  const actionTypeRef = useRef<'back' | 'submit' | null>(null);
   
   // 環境変数からAPIエンドポイントを取得
   const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || '';
@@ -156,7 +157,7 @@ const Confirmation: React.FC = () => {
       primary: {
         container: 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/15',
         header: 'bg-primary/10 border-primary/20',
-        titleColor: 'text-primary',
+        titleColor: 'text-primary-text',
         iconBg: 'bg-primary'
       },
       green: {
@@ -320,7 +321,7 @@ const Confirmation: React.FC = () => {
         return (
           <div className="flex items-center gap-3 px-3 py-2.5 md:px-4 md:py-3 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl border border-primary/15 shadow-sm">
             <span className="text-lg md:text-xl">{typeIcons[response as keyof typeof typeIcons] || '👤'}</span>
-            <span className="font-semibold text-primary text-sm md:text-base">{customerTypeLabels[response as keyof typeof customerTypeLabels] || response}</span>
+            <span className="font-semibold text-primary-text text-sm md:text-base">{customerTypeLabels[response as keyof typeof customerTypeLabels] || response}</span>
           </div>
         );
       
@@ -339,7 +340,7 @@ const Confirmation: React.FC = () => {
               {singleResponse.otherText && (
                 <div className="ml-6 md:ml-8 px-3 py-2 md:px-4 md:py-2.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 rounded-lg border-l-3 md:border-l-4 border-primary/40 shadow-sm">
                   <div className="flex items-start gap-1.5 md:gap-2">
-                    <span className="text-primary text-xs md:text-sm font-medium">その他:</span>
+                    <span className="text-primary-text text-xs md:text-sm font-medium">その他:</span>
                     <span className="text-gray-700 text-xs md:text-sm leading-relaxed italic font-medium">"{singleResponse.otherText}"</span>
                   </div>
                 </div>
@@ -376,7 +377,7 @@ const Confirmation: React.FC = () => {
               {multiResponse.otherText && (
                 <div className="ml-6 md:ml-8 px-3 py-2 md:px-4 md:py-2.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 rounded-lg border-l-3 md:border-l-4 border-primary/40 shadow-sm">
                   <div className="flex items-start gap-1.5 md:gap-2">
-                    <span className="text-primary text-xs md:text-sm font-medium">その他:</span>
+                    <span className="text-primary-text text-xs md:text-sm font-medium">その他:</span>
                     <span className="text-gray-700 text-xs md:text-sm leading-relaxed italic font-medium">"{multiResponse.otherText}"</span>
                   </div>
                 </div>
@@ -470,7 +471,7 @@ const Confirmation: React.FC = () => {
               {Object.entries(response).map(([category, rating]) => (
                 <div key={category} className="flex justify-between items-center px-4 py-3 bg-white rounded-lg border border-gray-100 shadow-sm">
                   <span className="text-sm font-medium text-gray-700">{category}:</span>
-                  <span className="font-semibold text-primary">{String(rating)}</span>
+                  <span className="font-semibold text-primary-text">{String(rating)}</span>
                 </div>
               ))}
             </div>
@@ -526,7 +527,7 @@ const Confirmation: React.FC = () => {
               {multiResponse.otherText && (
                 <div className="ml-6 md:ml-8 px-3 py-2 md:px-4 md:py-2.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 rounded-lg border-l-3 md:border-l-4 border-primary/40 shadow-sm">
                   <div className="flex items-start gap-1.5 md:gap-2">
-                    <span className="text-primary text-xs md:text-sm font-medium">その他:</span>
+                    <span className="text-primary-text text-xs md:text-sm font-medium">その他:</span>
                     <span className="text-gray-700 text-xs md:text-sm leading-relaxed italic font-medium">"{multiResponse.otherText}"</span>
                   </div>
                 </div>
@@ -534,7 +535,7 @@ const Confirmation: React.FC = () => {
             </div>
           );
         }
-        
+
         console.warn(`[service-usage] 予期しない形式:`, response);
         return <span className="text-red-500">表示エラー: 予期しない形式</span>;
       
@@ -654,9 +655,27 @@ const Confirmation: React.FC = () => {
       accent?: 'primary' | 'green' | 'amber';
     }> = [];
 
+    // customer-type質問のIDを動的に検出
+    const customerTypeQuestion = surveyConfig.questionCards.find(q => q.type === 'customer-type')
+    const customerTypeQuestionId = customerTypeQuestion?.id || 'customer-type'
+    
+    // 質問モードを取得（デフォルト: customer-type-based）
+    const questionMode = surveyConfig.questionMode || 'customer-type-based'
+    
     // ユーザーが回答した順序（質問フロー順）で表示
-    const questionFlow = surveyConfig.questionFlow[customerType] || [];
-    const orderedQuestionIds = ['customer-type', ...questionFlow];
+    let questionFlow: string[] = []
+    let orderedQuestionIds: string[] = []
+    
+    if (questionMode === 'unified') {
+      // 共通質問モード: customer-type質問なし
+      const firstCustomerType = surveyConfig.customerTypes[0] || Object.keys(surveyConfig.questionFlow)[0] || 'new'
+      questionFlow = surveyConfig.questionFlow[firstCustomerType] || []
+      orderedQuestionIds = questionFlow
+    } else {
+      // 顧客タイプ別モード
+      questionFlow = surveyConfig.questionFlow[customerType] || []
+      orderedQuestionIds = [customerTypeQuestionId, ...questionFlow]
+    }
     
     // 現在の顧客タイプに関連する回答のみをフィルタリング
     const filteredResponses: Record<string, any> = {};
@@ -759,6 +778,9 @@ const Confirmation: React.FC = () => {
 
   // 戻るボタン - スマホフレンドリーに改善
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
+    // 即座にrefを更新（同期的）- 最優先で設定
+    actionTypeRef.current = 'back';
+
     // 既にナビゲーション中または送信中の場合は処理しない
     if (isNavigating || isSubmitting) {
       console.log('Navigation or submission already in progress, ignoring back button');
@@ -770,8 +792,8 @@ const Confirmation: React.FC = () => {
       event.preventDefault();
       event.stopPropagation();
       // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
-      if ('stopImmediatePropagation' in event.nativeEvent) {
-        event.nativeEvent.stopImmediatePropagation();
+      if ('nativeEvent' in event && 'stopImmediatePropagation' in event.nativeEvent) {
+        (event.nativeEvent as Event).stopImmediatePropagation();
       }
     }
 
@@ -784,7 +806,7 @@ const Confirmation: React.FC = () => {
     // 即座にナビゲーションを実行（遅延を削除）
     try {
       // ReviewForm画面へ戻る際に現在のステートを引き継ぐ
-      navigate('/reviewform', { 
+      navigate('/reviewform', {
         state: {
           ...state,
           // 現在のフィードバック内容も含めて渡す
@@ -797,13 +819,14 @@ const Confirmation: React.FC = () => {
       // エラーが発生した場合はフラグをリセット
       setIsNavigating(false);
       setActionType(null);
+      actionTypeRef.current = null;
     }
   }, [navigate, state, isNavigating, isSubmitting]);
 
   // 送信ボタン - スマホフレンドリーに改善
   const handleSubmit = useCallback(async (event?: React.MouseEvent | React.FormEvent | React.TouchEvent) => {
-    // 既にナビゲーション中、送信中、または戻るボタンが押された場合は処理しない
-    if (isNavigating || isSubmitting || actionType === 'back') {
+    // refで即座にチェック（同期的）
+    if (actionTypeRef.current === 'back' || isNavigating || isSubmitting) {
       return;
     }
 
@@ -813,7 +836,8 @@ const Confirmation: React.FC = () => {
       event.stopPropagation();
     }
 
-    // 送信ボタンが押されたことを明示
+    // 送信ボタンが押されたことを明示（refも更新）
+    actionTypeRef.current = 'submit';
     setActionType('submit');
     setIsSubmitting(true);
 
@@ -861,7 +885,7 @@ const Confirmation: React.FC = () => {
       setIsSubmitting(false);
       setActionType(null);
     }
-  }, [isNavigating, isSubmitting, actionType, apiEndpoint, state, navigate]);
+  }, [isNavigating, isSubmitting, apiEndpoint, state, navigate]);
 
   const progressSteps = [
     {
@@ -891,8 +915,8 @@ const Confirmation: React.FC = () => {
         gradient: 'bg-gradient-to-br from-primary/8 via-primary/5 to-primary/12',
         border: 'border-primary/25',
         headerBg: 'bg-gradient-to-r from-primary/15 to-primary/20',
-        iconBg: 'bg-primary text-white shadow-primary/25',
-        titleColor: 'text-primary'
+        iconBg: 'bg-primary text-primary-foreground shadow-primary/25',
+        titleColor: 'text-primary-text'
       },
       green: {
         gradient: 'bg-gradient-to-br from-emerald-50 via-green-50/80 to-emerald-100/60',
@@ -949,8 +973,8 @@ const Confirmation: React.FC = () => {
     <div>
       <form onSubmit={(e) => {
         e.preventDefault();
-        // 戻るボタンが押された場合またはナビゲーション中・送信中の場合はsubmitを無視
-        if (actionType === 'back' || isNavigating || isSubmitting) {
+        // refで即座にチェック（同期的）
+        if (actionTypeRef.current === 'back' || isNavigating || isSubmitting) {
           return;
         }
         handleSubmit(e);
@@ -993,7 +1017,7 @@ const Confirmation: React.FC = () => {
                     title="ご利用状況"
                     content={
                       <div className="flex items-start gap-2">
-                        <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-primary-text mt-0.5 flex-shrink-0" />
                         <div className="text-[14px] text-gray-700">
                           {state.isNewCustomer && "🆕 初めてのご利用"}
                           {state.isSecondVisit && "🔄 2回目のご利用"}

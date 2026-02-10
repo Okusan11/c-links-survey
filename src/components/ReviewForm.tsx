@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 import { AlertCircle } from 'lucide-react';
@@ -19,9 +19,16 @@ const ReviewForm: React.FC = () => {
   const [error, setError] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'back' | 'next' | null>(null);
+  const actionTypeRef = useRef<'back' | 'next' | null>(null);
 
   // 戻るボタン - スマホフレンドリーに改善
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
+    // 即座にrefを更新（同期的）- 最優先で設定
+    actionTypeRef.current = 'back';
+
+    // エラー状態を即座にクリア（バリデーションメッセージを非表示に）
+    setError(false);
+
     // 既にナビゲーション中の場合は処理しない
     if (isNavigating) {
       console.log('Navigation already in progress, ignoring back button');
@@ -33,8 +40,8 @@ const ReviewForm: React.FC = () => {
       event.preventDefault();
       event.stopPropagation();
       // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
-      if ('stopImmediatePropagation' in event.nativeEvent) {
-        event.nativeEvent.stopImmediatePropagation();
+      if ('nativeEvent' in event && 'stopImmediatePropagation' in event.nativeEvent) {
+        (event.nativeEvent as Event).stopImmediatePropagation();
       }
     }
 
@@ -62,13 +69,14 @@ const ReviewForm: React.FC = () => {
       // エラーが発生した場合はフラグをリセット
       setIsNavigating(false);
       setActionType(null);
+      actionTypeRef.current = null;
     }
   }, [navigate, state, feedback, isNavigating]);
 
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.MouseEvent | React.FormEvent | React.TouchEvent) => {
-    // 既にナビゲーション中、または戻るボタンが押された場合は処理しない
-    if (isNavigating || actionType === 'back') {
+    // refで即座にチェック（同期的）
+    if (actionTypeRef.current === 'back' || isNavigating) {
       return;
     }
 
@@ -96,7 +104,8 @@ const ReviewForm: React.FC = () => {
       return;
     }
 
-    // 次へボタンが押されたことを明示
+    // 次へボタンが押されたことを明示（refも更新）
+    actionTypeRef.current = 'next';
     setActionType('next');
     setIsNavigating(true);
 
@@ -113,8 +122,9 @@ const ReviewForm: React.FC = () => {
       console.error('ナビゲーションエラー:', error);
       setIsNavigating(false);
       setActionType(null);
+      actionTypeRef.current = null;
     }
-  }, [isNavigating, actionType, feedback, navigate, state]);
+  }, [isNavigating, feedback, navigate, state]);
 
   const subtitle = 'ご利用いただいた際の感想をお聞かせください。今後のサービス向上に活用させていただきます。';
 
@@ -136,8 +146,8 @@ const ReviewForm: React.FC = () => {
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
-      if (actionType === 'back' || isNavigating) {
+      // refで即座にチェック（同期的）
+      if (actionTypeRef.current === 'back' || isNavigating) {
         console.log('Form submit ignored due to back action or navigation in progress');
         return;
       }
@@ -163,7 +173,7 @@ const ReviewForm: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100" data-question="feedback">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
-                <AlertCircle className="h-5 w-5 text-primary" />
+                <AlertCircle className="h-5 w-5 text-primary-text" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 tracking-wide whitespace-normal text-wrap">

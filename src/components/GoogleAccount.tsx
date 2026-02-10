@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn, scrollToFirstError, hasErrors } from '../lib/utils';
 
@@ -32,6 +32,7 @@ const GoogleAccount: React.FC = () => {
   const [error, setError] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'back' | 'next' | null>(null);
+  const actionTypeRef = useRef<'back' | 'next' | null>(null);
 
   useEffect(() => {
     // stateからsurveyConfigが渡されていない場合のみ読み込み
@@ -90,6 +91,12 @@ const GoogleAccount: React.FC = () => {
 
   // 戻るボタン - スマホフレンドリーに改善
   const handleBack = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
+    // 即座にrefを更新（同期的）- 最優先で設定
+    actionTypeRef.current = 'back';
+
+    // エラー状態を即座にクリア（バリデーションメッセージを非表示に）
+    setError(false);
+
     // 既にナビゲーション中の場合は処理しない
     if (isNavigating) {
       console.log('Navigation already in progress, ignoring back button');
@@ -101,8 +108,8 @@ const GoogleAccount: React.FC = () => {
       event.preventDefault();
       event.stopPropagation();
       // ネイティブイベントの場合のみstopImmediatePropagationを呼び出し
-      if ('stopImmediatePropagation' in event.nativeEvent) {
-        event.nativeEvent.stopImmediatePropagation();
+      if ('nativeEvent' in event && 'stopImmediatePropagation' in event.nativeEvent) {
+        (event.nativeEvent as Event).stopImmediatePropagation();
       }
     }
 
@@ -115,7 +122,8 @@ const GoogleAccount: React.FC = () => {
     // 即座にナビゲーションを実行（遅延を削除）
     try {
       // 統合アンケート画面に戻る（全ての顧客タイプで共通）
-      navigate('/survey', {
+      // ルートパスに遷移（basename相対）
+      navigate('/', {
         state: {
           ...state, // 全ての状態を保持
           hasGoogleAccount,
@@ -130,6 +138,7 @@ const GoogleAccount: React.FC = () => {
       // エラーが発生した場合はフラグをリセット
       setIsNavigating(false);
       setActionType(null);
+      actionTypeRef.current = null;
     }
   }, [navigate, state, hasGoogleAccount, feedback, isNavigating]);
   
@@ -141,8 +150,8 @@ const GoogleAccount: React.FC = () => {
 
   // 次へボタン - スマホフレンドリーに改善
   const handleNext = useCallback((event?: React.FormEvent | React.MouseEvent | React.TouchEvent) => {
-    // 既にナビゲーション中、または戻るボタンが押された場合は処理しない
-    if (isNavigating || actionType === 'back') {
+    // refで即座にチェック（同期的）
+    if (actionTypeRef.current === 'back' || isNavigating) {
       return;
     }
 
@@ -176,7 +185,8 @@ const GoogleAccount: React.FC = () => {
       return;
     }
 
-    // 次へボタンが押されたことを明示
+    // 次へボタンが押されたことを明示（refも更新）
+    actionTypeRef.current = 'next';
     setActionType('next');
     setIsNavigating(true);
 
@@ -258,7 +268,6 @@ const GoogleAccount: React.FC = () => {
     }
   }, [
     isNavigating,
-    actionType,
     hasGoogleAccount,
     apiEndpoint,
     navigate,
@@ -338,7 +347,7 @@ const GoogleAccount: React.FC = () => {
         <div className="flex items-center gap-2">
           {icon && (
             <div className={cn(
-              "flex-shrink-0 text-primary/80",
+              "flex-shrink-0 text-primary-text/80",
               selected ? "scale-105" : ""
             )}>
               {icon}
@@ -346,7 +355,7 @@ const GoogleAccount: React.FC = () => {
           )}
           <span className={cn(
             "text-[16px] sm:text-[17px] leading-tight font-medium",
-            selected ? "text-primary" : "text-gray-700"
+            selected ? "text-primary-text" : "text-gray-700"
           )}>
             {children}
           </span>
@@ -416,8 +425,8 @@ const GoogleAccount: React.FC = () => {
 
       <form onSubmit={(e) => {
         e.preventDefault();
-        // 戻るボタンが押された場合またはナビゲーション中の場合はsubmitを無視
-        if (actionType === 'back' || isNavigating) {
+        // refで即座にチェック（同期的）
+        if (actionTypeRef.current === 'back' || isNavigating) {
           console.log('Form submit ignored due to back action or navigation in progress');
           return;
         }
@@ -443,7 +452,7 @@ const GoogleAccount: React.FC = () => {
             <div className="space-y-8">
                           <div className="flex items-start gap-2.5 pb-3 border-b border-gray-100" data-question="google-account">
               <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
-                <Info className="h-5 w-5 text-primary" />
+                <Info className="h-5 w-5 text-primary-text" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 tracking-wide whitespace-normal text-wrap">

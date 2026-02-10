@@ -106,7 +106,7 @@ export interface DateTimeOptions {
 
 export interface CustomerTypeOptions {
   types: Array<{
-    value: 'new' | 'second-visit' | 'repeater';
+    value: string; // 動的な値に対応（将来的に年齢層、性別、会員ランクなどにも対応可能）
     label: string;
     icon: string;
   }>;
@@ -157,13 +157,14 @@ export interface QuestionCard {
 // 新しい柔軟なアンケート設定構造（V2）
 // ============================================
 
-// 顧客タイプの定義
-export type CustomerType = 'new' | 'second-visit' | 'repeater';
+// 顧客タイプの定義（動的に対応）
+export type CustomerType = string; // 動的な顧客タイプに対応
+// 後方互換性のため、従来の値も使用可能
+export type LegacyCustomerType = 'new' | 'second-visit' | 'repeater';
 
 // 質問フローの定義（顧客タイプごとの質問順序）
-export type QuestionFlow = {
-  [K in CustomerType]: string[];  // 質問IDの配列
-};
+// 動的な顧客タイプキーに対応（将来的に異なる分類方法にも対応可能）
+export type QuestionFlow = Record<string, string[]>; // 動的な顧客タイプキーに対応
 
 // アンケートテンプレートの定義
 export interface SurveyTemplate {
@@ -184,6 +185,7 @@ export interface SurveyConfig {
     title: string;
     description?: string;
   };
+  questionMode?: 'customer-type-based' | 'unified'; // 質問モード（デフォルト: 'customer-type-based'）
   customerTypes: CustomerType[];
   questionFlow: QuestionFlow;
   questionCards: QuestionCard[];
@@ -204,7 +206,8 @@ export interface SurveyConfig {
 
 // 設定の型ガード
 export function isSurveyConfig(config: SurveyConfig): config is SurveyConfig {
-  return 'version' in config && config.version === '2.0';
+  // questionModeはオプショナルなので、versionとquestionCards、questionFlowがあれば有効
+  return 'version' in config && config.version === '2.0' && 'questionCards' in config && 'questionFlow' in config;
 }
 
 // 型安全性を保ちながら動的にServiceKeyを扱うためのユーティリティ型

@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { Sparkles, Clock, Star } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 interface PageLayoutProps {
   title: string;
@@ -28,7 +28,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
           <div className="hidden sm:block absolute top-1/2 left-1/3 w-16 h-16 bg-white/5 rounded-full blur-lg animate-float" style={{ animationDelay: '4s' }} />
           
           {/* グリッドパターン - モバイルで控えめ */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] sm:bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:16px_16px] sm:bg-[size:20px_20px] md:bg-[size:32px_32px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(3, 2, 2, 0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] sm:bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:16px_16px] sm:bg-[size:20px_20px] md:bg-[size:32px_32px]" />
           
           {/* グラスモーフィズム効果 - モバイルで非表示 */}
           <div className="hidden md:block absolute right-0 top-1/4 w-80 h-80 glass rounded-full" />
@@ -37,20 +37,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
 
         {/* コンテンツ */}
         <div className="relative z-10 flex flex-col items-center text-center">
-          {/* アイコン装飾 - モバイルで小さく */}
-          <div className="mb-3 sm:mb-6 flex items-center gap-1.5 sm:gap-2">
-            <div className="p-2 sm:p-3 glass-card rounded-xl sm:rounded-2xl animate-scale-in">
-              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white/90" />
-            </div>
-            <div className="accent-line w-8 sm:w-12" />
-            <div className="p-2 sm:p-3 glass-card rounded-xl sm:rounded-2xl animate-scale-in" style={{ animationDelay: '0.1s' }}>
-              <Star className="w-4 h-4 sm:w-6 sm:h-6 text-white/90" />
-            </div>
-          </div>
-
-          {/* タイトル - モバイルで小さく */}
+          {/* タイトル */}
           <div className="space-y-1 sm:space-y-2">
-            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight max-w-4xl animate-fade-in-up">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground tracking-tight leading-tight max-w-4xl animate-fade-in-up">
               {title.split('\n').map((line, index) => (
                 <div key={index} className="block">
                   {line}
@@ -70,7 +59,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
           {/* サブタイトル - モバイルでコンパクト */}
           {subtitle && (
             <div className="mt-4 sm:mt-8 md:mt-12 space-y-3 sm:space-y-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <div className="text-sm sm:text-lg md:text-2xl text-white/95 max-w-3xl leading-relaxed px-2 sm:px-0">
+              <div className="text-sm sm:text-lg md:text-2xl text-primary-foreground/95 max-w-3xl leading-relaxed px-2 sm:px-0">
                 {subtitle.split('\n').map((line, index) => (
                   <p key={index} className="mb-2 sm:mb-3 font-medium tracking-wide">
                     {line}
@@ -81,8 +70,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, subtitle, children, clas
               {/* 所要時間インジケーター - モバイルでコンパクト */}
               <div className="mt-4 sm:mt-8 sm:mt-10 flex items-center justify-center">
                 <div className="inline-flex items-center gap-2 sm:gap-3 glass-card px-4 py-2.5 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl animate-scale-in" style={{ animationDelay: '0.4s' }}>
-                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white/80" />
-                  <div className="text-xs sm:text-sm md:text-base font-medium text-white/90">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground/80" />
+                  <div className="text-xs sm:text-sm md:text-base font-medium text-primary-foreground/90">
                     約1分で完了
                   </div>
                   <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-accent rounded-full animate-pulse" />

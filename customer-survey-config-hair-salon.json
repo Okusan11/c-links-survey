@@ -292,7 +292,7 @@
         "id": "service-cut-evaluation",
         "type": "service-evaluation",
         "title": "カットについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -308,7 +308,7 @@
         "id": "service-color-evaluation",
         "type": "service-evaluation",
         "title": "カラーについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -324,7 +324,7 @@
         "id": "service-perm-evaluation",
         "type": "service-evaluation",
         "title": "パーマについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -340,7 +340,7 @@
         "id": "service-straightPerm-evaluation",
         "type": "service-evaluation",
         "title": "ストレートについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -356,7 +356,7 @@
         "id": "service-treatment-evaluation",
         "type": "service-evaluation",
         "title": "トリートメントについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -372,7 +372,7 @@
         "id": "service-headSpa-evaluation",
         "type": "service-evaluation",
         "title": "ヘッドスパについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -388,7 +388,7 @@
         "id": "service-hairSet-evaluation",
         "type": "service-evaluation",
         "title": "ヘアセットについて評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
@@ -404,7 +404,7 @@
         "id": "service-kyohatsu-evaluation",
         "type": "service-evaluation",
         "title": "強髪について評価をお聞かせください",
-        "required": false,
+        "required": true,
         "conditionalDisplay": {
           "dependsOn": "service-usage",
           "showWhen": [
